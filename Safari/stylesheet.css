@@ -1,18 +1,22 @@
-/* @import url('https://brandt.kurowski.net/monaspice-webfonts/monaspice.css'); */
+@import url("https://brandt.kurowski.net/monaspice-webfonts/monaspice.css");
+
+/* Base fonts are in vscode settings: 'MonaspiceAr Nerd Webfont', 'MonaspiceAr Nerd Font', monospace */
 
 /* Comment Class */
 #js-vscode-workbench .mtk3.mtki {
-  font-family: local('MonaspiceRn Nerd Font');
+  font-family: 'MonaspiceRn Nerd Webfont';
   font-weight: 500;
 }
 
 /* Copilot Classes */
 #js-vscode-workbench .ghost-text-decoration {
-  font-family: local('MonaspiceKr Nerd Font');
+  font-family: 'MonaspiceKr Nerd Webfont';
   font-weight: 200;
+  font-style: normal;
 }
 
 #js-vscode-workbench .ghost-text-decoration-preview {
-  font-family: local('MonaspiceKr Nerd Font');
+  font-family: 'MonaspiceKr Nerd Webfont';
   font-weight: 200;
+  font-style: normal;
 }
