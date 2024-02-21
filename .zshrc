@@ -116,3 +116,6 @@ source $ZSH/oh-my-zsh.sh
 # adding this specifically for devcontainers, but it also seems like a better default than 022
 umask 002
 
+if command -v atuin &> /dev/null; then
+  eval "$(atuin init zsh)"
+fi
