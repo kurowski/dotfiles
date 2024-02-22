@@ -7,6 +7,7 @@ ln -s $DOTFILES/.zshrc ~
 [[ ! -f ~/.p10k.zsh ]] || mv ~/.p10k.zsh ~/.p10k.zsh.orig
 ln -s $DOTFILES/.p10k.zsh ~
 [[ ! -f ~/.config/atuin/config.toml ]] || mv ~/.config/atuin/config.toml ~/.config/atuin/config.toml.orig
+mkdir -p ~/.config/atuin
 ln -s $DOTFILES/atuin/config.toml ~/.config/atuin
 if command -v defaults &> /dev/null; then
   defaults write com.apple.Safari UserStyleSheetLocationURLString -string "$DOTFILES/Safari/stylesheet.css"
