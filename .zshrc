@@ -117,5 +117,5 @@ source $ZSH/oh-my-zsh.sh
 umask 002
 
 if command -v atuin &> /dev/null; then
-  eval "$(atuin init zsh)"
+  eval "$(atuin init zsh --disable-up-arrow)"
 fi
