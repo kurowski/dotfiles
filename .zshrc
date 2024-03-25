@@ -119,3 +119,7 @@ umask 002
 if command -v atuin &> /dev/null; then
   eval "$(atuin init zsh --disable-up-arrow)"
 fi
+
+if command -v gh &> /dev/null && gh copilot &> /dev/null; then
+  eval "$(gh copilot alias -- zsh)"
+fi
