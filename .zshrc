@@ -123,3 +123,7 @@ fi
 if command -v gh &> /dev/null && gh copilot &> /dev/null; then
   eval "$(gh copilot alias -- zsh)"
 fi
+
+if command -v maestral &> /dev/null; then
+  eval "$(maestral completion zsh)"
+fi
