@@ -127,3 +127,7 @@ fi
 if command -v maestral &> /dev/null; then
   eval "$(maestral completion zsh)"
 fi
+
+if command -v jira &> /dev/null; then
+  eval "$(jira --completion-script-zsh)"
+fi

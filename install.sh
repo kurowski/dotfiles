@@ -17,6 +17,10 @@ if command -v atuin &> /dev/null && [ -v ATUIN_PASSWORD ] && [ -v ATUIN_KEY ]; t
   atuin login -u bkurowski -p "$ATUIN_PASSWORD" -k "$ATUIN_KEY"
 fi
 
+[[ ! -f ~/.config/gh-copilot/config.yml ]] || mv ~/.config/gh-copilot/config.yml ~/.config/gh-copilot/config.yml.orig
+mkdir -p ~/.config/gh-copilot
+ln -s $DOTFILES/gh-copilot/config.yml ~/.config/gh-copilot
+
 if command -v defaults &> /dev/null; then
   defaults write com.apple.Safari UserStyleSheetLocationURLString -string "$DOTFILES/Safari/stylesheet.css"
 fi
