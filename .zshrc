@@ -119,7 +119,7 @@ umask 002
 get_file_architecture() {
   BINARY_PATH=$1
   if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    file $BINARY_PATH | awk -F',' '{print $2}' | awk '{print $1}'
+    file $BINARY_PATH | awk -F',' '{print $2}' | awk '{print $NF}'
   elif [[ "$OSTYPE" == "darwin"* ]]; then
     file $BINARY_PATH | awk -F' ' '{print $NF}'
   else
