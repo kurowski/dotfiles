@@ -116,18 +116,49 @@ source $ZSH/oh-my-zsh.sh
 # adding this specifically for devcontainers, but it also seems like a better default than 022
 umask 002
 
-if command -v atuin &> /dev/null; then
+get_file_architecture() {
+  BINARY_PATH=$1
+  if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    file $BINARY_PATH | awk -F',' '{print $2}' | awk '{print $1}'
+  elif [[ "$OSTYPE" == "darwin"* ]]; then
+    file $BINARY_PATH | awk -F' ' '{print $NF}'
+  else
+    echo "Unknown OS"
+  fi
+}
+
+get_cpu_architecture() {
+  uname -m | sed 's/x86_64/x86-64/'
+}
+
+check_architecture() {
+  BINARY_PATH=`which $COMMAND`
+  if [ "$(get_file_architecture $BINARY_PATH)" = "$(get_cpu_architecture)" ]; then
+    return 0
+  else
+    echo "Binary '$BINARY_PATH' is not the correct architecture for this system"
+    return 1
+  fi
+}
+
+# check that command exists and that the architecture matches the system
+check_command() {
+  COMMAND=$1
+  if ! command -v $COMMAND &> /dev/null; then
+    echo "Command '$COMMAND' not found"
+    return 1
+  fi
+  check_architecture $COMMAND
+}
+
+if check_command atuin; then
   eval "$(atuin init zsh --disable-up-arrow)"
 fi
 
-if command -v gh &> /dev/null && gh copilot &> /dev/null; then
+if check_command gh; then
   eval "$(gh copilot alias -- zsh)"
 fi
 
-if command -v maestral &> /dev/null; then
-  eval "$(maestral completion zsh)"
-fi
-
-if command -v jira &> /dev/null; then
+if check_command jira; then
   eval "$(jira --completion-script-zsh)"
 fi
