@@ -145,7 +145,7 @@ check_architecture() {
 check_command() {
   COMMAND=$1
   if ! command -v $COMMAND &> /dev/null; then
-    echo "Command '$COMMAND' not found"
+    # echo "Command '$COMMAND' not found"
     return 1
   fi
   check_architecture $COMMAND
