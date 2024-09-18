@@ -160,5 +160,5 @@ if check_command gh; then
 fi
 
 if check_command jira; then
-  eval "$(jira --completion-script-zsh)"
+  eval "$(jira completion zsh)"
 fi
