@@ -162,3 +162,7 @@ fi
 if check_command jira; then
   eval "$(jira completion zsh)"
 fi
+
+if check_command kubectl; then
+  source <(kubectl completion zsh)
+fi
