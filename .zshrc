@@ -155,7 +155,7 @@ if check_command atuin; then
   eval "$(atuin init zsh --disable-up-arrow)"
 fi
 
-if check_command gh; then
+if check_command gh && gh copilot 2> /dev/null; then
   eval "$(gh copilot alias -- zsh)"
 fi
 
