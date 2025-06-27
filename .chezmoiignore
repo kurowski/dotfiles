@@ -1,4 +1,5 @@
 .github/
+assets
 install.sh
 LICENSE
 README.md
