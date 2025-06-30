@@ -8,3 +8,4 @@ ujust --explain setup-luks-tpm-unlock
 ujust --explain dx-group
 ujust --explain install-fonts
 ujust --explain aurora-cli
+ujust --explain ptyxis-transparency 1
