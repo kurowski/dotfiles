@@ -7,6 +7,7 @@
 export EDITOR=nvim
 export VISUAL=$EDITOR
 export TERMINUS_TOKEN={{ onepasswordRead "op://employee/terminus-token/credential" }}
+export GH_TOKEN=$(gh auth token)
 
 export ATUIN_INIT_FLAGS="--disable-up-arrow"
 eval "$(atuin init zsh ${ATUIN_INIT_FLAGS})"
@@ -14,3 +15,7 @@ eval "$(atuin init zsh ${ATUIN_INIT_FLAGS})"
 alias vim=nvim
 
 alias .j='just --justfile ~/.user.justfile --working-directory .'
+
+### bling.sh source start
+test -f /usr/share/ublue-os/bling/bling.sh && source /usr/share/ublue-os/bling/bling.sh
+### bling.sh source end

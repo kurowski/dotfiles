@@ -9,3 +9,6 @@ ujust --explain dx-group
 ujust --explain install-fonts
 ujust --explain aurora-cli
 ujust --explain ptyxis-transparency 1
+
+# temporarily putting this here for lack of a better place
+brew install devcontainer
