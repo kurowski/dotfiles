@@ -7,10 +7,10 @@
 export SHELL=/usr/bin/zsh
 export EDITOR=nvim
 export VISUAL=$EDITOR
-{{- if (and (not .devcontainer) (not .codespaces)) -}}
+{{ if (and (not .devcontainer) (not .codespaces)) }}
 export TERMINUS_TOKEN={{ onepasswordRead "op://employee/terminus-token/credential" }}
 export GH_TOKEN=$(gh auth token)
-{{- end -}}
+{{ end }}
 
 if command -v op >/dev/null 2>&1; then
   export SSH_AUTH_SOCK=~/.1password/agent.sock
