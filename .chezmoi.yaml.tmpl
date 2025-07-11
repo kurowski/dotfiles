@@ -23,8 +23,13 @@
 {{-   writeToStdout "💡 Tip: you can re-enter your name and email with `chezmoi init --data=false`.\n" -}}
 {{- end -}}
 
+{{- $codespaces:= env "CODESPACES" | not | not -}}
+{{- $devcontainer:= env "REMOTE_CONTAINERS" | not | not -}}
+
 sourceDir: {{ .chezmoi.sourceDir | quote }}
 
 data:
   name: {{ $name | quote }}
   email: {{ $email | quote }}
+  codespaces: {{ $codespaces }}
+  devcontainer: {{ $devcontainer }}
