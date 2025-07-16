@@ -8,8 +8,9 @@ export SHELL=/usr/bin/zsh
 export EDITOR=nvim
 export VISUAL=$EDITOR
 {{ if (and (not .devcontainer) (not .codespaces)) }}
-export TERMINUS_TOKEN={{ onepasswordRead "op://employee/terminus-token/credential" }}
+export AWS_BEARER_TOKEN_BEDROCK={{ onepasswordRead "op://employee/4tk2r353nh2ief4sr3c2jostha/credential" }}
 export GH_TOKEN=$(gh auth token)
+export TERMINUS_TOKEN={{ onepasswordRead "op://employee/terminus-token/credential" }}
 {{ end }}
 
 if command -v op >/dev/null 2>&1; then
