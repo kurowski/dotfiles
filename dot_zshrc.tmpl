@@ -9,6 +9,8 @@ export EDITOR=nvim
 export VISUAL=$EDITOR
 {{ if (and (not .devcontainer) (not .codespaces)) }}
 export GH_TOKEN=$(gh auth token)
+export UCEAP_PORTAL_GOOGLE_CLIENT_ID={{ onepasswordRead "op://employee/ysuhgai7uvxcab5vqhyods4cvi/username" }}
+export UCEAP_PORTAL_GOOGLE_CLIENT_SECRET={{ onepasswordRead "op://employee/ysuhgai7uvxcab5vqhyods4cvi/credential" }}
 export TERMINUS_TOKEN={{ onepasswordRead "op://employee/terminus-token/credential" }}
 {{ end }}
 
