@@ -26,6 +26,10 @@ alias vim=nvim
 
 alias .j='just --justfile ~/.user.justfile --working-directory .'
 
-### bling.sh source start
-test -f /usr/share/ublue-os/bling/bling.sh && source /usr/share/ublue-os/bling/bling.sh
-### bling.sh source end
+if test -f /usr/share/ublue-os/bling/bling.sh; then
+    source /usr/share/ublue-os/bling/bling.sh
+else
+    [ "$(command -v starship)" ] && eval "$(starship init zsh)"
+    [ "$(command -v atuin)" ] && eval "$(atuin init zsh ${ATUIN_INIT_FLAGS})"
+    [ "$(command -v zoxide)" ] && eval "$(zoxide init zsh)"
+fi
