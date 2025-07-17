@@ -33,3 +33,7 @@ else
     [ "$(command -v atuin)" ] && eval "$(atuin init zsh ${ATUIN_INIT_FLAGS})"
     [ "$(command -v zoxide)" ] && eval "$(zoxide init zsh)"
 fi
+
+if [ -f "$HOME/.zshrc.local" ]; then
+    source "$HOME/.zshrc.local"
+fi                                                                                                                                             
