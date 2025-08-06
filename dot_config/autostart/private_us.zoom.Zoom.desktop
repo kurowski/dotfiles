@@ -1,0 +1,15 @@
+[Desktop Entry]
+Categories=Network;InstantMessaging;VideoConference;Telephony;
+Comment=Zoom Video Conference
+Exec=/usr/bin/flatpak run --branch=stable --arch=x86_64 --command=zoom --file-forwarding us.zoom.Zoom @@u %U @@
+GenericName=Zoom Client for Linux
+Icon=us.zoom.Zoom
+MimeType=x-scheme-handler/zoommtg;x-scheme-handler/zoomus;x-scheme-handler/tel;x-scheme-handler/callto;x-scheme-handler/zoomphonecall;application/x-zoom
+Name=Zoom
+StartupNotify=true
+StartupWMClass=zoom
+Terminal=false
+Type=Application
+X-Flatpak=us.zoom.Zoom
+X-Flatpak-Tags=proprietary;
+X-KDE-Protocols=zoommtg;zoomus;tel;callto;zoomphonecall;
