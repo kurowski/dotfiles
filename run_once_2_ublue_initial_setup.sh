@@ -11,4 +11,4 @@ ujust --explain aurora-cli
 ujust --explain ptyxis-transparency 1
 
 # temporarily putting this here for lack of a better place
-brew install devcontainer lazygit marp-cli
+brew install devcontainer doxx lazygit marp-cli
