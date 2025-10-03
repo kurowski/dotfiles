@@ -1,4 +1,7 @@
 #!/bin/zsh
 
-echo "Copying avatar..."
-sudo cp "{{ .chezmoi.sourceDir }}/assets/face.icon" /var/lib/AccountsService/icons/bkurowski
+ICONS_DIR=/var/lib/AccountsService/icons/
+if [ -d "$ICONS_DIR" ]; then
+  echo "Copying avatar..."
+  sudo cp "{{ .chezmoi.sourceDir }}/assets/face.icon" "$ICONS_DIR/bkurowski"
+fi
