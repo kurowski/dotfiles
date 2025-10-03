@@ -1,14 +1,16 @@
 # Get editor completions based on the config schema
 "$schema" = 'https://starship.rs/config-schema.json'
 
+palette = "catppuccin_frappe"
+
 add_newline = true
 
 [line_break]
 disabled = false
 
 [username]
-style_user = 'red'
-style_root = 'bright-red bold'
+style_user = 'blue bold'
+style_root = 'red bold'
 format = '[$user]($style)'
 disabled = false
 show_always = true
@@ -16,7 +18,7 @@ show_always = true
 [hostname]
 ssh_only = false
 ssh_symbol = " "
-format = '[$ssh_symbol](bold gray) at [$hostname](bold blue) '
+format = '[$ssh_symbol](bold gray) at [$hostname](bold green) '
 disabled = false
 
 [character]
@@ -46,7 +48,7 @@ symbol = " "
 
 [directory]
 read_only = " 󰌾"
-format = 'in [$path](green) '
+format = 'in [$path](bold yellow) '
 
 [docker_context]
 symbol = " "
@@ -204,6 +206,31 @@ symbol = ""
 format = " $symbol [($output)]($style) "
 style = "italic green"
 
-[cmd_duration]
-min_time=0
-style="bold cyan"
+[palettes.catppuccin_frappe]
+rosewater = "#f2d5cf"
+flamingo = "#eebebe"
+pink = "#f4b8e4"
+mauve = "#ca9ee6"
+red = "#e78284"
+maroon = "#ea999c"
+peach = "#ef9f76"
+yellow = "#e5c890"
+green = "#a6d189"
+teal = "#81c8be"
+sky = "#99d1db"
+sapphire = "#85c1dc"
+blue = "#8caaee"
+lavender = "#babbf1"
+text = "#c6d0f5"
+subtext1 = "#b5bfe2"
+subtext0 = "#a5adce"
+overlay2 = "#949cbb"
+overlay1 = "#838ba7"
+overlay0 = "#737994"
+surface2 = "#626880"
+surface1 = "#51576d"
+surface0 = "#414559"
+base = "#303446"
+mantle = "#292c3c"
+crust = "#232634"
+
