@@ -33,7 +33,16 @@ else
     [ "$(command -v zoxide)" ] && eval "$(zoxide init zsh)"
 fi
 
-export LS_COLORS="$(vivid generate catppuccin-frappe)"
+if command -v vivid >/dev/null 2>&1; then
+  export LS_COLORS="$(vivid generate catppuccin-frappe)"
+fi
+
+if command -v devcontainer >/dev/null 2>&1; then
+  alias dcu='devcontainer up --workspace-folder . --dotfiles-repository kurowski/dotfiles'
+  alias dce='devcontainer exec --workspace-folder . zsh'
+  alias dck='docker ps --filter name=$(basename $(pwd)) --format '{{"{{.ID}}"}}' | xargs docker rm -f'
+fi
+
 
 if [ -f "$HOME/.zshrc.local" ]; then
     source "$HOME/.zshrc.local"
