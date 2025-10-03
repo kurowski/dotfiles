@@ -8,7 +8,6 @@ export SHELL=/usr/bin/zsh
 export EDITOR=nvim
 export VISUAL=$EDITOR
 {{ if (and (not .devcontainer) (not .codespaces)) }}
-export AWS_BEARER_TOKEN_BEDROCK={{ onepasswordRead "op://employee/fmk3q3xuymqgwqnv5rx2keuhqy/credential" }}
 export GH_TOKEN={{ onepasswordRead "op://employee/5myfngtqzw57ult576drgswdqi/token" }}
 export UCEAP_PORTAL_GOOGLE_CLIENT_ID={{ onepasswordRead "op://employee/ysuhgai7uvxcab5vqhyods4cvi/username" }}
 export UCEAP_PORTAL_GOOGLE_CLIENT_SECRET={{ onepasswordRead "op://employee/ysuhgai7uvxcab5vqhyods4cvi/credential" }}
