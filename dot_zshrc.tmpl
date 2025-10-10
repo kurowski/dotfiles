@@ -38,11 +38,10 @@ if command -v vivid >/dev/null 2>&1; then
 fi
 
 if command -v devcontainer >/dev/null 2>&1; then
-  alias dcu='devcontainer up --workspace-folder . --dotfiles-repository kurowski/dotfiles'
-  alias dce='devcontainer exec --workspace-folder . zsh'
-  alias dck='docker ps --filter name=$(basename $(pwd)) --format '{{"{{.ID}}"}}' | xargs docker rm -f'
+  alias dcu='devcontainer up   --id-label=project=$(basename $(pwd)) --workspace-folder . --dotfiles-repository kurowski/dotfiles'
+  alias dce='devcontainer exec --id-label=project=$(basename $(pwd)) --workspace-folder . zsh'
+  alias dck='docker ps     --filter label=project=$(basename $(pwd)) --format '{{.ID}}' | xargs docker rm -f'
 fi
-
 
 if [ -f "$HOME/.zshrc.local" ]; then
     source "$HOME/.zshrc.local"
