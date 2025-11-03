@@ -7,14 +7,17 @@
 export SHELL=/usr/bin/zsh
 export EDITOR=nvim
 export VISUAL=$EDITOR
+export JIRA_BASE_URL="https://uceapit.atlassian.net"
 {{ if (and (not .devcontainer) (not .codespaces)) }}
 export GH_TOKEN={{ onepasswordRead "op://employee/5myfngtqzw57ult576drgswdqi/token" }}
+export JIRA_API_TOKEN={{ onepasswordRead "op://employee/mupia66ql5hjgse7ijnsookwum/credential" }}
+export JIRA_EMAIL={{ onepasswordRead "op://employee/mupia66ql5hjgse7ijnsookwum/username" }}
+export TERMINUS_TOKEN={{ onepasswordRead "op://employee/terminus-token/credential" }}
 export UCEAP_PORTAL_GOOGLE_CLIENT_ID={{ onepasswordRead "op://employee/ysuhgai7uvxcab5vqhyods4cvi/username" }}
 export UCEAP_PORTAL_GOOGLE_CLIENT_SECRET={{ onepasswordRead "op://employee/ysuhgai7uvxcab5vqhyods4cvi/credential" }}
-export TERMINUS_TOKEN={{ onepasswordRead "op://employee/terminus-token/credential" }}
 {{ end }}
 
-if command -v op >/dev/null 2>&1; then
+if [ -S ~/.1password/agent.sock ]; then
   export SSH_AUTH_SOCK=~/.1password/agent.sock
 fi
 
