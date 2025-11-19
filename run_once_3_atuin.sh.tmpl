@@ -1,6 +1,5 @@
 #!/bin/zsh
 
-sudo cp "{{ .chezmoi.sourceDir }}/assets/face.icon" /var/lib/AccountsService/icons/bkurowski
 atuin login \
   --username '{{ onepasswordRead "op://employee/atuin/username" }}' \
   --password '{{ onepasswordRead "op://employee/atuin/password" }}' \
