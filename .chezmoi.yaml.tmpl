@@ -25,6 +25,10 @@
 
 {{- $codespaces:= env "CODESPACES" | not | not -}}
 {{- $devcontainer:= env "REMOTE_CONTAINERS" | not | not -}}
+{{- $docker := false -}}
+{{- if stat "/.dockerenv" -}}
+  {{- $docker = true -}}
+{{- end -}}
 
 sourceDir: {{ .chezmoi.sourceDir | quote }}
 
@@ -33,3 +37,5 @@ data:
   email: {{ $email | quote }}
   codespaces: {{ $codespaces }}
   devcontainer: {{ $devcontainer }}
+  container: {{ $docker }}
+
