@@ -9,6 +9,7 @@ export EDITOR=nvim
 export VISUAL=$EDITOR
 export JIRA_BASE_URL="https://uceapit.atlassian.net"
 {{ if (and (not .devcontainer) (not .codespaces) (not .container)) }}
+export ANTHROPIC_FOUNDRY_API_KEY={{ onepasswordRead "op://xo32sy3f3wzlibewb2wn56f62i/kcxkwyhuudsqsmsvgw6j4l4crq/credential" }}
 export GH_TOKEN={{ onepasswordRead "op://employee/5myfngtqzw57ult576drgswdqi/token" }}
 export JIRA_API_TOKEN={{ onepasswordRead "op://employee/mupia66ql5hjgse7ijnsookwum/credential" }}
 export JIRA_EMAIL={{ onepasswordRead "op://employee/mupia66ql5hjgse7ijnsookwum/username" }}
