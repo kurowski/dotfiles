@@ -1,0 +1,55 @@
+#
+# .zshrc — managed by ansible (dotfiles)
+#
+
+export SHELL=/usr/bin/zsh
+export EDITOR=nvim
+export VISUAL=$EDITOR
+
+# 1Password SSH agent
+if [ -S ~/.1password/agent.sock ]; then
+  export SSH_AUTH_SOCK=~/.1password/agent.sock
+fi
+
+# Atuin — shell history
+export ATUIN_INIT_FLAGS="--disable-up-arrow"
+if command -v atuin >/dev/null 2>&1; then
+  eval "$(atuin init zsh ${ATUIN_INIT_FLAGS})"
+fi
+
+# Starship prompt
+if command -v starship >/dev/null 2>&1; then
+  eval "$(starship init zsh)"
+fi
+
+# Zoxide — smart cd
+if command -v zoxide >/dev/null 2>&1; then
+  eval "$(zoxide init zsh)"
+fi
+
+# Aliases
+alias vim=nvim
+alias ll='ls -alF'
+alias la='ls -A'
+
+# Devcontainer helpers
+if command -v devcontainer >/dev/null 2>&1; then
+  alias dcu='devcontainer up   --id-label=project=$(basename $(pwd)) --workspace-folder . --dotfiles-repository kurowski/dotfiles'
+  alias dck='docker ps     --filter label=project=$(basename $(pwd)) --format "{{ '{{' }}.ID{{ '}}' }}" | xargs docker rm -f'
+  dce() {
+    local session_name="${1:-devcontainer}"
+    devcontainer exec --id-label=project=$(basename $(pwd)) --workspace-folder . tmux new-session -As "$session_name"
+  }
+fi
+
+# Obsidian-Claude
+oc() {
+  docker start obsidian-claude 2>/dev/null
+  docker exec -it obsidian-claude claude "$@"
+}
+alias ocr='oc --resume'
+
+# Local overrides (machine-specific, not in devcontainers)
+if [ -f "$HOME/.zshrc.local" ]; then
+  source "$HOME/.zshrc.local"
+fi

@@ -1,0 +1,10 @@
+#
+# .zshrc.local — machine-specific config, managed by ansible
+# This file is not deployed to devcontainers.
+#
+
+{% if work_env_vars is defined %}
+{% for key, value in work_env_vars.items() %}
+export {{ key }}={{ value }}
+{% endfor %}
+{% endif %}

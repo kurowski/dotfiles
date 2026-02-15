@@ -14,3 +14,7 @@
           is_desktop: "{{ is_desktop }}"
           shell: "{{ shell }}"
           editor: "{{ editor }}"
+
+  roles:
+    - onepassword
+    - shell

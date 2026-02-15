@@ -1,0 +1,65 @@
+---
+- name: Install zsh
+  become: true
+  ansible.builtin.apt:
+    name: zsh
+    state: present
+
+- name: Set default shell to zsh
+  become: true
+  ansible.builtin.user:
+    name: "{{ username }}"
+    shell: /usr/bin/zsh
+
+- name: Install starship
+  become: true
+  ansible.builtin.shell:
+    cmd: curl -sS https://starship.rs/install.sh | sh -s -- --yes
+    creates: /usr/local/bin/starship
+
+- name: Install atuin
+  ansible.builtin.shell:
+    cmd: curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh
+    creates: "{{ ansible_env.HOME }}/.atuin/bin/atuin"
+
+- name: Check if op CLI is authenticated
+  become: false
+  ansible.builtin.command: op account list
+  register: op_check
+  changed_when: false
+  failed_when: false
+
+- name: Log in to atuin sync
+  become: false
+  ansible.builtin.shell:
+    cmd: |
+      {{ ansible_env.HOME }}/.atuin/bin/atuin login \
+        --username "$(op read --account team-uceap 'op://Employee/atuin/username')" \
+        --password "$(op read --account team-uceap 'op://Employee/atuin/password')" \
+        --key "$(op read --account team-uceap 'op://Employee/atuin-key/password')"
+    creates: "{{ ansible_env.HOME }}/.local/share/atuin/session"
+  when: op_check.rc == 0
+
+- name: Deploy .zshrc
+  ansible.builtin.template:
+    src: zshrc.j2
+    dest: "{{ ansible_env.HOME }}/.zshrc"
+    mode: "0644"
+
+- name: Deploy .zshrc.local
+  ansible.builtin.template:
+    src: zshrc.local.j2
+    dest: "{{ ansible_env.HOME }}/.zshrc.local"
+    mode: "0600"
+
+- name: Create starship config directory
+  ansible.builtin.file:
+    path: "{{ ansible_env.HOME }}/.config"
+    state: directory
+    mode: "0755"
+
+- name: Deploy starship.toml
+  ansible.builtin.copy:
+    src: starship.toml
+    dest: "{{ ansible_env.HOME }}/.config/starship.toml"
+    mode: "0644"
