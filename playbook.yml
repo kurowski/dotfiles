@@ -18,3 +18,5 @@
   roles:
     - onepassword
     - shell
+    - role: gnome
+      when: is_desktop | bool

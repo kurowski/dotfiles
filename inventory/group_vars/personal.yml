@@ -1,3 +1,12 @@
 git_email: brandt@kurowski.net
 theme: dark
 is_desktop: true
+dock_favorites:
+  - org.gnome.Nautilus.desktop
+  - 1password.desktop
+  - obsidian_obsidian.desktop
+  - ghostty_ghostty.desktop
+  - firefox_firefox.desktop
+  - code_code.desktop
+  - spotify_spotify.desktop
+  - snap-store_snap-store.desktop

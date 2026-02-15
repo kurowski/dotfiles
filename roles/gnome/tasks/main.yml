@@ -1,0 +1,248 @@
+---
+# --- Packages ---
+
+- name: Install GNOME Tweaks
+  become: true
+  ansible.builtin.apt:
+    name: gnome-tweaks
+    state: present
+
+# --- Fonts ---
+
+- name: Create local fonts directory
+  ansible.builtin.file:
+    path: "{{ ansible_env.HOME }}/.local/share/fonts/JetBrainsMono"
+    state: directory
+    mode: "0755"
+
+- name: Check if JetBrainsMono Nerd Font is installed
+  ansible.builtin.find:
+    paths: "{{ ansible_env.HOME }}/.local/share/fonts/JetBrainsMono"
+    patterns: "*.ttf"
+  register: jetbrains_fonts
+
+- name: Download JetBrainsMono Nerd Font
+  ansible.builtin.shell:
+    cmd: >
+      curl -sSfL https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.tar.xz
+      | tar xJ -C {{ ansible_env.HOME }}/.local/share/fonts/JetBrainsMono/
+  when: jetbrains_fonts.matched == 0
+
+- name: Refresh font cache
+  ansible.builtin.command: fc-cache -fv
+  when: jetbrains_fonts.matched == 0
+  changed_when: true
+
+# --- Input ---
+
+- name: Remap Caps Lock to Escape
+  community.general.dconf:
+    key: /org/gnome/desktop/input-sources/xkb-options
+    value: "['caps:escape']"
+
+- name: Enable natural scroll on mouse
+  community.general.dconf:
+    key: /org/gnome/desktop/peripherals/mouse/natural-scroll
+    value: "true"
+
+- name: Enable two-finger scrolling on touchpad
+  community.general.dconf:
+    key: /org/gnome/desktop/peripherals/touchpad/two-finger-scrolling-enabled
+    value: "true"
+
+# --- Appearance ---
+
+- name: Set color scheme
+  community.general.dconf:
+    key: /org/gnome/desktop/interface/color-scheme
+    value: "'{{ 'prefer-dark' if theme == 'dark' else 'default' }}'"
+
+- name: Set GTK theme
+  community.general.dconf:
+    key: /org/gnome/desktop/interface/gtk-theme
+    value: "'{{ 'Yaru-dark' if theme == 'dark' else 'Yaru' }}'"
+
+- name: Set icon theme
+  community.general.dconf:
+    key: /org/gnome/desktop/interface/icon-theme
+    value: "'{{ 'Yaru-dark' if theme == 'dark' else 'Yaru' }}'"
+
+- name: Set font antialiasing
+  community.general.dconf:
+    key: /org/gnome/desktop/interface/font-antialiasing
+    value: "'rgba'"
+
+- name: Set font hinting
+  community.general.dconf:
+    key: /org/gnome/desktop/interface/font-hinting
+    value: "'slight'"
+
+# --- Terminal (Ptyxis) ---
+
+- name: Set terminal font
+  community.general.dconf:
+    key: /org/gnome/Ptyxis/font-name
+    value: "'JetBrainsMono Nerd Font Mono 10'"
+
+- name: Disable system font in terminal
+  community.general.dconf:
+    key: /org/gnome/Ptyxis/use-system-font
+    value: "false"
+
+# --- Window Management ---
+
+- name: Disable dynamic workspaces
+  community.general.dconf:
+    key: /org/gnome/mutter/dynamic-workspaces
+    value: "false"
+
+- name: Set single workspace
+  community.general.dconf:
+    key: /org/gnome/desktop/wm/preferences/num-workspaces
+    value: "1"
+
+- name: Enable auto-raise
+  community.general.dconf:
+    key: /org/gnome/desktop/wm/preferences/auto-raise
+    value: "true"
+
+- name: Set click-to-focus
+  community.general.dconf:
+    key: /org/gnome/desktop/wm/preferences/focus-mode
+    value: "'click'"
+
+- name: Disable Mutter edge tiling (Tiling Assistant handles this)
+  community.general.dconf:
+    key: /org/gnome/mutter/edge-tiling
+    value: "false"
+  when: is_desktop | bool
+
+- name: Disable Mutter tiled-left keybinding
+  community.general.dconf:
+    key: /org/gnome/mutter/keybindings/toggle-tiled-left
+    value: "@as []"
+  when: is_desktop | bool
+
+- name: Disable Mutter tiled-right keybinding
+  community.general.dconf:
+    key: /org/gnome/mutter/keybindings/toggle-tiled-right
+    value: "@as []"
+  when: is_desktop | bool
+
+# --- Tiling Assistant ---
+
+- name: Set Tiling Assistant focus hint color
+  community.general.dconf:
+    key: /org/gnome/shell/extensions/tiling-assistant/focus-hint-color
+    value: "'rgb(203,67,20)'"
+  when: is_desktop | bool
+
+- name: Enable Tiling Assistant popup on all workspaces
+  community.general.dconf:
+    key: /org/gnome/shell/extensions/tiling-assistant/tiling-popup-all-workspace
+    value: "true"
+  when: is_desktop | bool
+
+# --- Dock ---
+
+- name: Extend dock height
+  community.general.dconf:
+    key: /org/gnome/shell/extensions/dash-to-dock/extend-height
+    value: "true"
+  when: is_desktop | bool
+
+- name: Set dock icon size
+  community.general.dconf:
+    key: /org/gnome/shell/extensions/dash-to-dock/dash-max-icon-size
+    value: "44"
+  when: is_desktop | bool
+
+- name: Fix dock position
+  community.general.dconf:
+    key: /org/gnome/shell/extensions/dash-to-dock/dock-fixed
+    value: "true"
+  when: is_desktop | bool
+
+- name: Hide mounts in dock
+  community.general.dconf:
+    key: /org/gnome/shell/extensions/dash-to-dock/show-mounts
+    value: "false"
+  when: is_desktop | bool
+
+- name: Hide trash in dock
+  community.general.dconf:
+    key: /org/gnome/shell/extensions/dash-to-dock/show-trash
+    value: "false"
+  when: is_desktop | bool
+
+# --- Dock Favorites ---
+
+- name: Set dock favorite apps
+  community.general.dconf:
+    key: /org/gnome/shell/favorite-apps
+    value: "{{ dock_favorites | string }}"
+  when: is_desktop | bool and dock_favorites is defined
+
+# --- Desktop Icons ---
+
+- name: Hide home icon on desktop
+  community.general.dconf:
+    key: /org/gnome/shell/extensions/ding/show-home
+    value: "false"
+  when: is_desktop | bool
+
+# --- Power ---
+
+- name: Disable power button action
+  community.general.dconf:
+    key: /org/gnome/settings-daemon/plugins/power/power-button-action
+    value: "'nothing'"
+
+- name: Set AC sleep timeout
+  community.general.dconf:
+    key: /org/gnome/settings-daemon/plugins/power/sleep-inactive-ac-timeout
+    value: "3600"
+
+- name: Disable AC sleep action
+  community.general.dconf:
+    key: /org/gnome/settings-daemon/plugins/power/sleep-inactive-ac-type
+    value: "'nothing'"
+
+- name: Set idle delay to 15 minutes
+  community.general.dconf:
+    key: /org/gnome/desktop/session/idle-delay
+    value: "uint32 900"
+
+# --- Autostart ---
+
+- name: Create autostart directory
+  ansible.builtin.file:
+    path: "{{ ansible_env.HOME }}/.config/autostart"
+    state: directory
+    mode: "0755"
+  when: is_desktop | bool
+
+- name: Add Deskflow to autostart
+  ansible.builtin.copy:
+    dest: "{{ ansible_env.HOME }}/.config/autostart/deskflow.desktop"
+    content: |
+      [Desktop Entry]
+      Type=Application
+      Name=Deskflow
+      Exec=deskflow
+      Hidden=false
+      X-GNOME-Autostart-enabled=true
+    mode: "0644"
+  when: is_desktop | bool
+
+# --- File Manager ---
+
+- name: Sort directories first (GTK4)
+  community.general.dconf:
+    key: /org/gtk/gtk4/settings/file-chooser/sort-directories-first
+    value: "true"
+
+- name: Sort directories first (GTK3)
+  community.general.dconf:
+    key: /org/gtk/settings/file-chooser/sort-directories-first
+    value: "true"

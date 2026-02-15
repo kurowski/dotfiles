@@ -37,7 +37,7 @@
         --username "$(op read --account team-uceap 'op://Employee/atuin/username')" \
         --password "$(op read --account team-uceap 'op://Employee/atuin/password')" \
         --key "$(op read --account team-uceap 'op://Employee/atuin-key/password')"
-    creates: "{{ ansible_env.HOME }}/.local/share/atuin/session"
+    creates: "{{ ansible_env.HOME }}/.local/share/atuin/key"
   when: op_check.rc == 0
 
 - name: Deploy .zshrc
