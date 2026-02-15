@@ -1,0 +1,16 @@
+---
+- name: Dotfiles setup
+  hosts: all
+  gather_facts: true
+
+  tasks:
+    - name: Show resolved configuration
+      ansible.builtin.debug:
+        msg:
+          hostname: "{{ ansible_hostname }}"
+          username: "{{ username }}"
+          git_email: "{{ git_email }}"
+          theme: "{{ theme }}"
+          is_desktop: "{{ is_desktop }}"
+          shell: "{{ shell }}"
+          editor: "{{ editor }}"
