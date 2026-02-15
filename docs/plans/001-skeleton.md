@@ -1,102 +1,52 @@
-# Ansible Dotfiles Skeleton
+# 001 — Skeleton & Shell Setup
+
+## Status: Complete
 
 ## Context
 
 Brandt is moving from chezmoi on Aurora Linux to a fresh Ansible-based dotfiles setup for Ubuntu. The repo needs to serve both work and personal machines, with per-machine customization via Ansible inventory. It also needs a lightweight (non-Ansible) install script for devcontainers that just sets up shell/editor config.
 
-This first step is just the **skeleton** — repo structure, inventory, group/host vars, a minimal playbook that runs, and the devcontainer install script. No roles or real configuration yet; we'll add those incrementally in follow-up sessions.
+**This repo is public.** No secrets in any file. Secrets are injected at runtime via 1Password CLI (`op read --account <account> 'op://vault/item/field'`).
 
-**This repo will be public.** No secrets in any file. Secrets (API tokens, passwords, etc.) will be injected at runtime via 1Password CLI (`op read`, `op run`, etc.), matching the pattern already used in the existing chezmoi dotfiles.
+## What was built
 
-## Machines
+### Skeleton
+- Repo at `~/Projects/dotfiles/` with Ansible inventory for 5 machines
+- Two groups: `work` (uceap-dev01) and `personal` (coach, cece, winston, nick)
+- `group_vars/` for work vs personal defaults (theme, git email, is_desktop)
+- `host_vars/` for per-machine overrides (servers set `is_desktop: false`)
+- `install.sh` stub for devcontainer dotfiles (not yet wired up)
+- `docs/plans/` for tracking design decisions
 
-| Hostname     | Group    | Description              |
-|-------------|----------|--------------------------|
-| coach       | personal | Personal desktop (current) |
-| cece        | personal | Personal laptop          |
-| winston     | personal | Home server              |
-| nick        | personal | Remote server            |
-| uceap-dev01 | work     | Work Linux laptop        |
+### 1Password role (`roles/onepassword`)
+- Adds 1Password APT repo (GPG key, sources list, debsig policy)
+- Installs `1password` and `1password-cli` packages
+- Note: On first run, 1Password must be opened and CLI integration enabled manually before `op read` works
 
-## Repo Structure
+### Shell role (`roles/shell`)
+- Installs zsh and sets it as default shell
+- Installs starship prompt (via install script)
+- Installs atuin (via install script, not snap — snap has confinement issues with Ansible)
+- Logs in to atuin sync using 1Password credentials (skipped if `op` not yet authenticated)
+- Deploys `.zshrc` with starship, atuin, zoxide init; devcontainer helpers; obsidian-claude functions
+- Deploys `.zshrc.local` for per-machine env vars (work secrets via `op read`)
+- Deploys `starship.toml` (Catppuccin Frappe theme, Nerd Font symbols, Aurora bits stripped)
 
-```
-~/Projects/dotfiles/
-├── ansible.cfg              # Local ansible config (inventory path, defaults)
-├── playbook.yml             # Main playbook
-├── inventory/
-│   ├── hosts.yml            # All machines grouped by work/personal
-│   ├── group_vars/
-│   │   ├── all.yml          # Shared defaults (shell, editor, CLI tools)
-│   │   ├── personal.yml     # Personal overrides (dark mode, personal email, etc.)
-│   │   └── work.yml         # Work overrides (light mode, work email, etc.)
-│   └── host_vars/
-│       ├── coach.yml        # Desktop-specific (GNOME desktop apps, etc.)
-│       ├── cece.yml         # Laptop-specific
-│       ├── winston.yml      # Home server (no desktop)
-│       ├── nick.yml         # Remote server (no desktop)
-│       └── uceap-dev01.yml  # Work laptop-specific
-├── roles/                   # Empty for now, we'll add roles incrementally
-├── files/                   # Static config files (starship.toml, etc.) — added later
-├── templates/               # Jinja2 templates (.zshrc.j2, .gitconfig.j2, etc.) — added later
-├── docs/
-│   └── plans/
-│       └── 001-skeleton.md  # This plan (and future plans as 002-*, 003-*, etc.)
-└── install.sh               # Lightweight devcontainer/dotfiles install script
-```
+## Lessons learned
 
-## Files to Create
+- **sudo-rs incompatibility**: Ubuntu's sudo-rs doesn't work with Ansible's become mechanism. Workaround: `become_exe = sudo.ws` in ansible.cfg. Tracked at [ansible/ansible#85837](https://github.com/ansible/ansible/issues/85837).
+- **Snap + Ansible**: Snap-installed tools (like atuin) have confinement issues when run from Ansible's shell tasks. Prefer native installs.
+- **1Password circular dependency**: The playbook installs 1Password, but `op read` needs the app configured first. Solution: check `op account list` and skip tasks that need it when not yet authenticated. First run installs everything; second run (after signing into 1Password) completes setup.
+- **Multiple 1Password accounts**: Must use `--account team-uceap` or `--account my` with `op read` to disambiguate.
 
-### `CLAUDE.md`
-- This is an Ansible-based dotfiles repo for automating Linux desktop setup across work and personal machines
-- The repo is **public** — never commit secrets; use 1Password CLI (`op://` URIs) for secret injection at runtime
-- Plans and design decisions live in `docs/plans/` as numbered files (001-skeleton.md, etc.) — read these for project history and context
-- All playbook runs are local (`ansible_connection=local`), never remote SSH
-- Work vs personal is distinguished via Ansible inventory groups and group_vars
-- `install.sh` is a lightweight non-Ansible script for devcontainer dotfiles setup
+## What's next
 
-
-
-### `ansible.cfg`
-- Set `inventory = inventory/hosts.yml`
-- Set `localhost` connection defaults
-
-### `inventory/hosts.yml`
-- Two groups: `work` and `personal`
-- All hosts use `ansible_connection=local` (playbook runs locally on each machine)
-- Each host identified by hostname
-
-### `inventory/group_vars/all.yml`
-- Placeholder shared vars: `username`, `shell` (zsh), `editor` (nvim)
-- No secrets — any secret references will use 1Password URI format (e.g., `op://vault/item/field`) to be resolved at runtime
-
-### `inventory/group_vars/personal.yml`
-- `git_email: brandt@kurowski.net`
-- `theme: dark`
-- `is_desktop: true` (overridden per host)
-
-### `inventory/group_vars/work.yml`
-- `git_email: bkurowski@uceap.universityofcalifornia.edu`
-- `theme: light`
-- `is_desktop: true`
-
-### `inventory/host_vars/*.yml`
-- Minimal placeholders for now
-- `winston.yml` and `nick.yml` set `is_desktop: false` (servers, no GUI)
-
-### `playbook.yml`
-- Targets the current hostname via `hosts: {{ ansible_hostname }}`
-- A single debug task that prints the resolved vars to verify everything works
-
-### `install.sh`
-- Lightweight script for devcontainers (no Ansible dependency)
-- Symlinks/copies shell config files (zshrc, starship.toml, gitconfig)
-- Compatible with VS Code devcontainer dotfiles support
-- Detects if running in a container and skips desktop-only config
-
-## Verification
-
-After creating the skeleton:
-1. Run `ansible-playbook playbook.yml --limit coach` — should print resolved vars for this machine
-2. Run `ansible-playbook playbook.yml --limit uceap-dev01` — should show work vars (will only work on that machine, but we can use `--check` to validate)
-3. Confirm `install.sh` is executable
+Potential future plans (not prioritized):
+- GNOME/dconf settings (dark/light mode, caps→escape, fonts, extensions, tiling)
+- Git config role (.gitconfig template with work/personal email)
+- APT packages & custom repos (gh, tailscale, docker, ghostty, etc.)
+- Snap/desktop app installation (Obsidian, Spotify, Firefox, etc.)
+- Neovim/LazyVim config
+- Fonts (Nerd Fonts installation)
+- Wire up `install.sh` for devcontainer dotfiles
+- VS Code settings sync strategy
