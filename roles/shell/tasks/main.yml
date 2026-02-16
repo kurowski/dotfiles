@@ -71,7 +71,7 @@
     mode: "0755"
 
 - name: Deploy starship.toml
-  ansible.builtin.copy:
-    src: starship.toml
+  ansible.builtin.template:
+    src: starship.toml.j2
     dest: "{{ ansible_env.HOME }}/.config/starship.toml"
     mode: "0644"

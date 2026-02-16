@@ -1,6 +1,6 @@
 "$schema" = 'https://starship.rs/config-schema.json'
 
-palette = "gruvbox_dark"
+palette = "{% if theme == 'dark' %}gruvbox_dark{% else %}nordic{% endif %}"
 
 add_newline = true
 
@@ -237,3 +237,15 @@ color_orange = '#d65d0e'
 color_purple = '#b16286'
 color_red = '#cc241d'
 color_yellow = '#d79921'
+
+[palettes.nordic]
+color_fg0 = '#d8dee9'
+color_bg1 = '#3b4252'
+color_bg3 = '#4c566a'
+color_blue = '#5e81ac'
+color_aqua = '#88c0d0'
+color_green = '#a3be8c'
+color_orange = '#d08770'
+color_purple = '#b48ead'
+color_red = '#bf616a'
+color_yellow = '#ebcb8b'
