@@ -39,9 +39,9 @@
   ansible.builtin.shell:
     cmd: |
       {{ ansible_env.HOME }}/.atuin/bin/atuin login \
-        --username "$(op read --account team-uceap 'op://Employee/atuin/username')" \
-        --password "$(op read --account team-uceap 'op://Employee/atuin/password')" \
-        --key "$(op read --account team-uceap 'op://Employee/atuin-key/password')"
+        --username "$(op read --account {{ op_account }} 'op://{{ atuin_vault }}/atuin/username')" \
+        --password "$(op read --account {{ op_account }} 'op://{{ atuin_vault }}/atuin/password')" \
+        --key "$(op read --account {{ op_account }} 'op://{{ atuin_vault }}/atuin-key/password')"
     creates: "{{ ansible_env.HOME }}/.local/share/atuin/key"
   when: op_check.rc == 0
 
@@ -56,6 +56,13 @@
     src: zshrc.local.j2
     dest: "{{ ansible_env.HOME }}/.zshrc.local"
     mode: "0600"
+
+- name: Deploy op inject env template
+  ansible.builtin.copy:
+    src: "env-templates/{{ ansible_hostname }}.tmpl"
+    dest: "{{ ansible_env.HOME }}/.config/zshrc-env.tmpl"
+    mode: "0600"
+  when: has_env_template | default(false)
 
 - name: Create starship config directory
   ansible.builtin.file:

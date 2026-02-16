@@ -3,8 +3,9 @@
 # This file is not deployed to devcontainers.
 #
 
-{% if work_env_vars is defined %}
-{% for key, value in work_env_vars.items() %}
-export {{ key }}={{ value }}
-{% endfor %}
+{% if has_env_template | default(false) %}
+# Inject secrets from 1Password in a single call
+if command -v op >/dev/null 2>&1; then
+  eval "$(op inject --account {{ op_account }} -i {{ ansible_env.HOME }}/.config/zshrc-env.tmpl 2>/dev/null)"
+fi
 {% endif %}

@@ -1,10 +1,2 @@
 # Work Linux laptop
-work_env_vars:
-  JIRA_BASE_URL: "https://uceapit.atlassian.net"
-  ANTHROPIC_FOUNDRY_API_KEY: "$(op read 'op://xo32sy3f3wzlibewb2wn56f62i/kcxkwyhuudsqsmsvgw6j4l4crq/credential')"
-  GH_TOKEN: "$(op read 'op://employee/5myfngtqzw57ult576drgswdqi/token')"
-  JIRA_API_TOKEN: "$(op read 'op://employee/mupia66ql5hjgse7ijnsookwum/credential')"
-  JIRA_EMAIL: "$(op read 'op://employee/mupia66ql5hjgse7ijnsookwum/username')"
-  TERMINUS_TOKEN: "$(op read 'op://employee/terminus-token/credential')"
-  UCEAP_PORTAL_GOOGLE_CLIENT_ID: "$(op read 'op://employee/ysuhgai7uvxcab5vqhyods4cvi/username')"
-  UCEAP_PORTAL_GOOGLE_CLIENT_SECRET: "$(op read 'op://employee/ysuhgai7uvxcab5vqhyods4cvi/credential')"
+has_env_template: true
