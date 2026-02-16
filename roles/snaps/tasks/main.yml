@@ -1,0 +1,18 @@
+---
+- name: Install common snaps
+  become: true
+  community.general.snap:
+    name: "{{ item.name }}"
+    classic: "{{ item.classic | default(false) }}"
+    state: present
+  loop: "{{ snaps_common }}"
+  when: snaps_common is defined
+
+- name: Install desktop snaps
+  become: true
+  community.general.snap:
+    name: "{{ item.name }}"
+    classic: "{{ item.classic | default(false) }}"
+    state: present
+  loop: "{{ snaps_desktop | default([]) }}"
+  when: is_desktop | bool and snaps_desktop is defined

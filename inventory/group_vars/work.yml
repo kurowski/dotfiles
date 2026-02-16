@@ -1,6 +1,9 @@
 git_email: bkurowski@uceap.universityofcalifornia.edu
 theme: light
 is_desktop: true
+snaps_desktop:
+  - { name: code, classic: true }
+  - { name: obsidian, classic: true }
 dock_favorites:
   - org.gnome.Nautilus.desktop
   - 1password.desktop

@@ -1,6 +1,13 @@
 git_email: brandt@kurowski.net
 theme: dark
 is_desktop: true
+snaps_common:
+  - { name: tailscale }
+snaps_desktop:
+  - { name: code, classic: true }
+  - { name: obsidian, classic: true }
+  - { name: gimp }
+  - { name: spotify }
 dock_favorites:
   - org.gnome.Nautilus.desktop
   - 1password.desktop
