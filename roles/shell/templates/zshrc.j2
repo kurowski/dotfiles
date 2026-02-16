@@ -3,8 +3,9 @@
 #
 
 export SHELL=/usr/bin/zsh
-export EDITOR=nvim
+export EDITOR={{ editor }}
 export VISUAL=$EDITOR
+export PATH="$HOME/.atuin/bin:$HOME/.local/bin:$PATH"
 
 # 1Password SSH agent
 if [ -S ~/.1password/agent.sock ]; then
@@ -28,7 +29,7 @@ if command -v zoxide >/dev/null 2>&1; then
 fi
 
 # Aliases
-alias vim=nvim
+alias vim={{ editor }}
 alias ll='ls -alF'
 alias la='ls -A'
 

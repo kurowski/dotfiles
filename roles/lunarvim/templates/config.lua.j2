@@ -1,0 +1,13 @@
+-- LunarVim config — managed by ansible (dotfiles)
+
+{% if theme == 'dark' %}
+lvim.plugins = {
+  { "luisiacc/gruvbox-baby" },
+}
+lvim.colorscheme = "gruvbox-baby"
+{% else %}
+lvim.plugins = {
+  { "projekt0n/github-nvim-theme" },
+}
+lvim.colorscheme = "github_light"
+{% endif %}

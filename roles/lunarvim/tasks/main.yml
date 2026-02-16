@@ -1,0 +1,19 @@
+---
+- name: Install neovim
+  become: true
+  ansible.builtin.apt:
+    name: neovim
+    state: present
+
+- name: Install LunarVim
+  ansible.builtin.shell:
+    cmd: >
+      LV_BRANCH='release-1.4/neovim-0.9'
+      bash <(curl -s https://raw.githubusercontent.com/LunarVim/LunarVim/release-1.4/neovim-0.9/utils/installer/install.sh) --yes
+    creates: "{{ ansible_env.HOME }}/.local/bin/lvim"
+
+- name: Deploy LunarVim config
+  ansible.builtin.template:
+    src: config.lua.j2
+    dest: "{{ ansible_env.HOME }}/.config/lvim/config.lua"
+    mode: "0644"

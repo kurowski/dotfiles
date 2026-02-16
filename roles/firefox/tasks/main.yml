@@ -1,0 +1,44 @@
+---
+# Install Firefox from Mozilla's official APT repo instead of snap.
+# This enables native messaging for 1Password browser integration.
+
+- name: Remove Firefox snap
+  become: true
+  community.general.snap:
+    name: firefox
+    state: absent
+  ignore_errors: true
+
+- name: Add Mozilla APT signing key
+  become: true
+  ansible.builtin.shell:
+    cmd: wget -q https://packages.mozilla.org/apt/repo-signing-key.gpg -O- | tee /etc/apt/keyrings/packages.mozilla.org.asc > /dev/null
+    creates: /etc/apt/keyrings/packages.mozilla.org.asc
+
+- name: Add Mozilla APT repository
+  become: true
+  ansible.builtin.copy:
+    content: "deb [signed-by=/etc/apt/keyrings/packages.mozilla.org.asc] https://packages.mozilla.org/apt mozilla main\n"
+    dest: /etc/apt/sources.list.d/mozilla.list
+    mode: "0644"
+
+# Ubuntu ships a firefox deb that's just a shim redirecting to snap.
+# Pinning the Mozilla repo at priority 1000 ensures apt installs the
+# real Firefox deb and upgrades over the shim automatically.
+- name: Pin Mozilla repo to prefer over snap shim
+  become: true
+  ansible.builtin.copy:
+    content: |
+      Package: *
+      Pin: origin packages.mozilla.org
+      Pin-Priority: 1000
+    dest: /etc/apt/preferences.d/mozilla
+    mode: "0644"
+
+- name: Install Firefox from Mozilla APT repo
+  become: true
+  ansible.builtin.apt:
+    name: firefox
+    state: latest
+    update_cache: true
+    allow_downgrade: true

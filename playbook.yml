@@ -17,6 +17,12 @@
 
   roles:
     - onepassword
+    - lunarvim
     - shell
+    - tmux
+    - role: ghostty
+      when: is_desktop | bool
+    - role: firefox
+      when: is_desktop | bool
     - role: gnome
       when: is_desktop | bool
