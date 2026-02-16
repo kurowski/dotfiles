@@ -19,6 +19,7 @@
     - onepassword
     - lunarvim
     - shell
+    - git
     - tmux
     - role: ghostty
       when: is_desktop | bool
