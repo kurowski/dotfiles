@@ -16,6 +16,7 @@
           editor: "{{ editor }}"
 
   roles:
+    - packages
     - onepassword
     - lunarvim
     - shell

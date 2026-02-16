@@ -1,0 +1,56 @@
+---
+# --- GitHub CLI repo ---
+
+- name: Add GitHub CLI GPG key
+  become: true
+  ansible.builtin.shell:
+    cmd: curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg -o /etc/apt/keyrings/githubcli-archive-keyring.gpg
+    creates: /etc/apt/keyrings/githubcli-archive-keyring.gpg
+
+- name: Add GitHub CLI APT repository
+  become: true
+  ansible.builtin.copy:
+    content: "deb [arch=amd64 signed-by=/etc/apt/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main\n"
+    dest: /etc/apt/sources.list.d/github-cli.list
+    mode: "0644"
+
+# --- Common packages (all machines) ---
+
+- name: Install common packages
+  become: true
+  ansible.builtin.apt:
+    name:
+      - cargo
+      - curl
+      - docker.io
+      - docker-buildx
+      - fastfetch
+      - gcc
+      - gh
+      - git
+      - glow
+      - make
+      - nodejs
+      - npm
+      - openssh-server
+      - python3-pip
+    state: present
+    update_cache: true
+
+- name: Add user to docker group
+  become: true
+  ansible.builtin.user:
+    name: "{{ username }}"
+    groups: docker
+    append: true
+
+# --- Desktop packages ---
+
+- name: Install desktop packages
+  become: true
+  ansible.builtin.apt:
+    name:
+      - ddcutil
+      - deskflow
+    state: present
+  when: is_desktop | bool
