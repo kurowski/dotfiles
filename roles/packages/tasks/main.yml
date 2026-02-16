@@ -29,6 +29,7 @@
       - gh
       - git
       - glow
+      - lazygit
       - make
       - nodejs
       - npm
