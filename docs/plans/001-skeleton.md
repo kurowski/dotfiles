@@ -1,52 +1,60 @@
-# 001 — Skeleton & Shell Setup
+# 001 — Dotfiles Setup
 
 ## Status: Complete
 
 ## Context
 
-Brandt is moving from chezmoi on Aurora Linux to a fresh Ansible-based dotfiles setup for Ubuntu. The repo needs to serve both work and personal machines, with per-machine customization via Ansible inventory. It also needs a lightweight (non-Ansible) install script for devcontainers that just sets up shell/editor config.
+Brandt is moving from chezmoi on Aurora Linux to a fresh Ansible-based dotfiles setup for Ubuntu. The repo serves both work and personal machines, with per-machine customization via Ansible inventory. A lightweight install script handles devcontainer dotfiles without Ansible.
 
-**This repo is public.** No secrets in any file. Secrets are injected at runtime via 1Password CLI (`op read --account <account> 'op://vault/item/field'`).
+**This repo is public.** No secrets in any file. Secrets are injected at runtime via 1Password CLI (`op inject` / `op read --account <account> 'op://vault/item/field'`).
 
-## What was built
+## Machines
 
-### Skeleton
-- Repo at `~/Projects/dotfiles/` with Ansible inventory for 5 machines
-- Two groups: `work` (uceap-dev01) and `personal` (coach, cece, winston, nick)
-- `group_vars/` for work vs personal defaults (theme, git email, is_desktop)
-- `host_vars/` for per-machine overrides (servers set `is_desktop: false`)
-- `install.sh` stub for devcontainer dotfiles (not yet wired up)
-- `docs/plans/` for tracking design decisions
+| Hostname     | Group    | Description              |
+|-------------|----------|--------------------------|
+| coach       | personal | Personal desktop         |
+| cece        | personal | Personal laptop          |
+| winston     | personal | Home server              |
+| nick        | personal | Remote server            |
+| uceap-dev01 | work     | Work Linux laptop        |
 
-### 1Password role (`roles/onepassword`)
-- Adds 1Password APT repo (GPG key, sources list, debsig policy)
-- Installs `1password` and `1password-cli` packages
-- Note: On first run, 1Password must be opened and CLI integration enabled manually before `op read` works
+## Roles
 
-### Shell role (`roles/shell`)
-- Installs zsh and sets it as default shell
-- Installs starship prompt (via install script)
-- Installs atuin (via install script, not snap — snap has confinement issues with Ansible)
-- Logs in to atuin sync using 1Password credentials (skipped if `op` not yet authenticated)
-- Deploys `.zshrc` with starship, atuin, zoxide init; devcontainer helpers; obsidian-claude functions
-- Deploys `.zshrc.local` for per-machine env vars (work secrets via `op read`)
-- Deploys `starship.toml` (Catppuccin Frappe theme, Nerd Font symbols, Aurora bits stripped)
+| Role         | What it does                                                        |
+|-------------|---------------------------------------------------------------------|
+| packages     | Common APT packages (docker, gh, cargo, nodejs, lazygit, etc.), GitHub CLI repo, desktop packages (deskflow, ddcutil), docker group |
+| onepassword  | 1Password APT repo, desktop app + CLI                              |
+| lunarvim     | Neovim + LunarVim, config with gruvbox-baby (personal) / github-light (work) |
+| shell        | Zsh, starship, atuin (with sync), devcontainer CLI, .zshrc, .zshrc.local (op inject), starship.toml |
+| git          | .gitconfig template with per-group email, gh credential helper     |
+| snaps        | Per-group snap packages (tailscale, VS Code, Obsidian, GIMP, Spotify) |
+| tmux         | Tmux from apt, TPM, gruvbox dark (personal) / nord (work)         |
+| ghostty      | Ghostty snap, config with Gruvbox Dark (personal) / Nord Light (work) |
+| firefox      | Remove snap Firefox, install from Mozilla APT repo for 1Password native messaging |
+| gnome        | Tweaks, fonts (JetBrainsMono Nerd Font), input (caps→escape, natural scroll), appearance (dark/light per group), terminal font/theme, window management, tiling assistant, dock, power, autostart, file manager |
 
-## Lessons learned
+## Devcontainer support
 
-- **sudo-rs incompatibility**: Ubuntu's sudo-rs doesn't work with Ansible's become mechanism. Workaround: `become_exe = sudo.ws` in ansible.cfg. Tracked at [ansible/ansible#85837](https://github.com/ansible/ansible/issues/85837).
-- **Snap + Ansible**: Snap-installed tools (like atuin) have confinement issues when run from Ansible's shell tasks. Prefer native installs.
-- **1Password circular dependency**: The playbook installs 1Password, but `op read` needs the app configured first. Solution: check `op account list` and skip tasks that need it when not yet authenticated. First run installs everything; second run (after signing into 1Password) completes setup.
-- **Multiple 1Password accounts**: Must use `--account team-uceap` or `--account my` with `op read` to disambiguate.
+`install.sh` — lightweight script that VS Code runs when creating devcontainers:
+- Installs starship and atuin if not present
+- Symlinks starship.toml from the repo
+- Appends starship + atuin init to existing .zshrc
+- Git config inherited from host automatically
+
+## Key patterns
+
+- **Work vs personal**: Ansible inventory groups with `group_vars/` (theme, email, 1Password account, snap lists, dock favorites)
+- **Per-host config**: `host_vars/` for machine-specific overrides (servers: `is_desktop: false`, work: env template for op inject)
+- **Secrets**: Never in files. `op inject` for shell env vars (single fast call), `op read` for one-off tasks (atuin login). Always specify `--account`.
+- **sudo-rs workaround**: `become_exe = sudo.ws` in ansible.cfg ([ansible#85837](https://github.com/ansible/ansible/issues/85837))
+- **Snap avoidance for CLI tools**: Snap confinement breaks Ansible shell tasks. Use native installs for atuin, tmux. Snaps fine for GUI apps.
+- **1Password bootstrap**: First run installs 1Password but can't use it yet. Tasks that need `op` check `op account list` and skip gracefully. Second run completes setup.
 
 ## What's next
 
-Potential future plans (not prioritized):
-- GNOME/dconf settings (dark/light mode, caps→escape, fonts, extensions, tiling)
-- Git config role (.gitconfig template with work/personal email)
-- APT packages & custom repos (gh, tailscale, docker, ghostty, etc.)
-- Snap/desktop app installation (Obsidian, Spotify, Firefox, etc.)
-- Neovim/LazyVim config
-- Fonts (Nerd Fonts installation)
-- Wire up `install.sh` for devcontainer dotfiles
-- VS Code settings sync strategy
+Potential future enhancements:
+- VS Code extensions list (currently using built-in Settings Sync)
+- Tailscale configuration
+- SSH server hardening
+- Obsidian vault cloning per machine
+- Deskflow configuration files
