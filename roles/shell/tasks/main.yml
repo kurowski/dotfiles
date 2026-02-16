@@ -22,6 +22,11 @@
     cmd: curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh
     creates: "{{ ansible_env.HOME }}/.atuin/bin/atuin"
 
+- name: Install devcontainer CLI
+  ansible.builtin.shell:
+    cmd: curl -fsSL https://raw.githubusercontent.com/devcontainers/cli/main/scripts/install.sh | sh
+    creates: "{{ ansible_env.HOME }}/.devcontainers/bin/devcontainer"
+
 - name: Check if op CLI is authenticated
   become: false
   ansible.builtin.command: op account list
