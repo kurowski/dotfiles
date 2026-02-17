@@ -53,5 +53,13 @@
     name:
       - ddcutil
       - deskflow
+      - fprintd
+      - libpam-fprintd
     state: present
+  when: is_desktop | bool
+
+- name: Enable fprintd PAM authentication
+  become: true
+  ansible.builtin.command: pam-auth-update --enable fprintd
+  changed_when: false
   when: is_desktop | bool
