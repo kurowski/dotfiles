@@ -3,3 +3,15 @@
   ansible.builtin.shell:
     cmd: "{{ ansible_env.HOME }}/.cargo/bin/cargo install --locked zellij"
     creates: "{{ ansible_env.HOME }}/.cargo/bin/zellij"
+
+- name: Create Zellij config directory
+  ansible.builtin.file:
+    path: "{{ ansible_env.HOME }}/.config/zellij"
+    state: directory
+    mode: "0755"
+
+- name: Deploy Zellij config
+  ansible.builtin.template:
+    src: config.kdl.j2
+    dest: "{{ ansible_env.HOME }}/.config/zellij/config.kdl"
+    mode: "0644"
