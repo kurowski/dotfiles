@@ -20,7 +20,6 @@
   become: true
   ansible.builtin.apt:
     name:
-      - cargo
       - curl
       - docker.io
       - docker-buildx
@@ -31,8 +30,6 @@
       - glow
       - lazygit
       - make
-      - nodejs
-      - npm
       - openssh-server
       - python3-pip
     state: present

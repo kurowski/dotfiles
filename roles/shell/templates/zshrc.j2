@@ -5,7 +5,11 @@
 export SHELL=/usr/bin/zsh
 export EDITOR={{ editor }}
 export VISUAL=$EDITOR
-export PATH="$HOME/.atuin/bin:$HOME/.local/bin:$HOME/.devcontainers/bin:$PATH"
+export PATH="$HOME/.cargo/bin:$HOME/.atuin/bin:$HOME/.local/bin:$HOME/.devcontainers/bin:$PATH"
+
+# nvm — Node version manager
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && source "$NVM_DIR/nvm.sh"
 
 # 1Password SSH agent
 if [ -S ~/.1password/agent.sock ]; then
@@ -39,7 +43,7 @@ if command -v devcontainer >/dev/null 2>&1; then
   alias dck='docker ps     --filter label=project=$(basename $(pwd)) --format "{{ '{{' }}.ID{{ '}}' }}" | xargs docker rm -f'
   dce() {
     local session_name="${1:-devcontainer}"
-    devcontainer exec --id-label=project=$(basename $(pwd)) --workspace-folder . tmux new-session -As "$session_name"
+    devcontainer exec --id-label=project=$(basename $(pwd)) --workspace-folder . zellij attach "$session_name" --create
   }
 fi
 

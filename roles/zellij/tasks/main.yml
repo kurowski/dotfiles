@@ -1,0 +1,5 @@
+---
+- name: Install zellij
+  ansible.builtin.shell:
+    cmd: "{{ ansible_env.HOME }}/.cargo/bin/cargo install --locked zellij"
+    creates: "{{ ansible_env.HOME }}/.cargo/bin/zellij"

@@ -17,11 +17,13 @@
 
   roles:
     - packages
+    - rust
+    - node
     - onepassword
     - lunarvim
     - shell
     - git
-    - tmux
+    - zellij
     - snaps
     - role: ghostty
       when: is_desktop | bool
