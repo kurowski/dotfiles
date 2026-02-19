@@ -3,7 +3,7 @@
   hosts: all
   gather_facts: true
 
-  tasks:
+  pre_tasks:
     - name: Show resolved configuration
       ansible.builtin.debug:
         msg:
@@ -14,6 +14,30 @@
           is_desktop: "{{ is_desktop }}"
           shell: "{{ shell }}"
           editor: "{{ editor }}"
+
+    # sudo.ws (original sudo kept alongside sudo-rs) hardcodes "sudo" as its
+    # PAM service name, so it reads /etc/pam.d/sudo. The default config
+    # @includes common-auth which contains pam_fprintd — the fingerprint
+    # prompt blocks non-interactive become. Deploy a password-only config
+    # here. Fingerprint auth is unaffected for GNOME login/unlock (separate
+    # PAM services that still @include common-auth).
+    - name: Deploy password-only PAM config for sudo
+      become: true
+      ansible.builtin.copy:
+        content: |
+          # Managed by Ansible — password-only auth so Ansible become doesn't
+          # hang on the pam_fprintd fingerprint prompt.
+          auth    [success=1 default=ignore]   pam_unix.so nullok try_first_pass
+          auth    requisite                     pam_deny.so
+          auth    required                      pam_permit.so
+          session required                      pam_limits.so
+          session required                      pam_env.so readenv=1 user_readenv=0
+          session required                      pam_env.so readenv=1 envfile=/etc/default/locale user_readenv=0
+          @include common-account
+          @include common-session-noninteractive
+        dest: /etc/pam.d/sudo
+        mode: "0644"
+      when: is_desktop | bool
 
   roles:
     - packages
