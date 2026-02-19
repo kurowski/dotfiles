@@ -9,6 +9,8 @@ lvim.colorscheme = "gruvbox-baby"
 lvim.plugins = {
   { "cocopon/iceberg.vim" },
 }
-vim.o.background = "light"
 lvim.colorscheme = "iceberg"
+vim.api.nvim_create_autocmd("VimEnter", {
+  callback = function() vim.o.background = "light" end,
+})
 {% endif %}
