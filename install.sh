@@ -7,15 +7,6 @@ set -euo pipefail
 
 DOTFILES_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-link() {
-  local src="$1" dest="$2"
-  if [ -e "$dest" ] || [ -L "$dest" ]; then
-    rm -f "$dest"
-  fi
-  mkdir -p "$(dirname "$dest")"
-  ln -sf "$src" "$dest"
-}
-
 # Install starship if not present
 if ! command -v starship >/dev/null 2>&1; then
   curl -sS https://starship.rs/install.sh | sh -s -- --yes
@@ -26,8 +17,10 @@ if ! command -v atuin >/dev/null 2>&1; then
   curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh
 fi
 
-# Starship config
-link "$DOTFILES_DIR/roles/shell/files/starship.toml" "$HOME/.config/starship.toml"
+# Starship config — render the Jinja2 template with iceberg_light palette
+mkdir -p "$HOME/.config"
+sed "s/{% if theme == 'dark' %}gruvbox_dark{% else %}iceberg_light{% endif %}/iceberg_light/" \
+  "$DOTFILES_DIR/roles/shell/templates/starship.toml.j2" > "$HOME/.config/starship.toml"
 
 # Shell init — append to .zshrc if zsh exists
 if [ -f "$HOME/.zshrc" ]; then
