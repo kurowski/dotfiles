@@ -40,6 +40,7 @@
       when: is_desktop | bool
 
   roles:
+    - terraform
     - packages
     - rust
     - node
@@ -48,7 +49,6 @@
     - shell
     - git
     - zellij
-    - terraform
     - snaps
     - role: ghostty
       when: is_desktop | bool

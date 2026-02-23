@@ -5,12 +5,21 @@
     cmd: curl -fsSL https://apt.releases.hashicorp.com/gpg | gpg --dearmor --output /etc/apt/keyrings/hashicorp-archive-keyring.gpg
     creates: /etc/apt/keyrings/hashicorp-archive-keyring.gpg
 
+- name: Check if HashiCorp repo supports current codename
+  ansible.builtin.uri:
+    url: "https://apt.releases.hashicorp.com/dists/{{ ansible_distribution_release }}/Release"
+    method: HEAD
+    status_code: [200, 404]
+  register: hashicorp_release_check
+
 - name: Add HashiCorp APT repository
   become: true
   ansible.builtin.copy:
-    content: "deb [arch=amd64 signed-by=/etc/apt/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com {{ ansible_distribution_release }} main\n"
+    content: "deb [arch=amd64 signed-by=/etc/apt/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com {{ hashicorp_codename }} main\n"
     dest: /etc/apt/sources.list.d/hashicorp.list
     mode: "0644"
+  vars:
+    hashicorp_codename: "{{ ansible_distribution_release if hashicorp_release_check.status == 200 else 'noble' }}"
 
 - name: Install Terraform
   become: true
