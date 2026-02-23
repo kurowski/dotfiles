@@ -41,6 +41,7 @@
 
   roles:
     - terraform
+    - kubernetes
     - packages
     - rust
     - node
