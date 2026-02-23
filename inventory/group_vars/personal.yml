@@ -5,6 +5,7 @@ theme: dark
 is_desktop: true
 snaps_common:
   - { name: tailscale }
+  - { name: aws-cli, classic: true }
 snaps_desktop:
   - { name: code, classic: true }
   - { name: obsidian, classic: true }
