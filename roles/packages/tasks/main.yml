@@ -14,6 +14,23 @@
     dest: /etc/apt/sources.list.d/github-cli.list
     mode: "0644"
 
+# --- VS Code repo (desktop only) ---
+
+- name: Add Microsoft GPG key
+  become: true
+  ansible.builtin.shell:
+    cmd: curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /etc/apt/keyrings/packages.microsoft.gpg
+    creates: /etc/apt/keyrings/packages.microsoft.gpg
+  when: is_desktop | bool
+
+- name: Add VS Code APT repository
+  become: true
+  ansible.builtin.copy:
+    content: "deb [arch=amd64 signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main\n"
+    dest: /etc/apt/sources.list.d/vscode.list
+    mode: "0644"
+  when: is_desktop | bool
+
 # --- Common packages (all machines) ---
 
 - name: Install common packages
@@ -44,15 +61,24 @@
 
 # --- Desktop packages ---
 
+- name: Remove VS Code snap
+  become: true
+  community.general.snap:
+    name: code
+    state: absent
+  when: is_desktop | bool
+
 - name: Install desktop packages
   become: true
   ansible.builtin.apt:
     name:
+      - code
       - ddcutil
       - deskflow
       - fprintd
       - libpam-fprintd
     state: present
+    update_cache: true
   when: is_desktop | bool
 
 - name: Enable fprintd PAM authentication

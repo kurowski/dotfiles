@@ -6,7 +6,6 @@ is_desktop: true
 snaps_common:
   - { name: aws-cli, classic: true }
 snaps_desktop:
-  - { name: code, classic: true }
   - { name: obsidian, classic: true }
 dock_favorites:
   - org.gnome.Nautilus.desktop
@@ -14,5 +13,5 @@ dock_favorites:
   - obsidian_obsidian.desktop
   - ghostty_ghostty.desktop
   - firefox.desktop
-  - code_code.desktop
+  - code.desktop
   - snap-store_snap-store.desktop
