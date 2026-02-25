@@ -14,21 +14,15 @@
     dest: /etc/apt/sources.list.d/github-cli.list
     mode: "0644"
 
-# --- VS Code repo (desktop only) ---
+# --- VS Code (desktop only) ---
+# The code .deb auto-manages its own apt source (vscode.sources).
+# Remove any manually-created source file to avoid Signed-By conflicts.
 
-- name: Add Microsoft GPG key
+- name: Remove manual VS Code apt source (managed by .deb)
   become: true
-  ansible.builtin.shell:
-    cmd: curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /etc/apt/keyrings/packages.microsoft.gpg
-    creates: /etc/apt/keyrings/packages.microsoft.gpg
-  when: is_desktop | bool
-
-- name: Add VS Code APT repository
-  become: true
-  ansible.builtin.copy:
-    content: "deb [arch=amd64 signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main\n"
-    dest: /etc/apt/sources.list.d/vscode.list
-    mode: "0644"
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/vscode.list
+    state: absent
   when: is_desktop | bool
 
 # --- Common packages (all machines) ---

@@ -25,3 +25,9 @@
     name: helm
     classic: true
     state: present
+
+- name: Install AWS SSM Session Manager plugin
+  become: true
+  ansible.builtin.apt:
+    deb: https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb
+    state: present
