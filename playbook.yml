@@ -51,6 +51,8 @@
     - git
     - zellij
     - snaps
+    - role: flatpaks
+      when: is_desktop | bool
     - role: ghostty
       when: is_desktop | bool
     - role: firefox
