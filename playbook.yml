@@ -55,6 +55,8 @@
       when: is_desktop | bool
     - role: ghostty
       when: is_desktop | bool
+    - role: chrome
+      when: is_desktop | bool
     - role: firefox
       when: is_desktop | bool
     - role: gnome

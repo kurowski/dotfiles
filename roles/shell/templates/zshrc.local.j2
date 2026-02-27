@@ -9,3 +9,9 @@ if command -v op >/dev/null 2>&1; then
   eval "$(op inject --account {{ op_account }} -i {{ ansible_env.HOME }}/.config/zshrc-env.tmpl 2>/dev/null)"
 fi
 {% endif %}
+
+{% if claude_foundry | default(false) %}
+# Claude Code Foundry
+export CLAUDE_CODE_USE_FOUNDRY="1"
+export ANTHROPIC_FOUNDRY_RESOURCE="{{ claude_foundry_resource }}"
+{% endif %}

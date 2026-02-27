@@ -1,0 +1,23 @@
+---
+# Install Google Chrome from Google's official APT repo.
+# This enables native messaging for 1Password browser integration.
+
+- name: Add Google Chrome GPG key
+  become: true
+  ansible.builtin.shell:
+    cmd: curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor --output /etc/apt/keyrings/google-chrome.gpg
+    creates: /etc/apt/keyrings/google-chrome.gpg
+
+- name: Add Google Chrome APT repository
+  become: true
+  ansible.builtin.copy:
+    content: "deb [arch=amd64 signed-by=/etc/apt/keyrings/google-chrome.gpg] https://dl.google.com/linux/chrome/deb/ stable main\n"
+    dest: /etc/apt/sources.list.d/google-chrome.list
+    mode: "0644"
+
+- name: Install Google Chrome
+  become: true
+  ansible.builtin.apt:
+    name: google-chrome-stable
+    state: present
+    update_cache: true

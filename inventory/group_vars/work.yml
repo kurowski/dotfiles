@@ -2,6 +2,8 @@ op_account: team-uceap
 atuin_vault: Employee
 git_email: bkurowski@uceap.universityofcalifornia.edu
 theme: light
+claude_foundry: true
+claude_foundry_resource: uceap-claude-test-resource
 is_desktop: true
 snaps_common:
   - { name: aws-cli, classic: true }
@@ -14,6 +16,6 @@ dock_favorites:
   - 1password.desktop
   - md.obsidian.Obsidian.desktop
   - ghostty_ghostty.desktop
-  - firefox.desktop
+  - google-chrome.desktop
   - code.desktop
   - snap-store_snap-store.desktop
