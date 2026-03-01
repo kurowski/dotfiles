@@ -39,6 +39,20 @@
         mode: "0644"
       when: is_desktop | bool
 
+    # The VS Code .deb auto-creates its own apt source (vscode.sources) at
+    # /usr/share/keyrings/microsoft.gpg. Remove any manually-created source
+    # that uses a different key path to prevent Signed-By conflicts that
+    # break all apt operations. Must run before any role calls update_cache.
+    - name: Remove conflicting VS Code apt source
+      become: true
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /etc/apt/sources.list.d/vscode.list
+        - /etc/apt/keyrings/microsoft.gpg
+      when: is_desktop | bool
+
   roles:
     - terraform
     - kubernetes

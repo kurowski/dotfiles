@@ -15,15 +15,30 @@
     mode: "0644"
 
 # --- VS Code (desktop only) ---
-# The code .deb auto-manages its own apt source (vscode.sources).
-# Remove any manually-created source file to avoid Signed-By conflicts.
+# The code .deb auto-manages its own apt source (vscode.sources) with its
+# own signing key. We only bootstrap a temporary source for the initial
+# install, then remove it so the .deb-managed source takes over.
 
-- name: Remove manual VS Code apt source (managed by .deb)
-  become: true
-  ansible.builtin.file:
-    path: /etc/apt/sources.list.d/vscode.list
-    state: absent
+- name: Check if VS Code apt source exists (managed by .deb)
+  ansible.builtin.stat:
+    path: /etc/apt/sources.list.d/vscode.sources
+  register: vscode_sources
   when: is_desktop | bool
+
+- name: Add VS Code GPG key (bootstrap)
+  become: true
+  ansible.builtin.shell:
+    cmd: curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /usr/share/keyrings/microsoft.gpg
+    creates: /usr/share/keyrings/microsoft.gpg
+  when: is_desktop | bool and not vscode_sources.stat.exists
+
+- name: Add VS Code APT repository (bootstrap)
+  become: true
+  ansible.builtin.copy:
+    content: "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/code stable main\n"
+    dest: /etc/apt/sources.list.d/vscode.list
+    mode: "0644"
+  when: is_desktop | bool and not vscode_sources.stat.exists
 
 # --- Common packages (all machines) ---
 
