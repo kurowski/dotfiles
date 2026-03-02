@@ -1,0 +1,41 @@
+#!/bin/bash
+#
+# op-env-session — inject 1Password secrets into the desktop session
+# Runs at GNOME login via autostart. Managed by ansible (dotfiles).
+#
+
+export OP_BIOMETRIC_UNLOCK_ENABLED=true
+TEMPLATE="{{ ansible_env.HOME }}/.config/zshrc-env.tmpl"
+ACCOUNT="{{ op_account }}"
+
+# Point SSH at 1Password agent
+if [ -S ~/.1password/agent.sock ]; then
+  export SSH_AUTH_SOCK=~/.1password/agent.sock
+  dbus-update-activation-environment SSH_AUTH_SOCK
+  systemctl --user import-environment SSH_AUTH_SOCK
+fi
+
+# Wait for 1Password CLI to be responsive (up to 60s)
+for _ in $(seq 1 30); do
+  op account list --account "$ACCOUNT" &>/dev/null && break
+  sleep 2
+done
+
+# Inject secrets
+ENV_EXPORTS=$(op inject --account "$ACCOUNT" -i "$TEMPLATE" 2>/dev/null)
+[ -z "$ENV_EXPORTS" ] && exit 1
+
+# Source to set in current process
+eval "$ENV_EXPORTS"
+
+# Extract variable names and add a marker so shells skip re-injection
+VAR_NAMES=$(echo "$ENV_EXPORTS" | grep -oP '(?<=export )\w+')
+export OP_SESSION_LOADED=1
+
+# Push to GNOME session (apps launched from dock/launcher inherit them)
+# shellcheck disable=SC2086
+dbus-update-activation-environment OP_SESSION_LOADED $VAR_NAMES
+
+# Push to systemd user session (for services and flatpak apps)
+# shellcheck disable=SC2086
+systemctl --user import-environment OP_SESSION_LOADED $VAR_NAMES
