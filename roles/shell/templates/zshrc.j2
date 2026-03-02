@@ -11,9 +11,10 @@ export PATH="$HOME/.cargo/bin:$HOME/.atuin/bin:$HOME/.local/bin:$HOME/.devcontai
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && source "$NVM_DIR/nvm.sh"
 
-# 1Password SSH agent
+# 1Password — SSH agent + CLI biometric unlock via desktop app
 if [ -S ~/.1password/agent.sock ]; then
   export SSH_AUTH_SOCK=~/.1password/agent.sock
+  export OP_BIOMETRIC_UNLOCK_ENABLED=true
 fi
 
 # Atuin — shell history
