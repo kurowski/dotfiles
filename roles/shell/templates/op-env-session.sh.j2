@@ -15,11 +15,11 @@ if [ -S ~/.1password/agent.sock ]; then
   systemctl --user import-environment SSH_AUTH_SOCK
 fi
 
-# Wait for 1Password CLI to be responsive (up to 60s)
-for _ in $(seq 1 30); do
-  op account list --account "$ACCOUNT" &>/dev/null && break
-  sleep 2
-done
+# Wait for 1Password to be running, then give the user time to unlock it.
+# We avoid op whoami here because it triggers a biometric prompt when
+# the app is locked, which can wedge the desktop app.
+until pgrep -x 1password &>/dev/null; do sleep 2; done
+sleep 30
 
 # Inject secrets
 ENV_EXPORTS=$(op inject --account "$ACCOUNT" -i "$TEMPLATE" 2>/dev/null)
