@@ -1,0 +1,151 @@
+---
+- name: Install KVM/QEMU/libvirt packages
+  become: true
+  ansible.builtin.apt:
+    name:
+      - qemu-kvm
+      - libvirt-daemon-system
+      - libvirt-clients
+      - virt-manager
+      - virtinst
+      - ovmf
+      - genisoimage
+      - virt-viewer
+    state: present
+    update_cache: true
+
+- name: Enable and start libvirtd
+  become: true
+  ansible.builtin.systemd:
+    name: libvirtd
+    enabled: true
+    state: started
+
+- name: Add user to libvirt and kvm groups
+  become: true
+  ansible.builtin.user:
+    name: "{{ username }}"
+    groups:
+      - libvirt
+      - kvm
+    append: true
+
+- name: Ensure default network is active
+  become: true
+  ansible.builtin.command: virsh net-start default
+  register: net_start
+  changed_when: net_start.rc == 0
+  failed_when: net_start.rc != 0 and 'already active' not in net_start.stderr
+
+- name: Ensure default network autostarts
+  become: true
+  ansible.builtin.command: virsh net-autostart default
+  changed_when: false
+
+- name: Download virtio-win drivers ISO
+  become: true
+  ansible.builtin.get_url:
+    url: https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/stable-virtio/virtio-win.iso
+    dest: "{{ libvirt_images_dir }}/virtio-win.iso"
+    mode: "0644"
+
+- name: Create Windows 10 disk image
+  become: true
+  ansible.builtin.command:
+    cmd: qemu-img create -f qcow2 "{{ libvirt_images_dir }}/win10.qcow2" {{ win10_disk_size }}
+    creates: "{{ libvirt_images_dir }}/win10.qcow2"
+
+- name: Create autounattend staging directory
+  ansible.builtin.file:
+    path: /tmp/autounattend
+    state: directory
+    mode: "0755"
+
+- name: Download SPICE guest tools for Windows
+  ansible.builtin.get_url:
+    url: https://www.spice-space.org/download/windows/spice-guest-tools/spice-guest-tools-latest.exe
+    dest: /tmp/autounattend/spice-guest-tools.exe
+    mode: "0644"
+  register: spice_guest_tools
+
+- name: Download 1Password for Windows
+  ansible.builtin.get_url:
+    url: https://downloads.1password.com/win/1PasswordSetup-latest.exe
+    dest: /tmp/autounattend/1PasswordSetup.exe
+    mode: "0644"
+  register: onepassword_installer
+
+- name: Download Google Chrome for Windows
+  ansible.builtin.get_url:
+    url: https://dl.google.com/chrome/install/GoogleChromeStandaloneEnterprise64.msi
+    dest: /tmp/autounattend/GoogleChrome.msi
+    mode: "0644"
+  register: chrome_installer
+
+- name: Template autounattend.xml
+  ansible.builtin.template:
+    src: autounattend.xml.j2
+    dest: /tmp/autounattend/autounattend.xml
+    mode: "0644"
+  register: autounattend_template
+
+- name: Build autounattend ISO
+  become: true
+  ansible.builtin.command:
+    cmd: genisoimage -o {{ libvirt_images_dir }}/autounattend.iso -J -r /tmp/autounattend/
+  when: autounattend_template is changed or spice_guest_tools is changed or onepassword_installer is changed or chrome_installer is changed
+
+- name: Check for Windows 10 ISO
+  ansible.builtin.stat:
+    path: "{{ libvirt_images_dir }}/{{ win10_iso }}"
+  register: win10_iso_file
+
+- name: Show Windows ISO instructions
+  ansible.builtin.debug:
+    msg: "Place your Windows 10 ISO at {{ libvirt_images_dir }}/{{ win10_iso }} then re-run to create the VM."
+  when: not win10_iso_file.stat.exists
+
+  # become is required because Ansible inherits the GNOME session's group
+  # list, which won't include the libvirt group until the next reboot — even
+  # after logout/login. The user's libvirt group membership handles
+  # interactive use (virt-manager, virsh) after a reboot.
+- name: Check if win10 VM already exists
+  become: true
+  ansible.builtin.command: virsh list --all --name
+  register: virsh_list
+  changed_when: false
+  when: win10_iso_file.stat.exists
+
+- name: Create Windows 10 VM
+  become: true
+  ansible.builtin.command:
+    argv:
+      - virt-install
+      - --name
+      - win10
+      - --ram
+      - "{{ win10_ram_mb }}"
+      - --vcpus
+      - "{{ win10_vcpus }}"
+      - --disk
+      - "path={{ libvirt_images_dir }}/win10.qcow2,bus=virtio"
+      - --disk
+      - "path={{ libvirt_images_dir }}/{{ win10_iso }},device=cdrom"
+      - --disk
+      - "path={{ libvirt_images_dir }}/virtio-win.iso,device=cdrom"
+      - --disk
+      - "path={{ libvirt_images_dir }}/autounattend.iso,device=cdrom"
+      - --os-variant
+      - win10
+      - --network
+      - network=default,model=virtio
+      - --graphics
+      - spice
+      - --video
+      - qxl,vgamem=65536
+      - --boot
+      - uefi,cdrom,hd
+      - --noautoconsole
+  when:
+    - win10_iso_file.stat.exists
+    - "'win10' not in virsh_list.stdout"

@@ -1,0 +1,8 @@
+---
+libvirt_images_dir: /var/lib/libvirt/images
+win10_iso: "Win10_22H2_English_x64v1.iso"
+win10_disk_size: "80G"
+win10_ram_mb: 8192
+win10_vcpus: 4
+win10_computer_name: WIN10-VM
+win10_timezone: Eastern Standard Time
