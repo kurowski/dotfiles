@@ -126,9 +126,9 @@
       - --ram
       - "{{ win10_ram_mb }}"
       - --vcpus
-      - "{{ win10_vcpus }}"
+      - "{{ win10_vcpus }},sockets=1,cores={{ win10_vcpus }},threads=1"
       - --disk
-      - "path={{ libvirt_images_dir }}/win10.qcow2,bus=virtio"
+      - "path={{ libvirt_images_dir }}/win10.qcow2,bus=virtio,cache=writeback,io=threads,discard=unmap"
       - --disk
       - "path={{ libvirt_images_dir }}/{{ win10_iso }},device=cdrom"
       - --disk
