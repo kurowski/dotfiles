@@ -72,6 +72,17 @@
     force: true
   when: "freerdp_version not in (freerdp_installed_version.stdout | default(''))"
 
+# 3.24.2 refactored rdpecam encoding into a video context abstraction that
+# hardcodes H264_CONTEXT_OPTION_HW_ACCEL to FALSE, regressing PR #10887's
+# VAAPI hardware encoding support. Flip it to TRUE so the VAAPI encoder
+# path in h264_ffmpeg.c is used (falls back to software if VAAPI unavailable).
+- name: Patch FreeRDP to enable VAAPI H264 encoding for rdpecam
+  ansible.builtin.replace:
+    path: /tmp/freerdp-build/libfreerdp/codec/video.c
+    regexp: 'H264_CONTEXT_OPTION_HW_ACCEL, FALSE'
+    replace: 'H264_CONTEXT_OPTION_HW_ACCEL, TRUE'
+  when: "freerdp_version not in (freerdp_installed_version.stdout | default(''))"
+
 - name: Build FreeRDP with rdpecam support
   ansible.builtin.shell: |
     cmake -B /tmp/freerdp-build/build -S /tmp/freerdp-build -G Ninja \
