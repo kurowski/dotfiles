@@ -11,8 +11,88 @@
       - ovmf
       - genisoimage
       - virt-viewer
+      - qemu-guest-agent
     state: present
     update_cache: true
+
+# Ubuntu's FreeRDP package disables FFMPEG and the rdpecam channel, so
+# camera redirection over RDP doesn't work. Build from source with
+# rdpecam enabled for webcam/mic support in the Windows VM.
+- name: Install FreeRDP build dependencies
+  become: true
+  ansible.builtin.apt:
+    name:
+      - cmake
+      - ninja-build
+      - pkg-config
+      - libssl-dev
+      - libx11-dev
+      - libxext-dev
+      - libxinerama-dev
+      - libxcursor-dev
+      - libxkbfile-dev
+      - libxv-dev
+      - libxi-dev
+      - libxdamage-dev
+      - libxrandr-dev
+      - libxfixes-dev
+      - libxtst-dev
+      - libcups2-dev
+      - libpulse-dev
+      - libasound2-dev
+      - libavcodec-dev
+      - libavutil-dev
+      - libswresample-dev
+      - libswscale-dev
+      - libusb-1.0-0-dev
+      - libsystemd-dev
+      - libpcsclite-dev
+      - libwayland-dev
+      - libsdl3-dev
+      - libsdl3-ttf-dev
+      - libv4l-dev
+      - libfuse3-dev
+      - libcjson-dev
+      - libcairo2-dev
+      - libicu-dev
+    state: present
+
+- name: Check installed FreeRDP version
+  ansible.builtin.command: /usr/local/bin/sdl-freerdp --version
+  register: freerdp_installed_version
+  changed_when: false
+  failed_when: false
+
+- name: Clone FreeRDP source
+  ansible.builtin.git:
+    repo: https://github.com/FreeRDP/FreeRDP.git
+    dest: /tmp/freerdp-build
+    version: "{{ freerdp_version }}"
+    depth: 1
+    force: true
+  when: "freerdp_version not in (freerdp_installed_version.stdout | default(''))"
+
+- name: Build FreeRDP with rdpecam support
+  ansible.builtin.shell: |
+    cmake -B /tmp/freerdp-build/build -S /tmp/freerdp-build -G Ninja \
+      -DCMAKE_INSTALL_PREFIX=/usr/local \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DWITH_FFMPEG=ON \
+      -DWITH_DSP_FFMPEG=ON \
+      -DWITH_CAIRO=ON \
+      -DWITH_PULSE=ON \
+      -DWITH_CUPS=ON \
+      -DWITH_V4L=ON \
+      -DCHANNEL_RDPECAM=ON \
+      -DCHANNEL_RDPECAM_CLIENT=ON \
+      -DWITH_CLIENT_SDL=ON && \
+    cmake --build /tmp/freerdp-build/build -j{{ ansible_processor_vcpus }}
+  when: "freerdp_version not in (freerdp_installed_version.stdout | default(''))"
+
+- name: Install FreeRDP
+  become: true
+  ansible.builtin.shell: cmake --install /tmp/freerdp-build/build && ldconfig
+  when: "freerdp_version not in (freerdp_installed_version.stdout | default(''))"
 
 - name: Enable and start libvirtd
   become: true
@@ -42,6 +122,12 @@
   ansible.builtin.command: virsh net-autostart default
   changed_when: false
 
+- name: Read Windows VM password from 1Password
+  ansible.builtin.command: op read "{{ win10_op_password_ref }}" --account {{ op_account }}
+  register: win10_password_result
+  changed_when: false
+  no_log: true
+
 - name: Download virtio-win drivers ISO
   become: true
   ansible.builtin.get_url:
@@ -52,21 +138,14 @@
 - name: Create Windows 10 disk image
   become: true
   ansible.builtin.command:
-    cmd: qemu-img create -f qcow2 "{{ libvirt_images_dir }}/win10.qcow2" {{ win10_disk_size }}
-    creates: "{{ libvirt_images_dir }}/win10.qcow2"
+    cmd: qemu-img create -f qcow2 "{{ libvirt_images_dir }}/{{ win10_vm_name }}.qcow2" {{ win10_disk_size }}
+    creates: "{{ libvirt_images_dir }}/{{ win10_vm_name }}.qcow2"
 
 - name: Create autounattend staging directory
   ansible.builtin.file:
     path: /tmp/autounattend
     state: directory
     mode: "0755"
-
-- name: Download SPICE guest tools for Windows
-  ansible.builtin.get_url:
-    url: https://www.spice-space.org/download/windows/spice-guest-tools/spice-guest-tools-latest.exe
-    dest: /tmp/autounattend/spice-guest-tools.exe
-    mode: "0644"
-  register: spice_guest_tools
 
 - name: Download 1Password for Windows
   ansible.builtin.get_url:
@@ -82,18 +161,50 @@
     mode: "0644"
   register: chrome_installer
 
+- name: Download Edge WebView2 bootstrapper
+  ansible.builtin.get_url:
+    url: https://go.microsoft.com/fwlink/p/?LinkId=2124703
+    dest: /tmp/autounattend/MicrosoftEdgeWebview2Setup.exe
+    mode: "0644"
+  register: webview2_installer
+
+- name: Download Microsoft Teams bootstrapper
+  ansible.builtin.get_url:
+    url: https://go.microsoft.com/fwlink/?linkid=2243204&clcid=0x409
+    dest: /tmp/autounattend/teamsbootstrapper.exe
+    mode: "0644"
+  register: teams_installer
+
+- name: Template WinApps helper scripts
+  ansible.builtin.template:
+    src: "{{ item }}"
+    dest: "/tmp/autounattend/{{ item | basename | regex_replace('\\.j2$', '') }}"
+    mode: "0644"
+  loop:
+    - NetProfileCleanup.ps1
+    - TimeSync.ps1
+  register: helper_scripts
+
 - name: Template autounattend.xml
   ansible.builtin.template:
     src: autounattend.xml.j2
     dest: /tmp/autounattend/autounattend.xml
     mode: "0644"
+  vars:
+    win10_password: "{{ win10_password_result.stdout }}"
   register: autounattend_template
 
 - name: Build autounattend ISO
   become: true
   ansible.builtin.command:
     cmd: genisoimage -o {{ libvirt_images_dir }}/autounattend.iso -J -r /tmp/autounattend/
-  when: autounattend_template is changed or spice_guest_tools is changed or onepassword_installer is changed or chrome_installer is changed
+  when: >-
+    autounattend_template is changed or
+    onepassword_installer is changed or
+    chrome_installer is changed or
+    webview2_installer is changed or
+    teams_installer is changed or
+    helper_scripts is changed
 
 - name: Check for Windows 10 ISO
   ansible.builtin.stat:
@@ -102,33 +213,35 @@
 
 - name: Show Windows ISO instructions
   ansible.builtin.debug:
-    msg: "Place your Windows 10 ISO at {{ libvirt_images_dir }}/{{ win10_iso }} then re-run to create the VM."
+    msg: "Place your Windows 10 Pro ISO at {{ libvirt_images_dir }}/{{ win10_iso }} then re-run to create the VM."
   when: not win10_iso_file.stat.exists
 
   # become is required because Ansible inherits the GNOME session's group
   # list, which won't include the libvirt group until the next reboot — even
   # after logout/login. The user's libvirt group membership handles
   # interactive use (virt-manager, virsh) after a reboot.
-- name: Check if win10 VM already exists
+- name: Check if VM already exists
   become: true
   ansible.builtin.command: virsh list --all --name
   register: virsh_list
   changed_when: false
   when: win10_iso_file.stat.exists
 
-- name: Create Windows 10 VM
+- name: Create Windows 10 Pro VM
   become: true
   ansible.builtin.command:
     argv:
       - virt-install
       - --name
-      - win10
+      - "{{ win10_vm_name }}"
       - --ram
       - "{{ win10_ram_mb }}"
       - --vcpus
       - "{{ win10_vcpus }},sockets=1,cores={{ win10_vcpus }},threads=1"
+      - --cpu
+      - host-passthrough
       - --disk
-      - "path={{ libvirt_images_dir }}/win10.qcow2,bus=virtio,cache=writeback,io=threads,discard=unmap"
+      - "path={{ libvirt_images_dir }}/{{ win10_vm_name }}.qcow2,bus=virtio,cache=writeback,io=threads,discard=unmap"
       - --disk
       - "path={{ libvirt_images_dir }}/{{ win10_iso }},device=cdrom"
       - --disk
@@ -142,10 +255,58 @@
       - --graphics
       - spice
       - --video
-      - qxl,vgamem=65536
+      - qxl
+      - --channel
+      - unix,target.type=virtio,target.name=org.qemu.guest_agent.0
+      - --features
+      - hyperv.relaxed.state=on,hyperv.vapic.state=on,hyperv.spinlocks.state=on,hyperv.spinlocks.retries=8191,hyperv.vpindex.state=on,hyperv.synic.state=on,hyperv.stimer.state=on,hyperv.stimer.direct.state=on,hyperv.reset.state=on,hyperv.frequencies.state=on,hyperv.reenlightenment.state=on,hyperv.tlbflush.state=on,hyperv.ipi.state=on
+      - --clock
+      - offset=localtime,rtc_present=no,pit_present=no,hpet_present=no,kvmclock_present=no,hypervclock_present=on
       - --boot
       - uefi,cdrom,hd
       - --noautoconsole
+  register: vm_created
   when:
     - win10_iso_file.stat.exists
-    - "'win10' not in virsh_list.stdout"
+    - "win10_vm_name not in virsh_list.stdout"
+
+  # OVMF with fresh NVRAM ignores OS-level <boot dev='cdrom'/> and drops
+  # to "No bootable option." Per-device boot order (boot order='N' on
+  # individual <disk> elements) is handled reliably. Shut down the VM,
+  # patch the XML, then restart.
+- name: Shut down VM to fix boot order
+  become: true
+  ansible.builtin.command: virsh destroy {{ win10_vm_name }}
+  when: vm_created is changed
+
+- name: Switch to per-device boot order for OVMF
+  become: true
+  ansible.builtin.shell: |
+    set -e
+    virsh dumpxml --inactive {{ win10_vm_name }} > /tmp/vm-boot-fix.xml
+    # Remove OS-level boot entries (OVMF ignores these with fresh NVRAM)
+    sed -i '/<boot dev=/d' /tmp/vm-boot-fix.xml
+    # Add per-device boot order: CD-ROM first (Windows ISO), then hard disk
+    sed -i '/<target dev='\''sda'\'' bus='\''sata'\''/{n;s|$|\n      <boot order="1"/>|}' /tmp/vm-boot-fix.xml
+    sed -i '/<target dev='\''vda'\'' bus='\''virtio'\''/{n;s|$|\n      <boot order="2"/>|}' /tmp/vm-boot-fix.xml
+    virsh define /tmp/vm-boot-fix.xml
+    rm /tmp/vm-boot-fix.xml
+  when: vm_created is changed
+
+- name: Start VM with corrected boot order
+  become: true
+  ansible.builtin.command: virsh start {{ win10_vm_name }}
+  when: vm_created is changed
+
+  # The Windows ISO prompts "Press any key to boot from CD or DVD..."
+  # which times out after ~5 seconds. Send a keypress to skip the wait.
+- name: Wait for Windows ISO boot prompt
+  ansible.builtin.pause:
+    seconds: 10
+  when: vm_created is changed
+
+- name: Send keypress to boot from DVD
+  become: true
+  ansible.builtin.command: virsh send-key {{ win10_vm_name }} KEY_ENTER
+  when: vm_created is changed
+
