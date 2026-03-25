@@ -32,7 +32,8 @@ winvm() {
   local pass
   pass=$(op read "{{ win10_op_password_ref }}" --account {{ op_account }}) || return 1
   /usr/local/bin/sdl-freerdp /v:"$ip" /u:{{ username }} /p:"$pass" \
-    /cert:tofu /dynamic-resolution /sound /microphone /dvc:rdpecam,quality:0
+    /cert:tofu /dynamic-resolution /sound /microphone /dvc:rdpecam,quality:0 \
+    /size:2560x1600 "$@"
 }
 {% endif %}
 
