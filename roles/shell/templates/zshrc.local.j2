@@ -24,9 +24,9 @@ fi
 # Connect to Windows VM via RDP (camera/mic via rdpecam channel)
 winvm() {
   local ip
-  ip=$(sudo virsh domifaddr {{ win10_vm_name }} 2>/dev/null | awk '/ipv4/ {split($4,a,"/"); print a[1]}')
+  ip=$(LIBVIRT_DEFAULT_URI=qemu:///system virsh domifaddr {{ win10_vm_name }} 2>/dev/null | awk '/ipv4/ {split($4,a,"/"); print a[1]}')
   if [ -z "$ip" ]; then
-    echo "VM {{ win10_vm_name }} is not running. Start it with: sudo virsh start {{ win10_vm_name }}" >&2
+    echo "VM {{ win10_vm_name }} is not running. Start it with: virsh start {{ win10_vm_name }}" >&2
     return 1
   fi
   local pass

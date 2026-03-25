@@ -1,0 +1,11 @@
+#!/bin/sh
+export LIBVIRT_DEFAULT_URI=qemu:///system
+ip=$(virsh domifaddr {{ win10_vm_name }} 2>/dev/null | awk '/ipv4/ {split($4,a,"/"); print a[1]}')
+if [ -z "$ip" ]; then
+  notify-send "Windows VM" "VM is not running. Start it with: virsh start {{ win10_vm_name }}"
+  exit 1
+fi
+pass=$(op read "{{ win10_op_password_ref }}" --account {{ op_account }}) || exit 1
+exec /usr/local/bin/sdl-freerdp /v:"$ip" /u:{{ username }} /p:"$pass" \
+  /cert:tofu /dynamic-resolution /sound /microphone /dvc:rdpecam,quality:0 \
+  /size:2560x1600

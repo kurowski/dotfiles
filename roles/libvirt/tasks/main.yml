@@ -94,6 +94,18 @@
   ansible.builtin.shell: cmake --install /tmp/freerdp-build/build && ldconfig
   when: "freerdp_version not in (freerdp_installed_version.stdout | default(''))"
 
+- name: Install winvm launcher script
+  ansible.builtin.template:
+    src: winvm.sh.j2
+    dest: "{{ ansible_env.HOME }}/.local/bin/winvm"
+    mode: "0755"
+
+- name: Install winvm desktop entry
+  ansible.builtin.template:
+    src: winvm.desktop.j2
+    dest: "{{ ansible_env.HOME }}/.local/share/applications/winvm.desktop"
+    mode: "0644"
+
 - name: Enable and start libvirtd
   become: true
   ansible.builtin.systemd:
