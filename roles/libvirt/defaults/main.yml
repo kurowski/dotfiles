@@ -1,0 +1,13 @@
+---
+libvirt_images_dir: /var/lib/libvirt/images
+win10_iso: "Win10_22H2_English_x64v1.iso"
+win10_disk_size: "80G"
+win10_ram_mb: 8192
+win10_vcpus: 4
+win10_vm_name: RDPWindows
+win10_computer_name: RDPWindows
+win10_timezone: Eastern Standard Time
+win10_edition: "Windows 10 Pro"
+win10_product_key: W269N-WFGWX-YVC9B-4J6C9-T83GX
+win10_op_password_ref: "op://Employee/Windows VM/password"
+freerdp_version: "3.24.2"
