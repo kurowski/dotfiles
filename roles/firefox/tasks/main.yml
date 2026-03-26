@@ -22,16 +22,22 @@
     dest: /etc/apt/sources.list.d/mozilla.list
     mode: "0644"
 
-# Ubuntu ships a firefox deb that's just a shim redirecting to snap.
-# Pinning the Mozilla repo at priority 1000 ensures apt installs the
-# real Firefox deb and upgrades over the shim automatically.
-- name: Pin Mozilla repo to prefer over snap shim
+# Ubuntu's firefox deb is a shim that redirects to snap. Its epoch
+# version (1:1snap1-*) sorts higher than Mozilla's real version, so a
+# simple priority boost isn't enough — we must also pin the Ubuntu
+# package to -1 (never install) to prevent apt upgrade from pulling
+# the shim back in.
+- name: Pin Mozilla repo and block Ubuntu snap shim
   become: true
   ansible.builtin.copy:
     content: |
-      Package: *
-      Pin: origin packages.mozilla.org
+      Package: firefox*
+      Pin: release o=packages.mozilla.org
       Pin-Priority: 1000
+
+      Package: firefox*
+      Pin: release o=Ubuntu
+      Pin-Priority: -1
     dest: /etc/apt/preferences.d/mozilla
     mode: "0644"
 
