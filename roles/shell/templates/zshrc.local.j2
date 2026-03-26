@@ -4,9 +4,19 @@
 #
 
 {% if has_env_template | default(false) %}
-# Inject secrets from 1Password in a single call
-if command -v op >/dev/null 2>&1; then
-  eval "$(op inject --account {{ op_account }} -i {{ ansible_env.HOME }}/.config/zshrc-env.tmpl 2>/dev/null)"
+# Load secrets — prefer systemd session (set by op-env-session at login),
+# fall back to op inject (will prompt for biometric)
+if [ -z "$OP_SESSION_LOADED" ]; then
+  _senv=$(systemctl --user show-environment 2>/dev/null)
+  if echo "$_senv" | grep -q '^OP_SESSION_LOADED='; then
+    _vars="OP_SESSION_LOADED $(grep -oP '(?<=export )\w+' {{ ansible_env.HOME }}/.config/zshrc-env.tmpl 2>/dev/null)"
+    for _v in ${=_vars}; do
+      eval "export $(echo "$_senv" | grep "^${_v}=")"
+    done
+  elif command -v op >/dev/null 2>&1; then
+    eval "$(op inject --account {{ op_account }} -i {{ ansible_env.HOME }}/.config/zshrc-env.tmpl 2>/dev/null)"
+  fi
+  unset _senv _vars _v
 fi
 {% endif %}
 

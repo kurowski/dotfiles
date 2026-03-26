@@ -64,6 +64,27 @@
     mode: "0600"
   when: has_env_template | default(false)
 
+- name: Deploy op-env-session script
+  ansible.builtin.template:
+    src: op-env-session.sh.j2
+    dest: "{{ ansible_env.HOME }}/.local/bin/op-env-session"
+    mode: "0755"
+  when: has_env_template | default(false) and is_desktop | bool
+
+- name: Deploy op-env-session autostart entry
+  ansible.builtin.copy:
+    content: |
+      [Desktop Entry]
+      Type=Application
+      Name=1Password Env Session
+      Exec={{ ansible_env.HOME }}/.local/bin/op-env-session
+      Hidden=false
+      NoDisplay=true
+      X-GNOME-Autostart-enabled=true
+    dest: "{{ ansible_env.HOME }}/.config/autostart/op-env-session.desktop"
+    mode: "0644"
+  when: has_env_template | default(false) and is_desktop | bool
+
 - name: Create starship config directory
   ansible.builtin.file:
     path: "{{ ansible_env.HOME }}/.config"
