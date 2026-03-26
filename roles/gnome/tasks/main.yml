@@ -7,6 +7,38 @@
     name: gnome-tweaks
     state: present
 
+# --- GNOME Shell Extensions ---
+
+- name: Check if display-brightness-ddcutil extension is installed
+  ansible.builtin.command: gnome-extensions info display-brightness-ddcutil@themightydeity.github.com
+  register: brightness_ext
+  failed_when: false
+  changed_when: false
+  when: is_desktop | bool and 'personal' in group_names
+
+- name: Get GNOME Shell major version
+  ansible.builtin.shell:
+    cmd: gnome-shell --version | grep -oP '\d+'
+  register: gnome_shell_version
+  changed_when: false
+  when: is_desktop | bool and 'personal' in group_names and brightness_ext.rc != 0
+
+- name: Download and install display-brightness-ddcutil extension
+  ansible.builtin.shell:
+    cmd: |
+      set -euo pipefail
+      EXT_URL=$(curl -s 'https://extensions.gnome.org/extension-info/?uuid=display-brightness-ddcutil@themightydeity.github.com&shell_version={{ gnome_shell_version.stdout }}' \
+        | python3 -c "import sys,json; print('https://extensions.gnome.org' + json.load(sys.stdin)['download_url'])")
+      curl -sSfL "$EXT_URL" -o /tmp/brightness-ddcutil.zip
+      gnome-extensions install --force /tmp/brightness-ddcutil.zip
+      rm -f /tmp/brightness-ddcutil.zip
+  when: is_desktop | bool and 'personal' in group_names and brightness_ext.rc != 0
+
+- name: Enable display-brightness-ddcutil extension
+  ansible.builtin.command: gnome-extensions enable display-brightness-ddcutil@themightydeity.github.com
+  changed_when: true
+  when: is_desktop | bool and 'personal' in group_names and brightness_ext.rc != 0
+
 # --- Fonts ---
 
 - name: Create local fonts directory

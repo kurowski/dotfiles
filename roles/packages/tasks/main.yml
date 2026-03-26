@@ -85,6 +85,8 @@
       - ddcutil
       - deskflow
       - fprintd
+      - gnome-browser-connector
+      - gnome-shell-extension-manager
       - libpam-fprintd
     state: present
     update_cache: true
