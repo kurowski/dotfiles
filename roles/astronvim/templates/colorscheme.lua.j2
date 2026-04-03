@@ -1,0 +1,25 @@
+-- colorscheme — managed by ansible (dotfiles)
+return {
+{% if theme == 'dark' %}
+  {
+    "luisiacc/gruvbox-baby",
+    name = "gruvbox-baby",
+    lazy = false,
+    priority = 1000,
+    config = function()
+      vim.cmd.colorscheme "gruvbox-baby"
+    end,
+  },
+{% else %}
+  {
+    "cocopon/iceberg.vim",
+    name = "iceberg",
+    lazy = false,
+    priority = 1000,
+    config = function()
+      vim.o.background = "light"
+      vim.cmd.colorscheme "iceberg"
+    end,
+  },
+{% endif %}
+}

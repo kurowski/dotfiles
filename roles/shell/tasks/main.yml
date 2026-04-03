@@ -1,4 +1,18 @@
 ---
+- name: Install ncurses-term (provides ghostty terminfo)
+  become: true
+  ansible.builtin.apt:
+    name: ncurses-term
+    state: present
+
+- name: Create xterm-ghostty terminfo alias
+  become: true
+  ansible.builtin.copy:
+    src: /usr/share/terminfo/g/ghostty
+    dest: /usr/share/terminfo/x/xterm-ghostty
+    remote_src: true
+    mode: preserve
+
 - name: Install zsh
   become: true
   ansible.builtin.apt:
@@ -43,7 +57,7 @@
         --password "$(op read --account {{ op_account }} 'op://{{ atuin_vault }}/atuin/password')" \
         --key "$(op read --account {{ op_account }} 'op://{{ atuin_vault }}/atuin-key/password')"
     creates: "{{ ansible_env.HOME }}/.local/share/atuin/key"
-  when: op_check.rc == 0
+  when: atuin_sync | bool and op_check.rc == 0 and op_check.stdout | trim | length > 0
 
 - name: Deploy .zshrc
   ansible.builtin.template:
