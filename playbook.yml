@@ -4,6 +4,13 @@
   gather_facts: true
 
   pre_tasks:
+    - name: Install curl (needed by roles that add apt keys)
+      become: true
+      ansible.builtin.apt:
+        name: curl
+        state: present
+        update_cache: true
+
     - name: Show resolved configuration
       ansible.builtin.debug:
         msg:
