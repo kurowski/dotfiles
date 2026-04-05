@@ -18,7 +18,7 @@
 
 - name: Get GNOME Shell major version
   ansible.builtin.shell:
-    cmd: gnome-shell --version | grep -oP '\d+'
+    cmd: gnome-shell --version | grep -oP '\d+' | head -1
   register: gnome_shell_version
   changed_when: false
   when: is_desktop | bool and 'personal' in group_names and brightness_ext.rc != 0
@@ -34,8 +34,18 @@
       rm -f /tmp/brightness-ddcutil.zip
   when: is_desktop | bool and 'personal' in group_names and brightness_ext.rc != 0
 
-- name: Enable display-brightness-ddcutil extension
-  ansible.builtin.command: gnome-extensions enable display-brightness-ddcutil@themightydeity.github.com
+- name: Enable display-brightness-ddcutil extension via dconf
+  ansible.builtin.shell:
+    cmd: |
+      set -euo pipefail
+      UUID="display-brightness-ddcutil@themightydeity.github.com"
+      CURRENT=$(dconf read /org/gnome/shell/enabled-extensions 2>/dev/null || echo "[]")
+      if [ "$CURRENT" = "" ] || [ "$CURRENT" = "[]" ]; then
+        dconf write /org/gnome/shell/enabled-extensions "['$UUID']"
+      elif ! echo "$CURRENT" | grep -q "$UUID"; then
+        NEW=$(echo "$CURRENT" | sed "s/]$/, '$UUID']/")
+        dconf write /org/gnome/shell/enabled-extensions "$NEW"
+      fi
   changed_when: true
   when: is_desktop | bool and 'personal' in group_names and brightness_ext.rc != 0
 

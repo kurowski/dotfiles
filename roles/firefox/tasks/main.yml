@@ -41,6 +41,12 @@
     dest: /etc/apt/preferences.d/mozilla
     mode: "0644"
 
+- name: Remove Ubuntu Firefox snap shim deb
+  become: true
+  ansible.builtin.apt:
+    name: firefox
+    state: absent
+
 - name: Install Firefox from Mozilla APT repo
   become: true
   ansible.builtin.apt:
