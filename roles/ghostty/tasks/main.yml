@@ -3,6 +3,7 @@
   become: true
   community.general.snap:
     name: ghostty
+    classic: true
     state: present
 
 - name: Create Ghostty config directory
