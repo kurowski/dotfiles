@@ -1,5 +1,5 @@
 op_account: my
-atuin_vault: Personal
+atuin_sync: false
 git_email: brandt@kurowski.net
 theme: dark
 is_desktop: true

@@ -1,4 +1,5 @@
 op_account: team-uceap
+atuin_sync: true
 atuin_vault: Employee
 git_email: bkurowski@uceap.universityofcalifornia.edu
 theme: light

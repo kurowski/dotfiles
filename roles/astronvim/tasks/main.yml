@@ -1,0 +1,19 @@
+---
+- name: Install neovim
+  become: true
+  ansible.builtin.apt:
+    name: neovim
+    state: present
+
+- name: Clone AstroNvim template
+  ansible.builtin.git:
+    repo: https://github.com/AstroNvim/template
+    dest: "{{ ansible_env.HOME }}/.config/nvim"
+    version: main
+    update: false
+
+- name: Deploy colorscheme config
+  ansible.builtin.template:
+    src: colorscheme.lua.j2
+    dest: "{{ ansible_env.HOME }}/.config/nvim/lua/plugins/colorscheme.lua"
+    mode: "0644"
