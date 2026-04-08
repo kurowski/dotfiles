@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="utf-8"?>
+<unattend xmlns="urn:schemas-microsoft-com:unattend">
+
+  <!-- WinPE pass: locale, virtio drivers, disk layout, edition selection -->
+  <settings pass="windowsPE">
+    <component name="Microsoft-Windows-International-Core-WinPE"
+               processorArchitecture="amd64"
+               publicKeyToken="31bf3856ad364e35"
+               language="neutral" versionScope="nonSxS"
+               xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <SetupUILanguage>
+        <UILanguage>en-US</UILanguage>
+      </SetupUILanguage>
+      <InputLocale>en-US</InputLocale>
+      <SystemLocale>en-US</SystemLocale>
+      <UILanguage>en-US</UILanguage>
+      <UserLocale>en-US</UserLocale>
+    </component>
+
+    <!-- Load virtio storage and network drivers so the installer can see
+         the virtio disk and reach Windows Update. The virtio-win ISO drive
+         letter varies by SATA port order, so we cover D: through F:. -->
+    <component name="Microsoft-Windows-PnpCustomizationsWinPE"
+               processorArchitecture="amd64"
+               publicKeyToken="31bf3856ad364e35"
+               language="neutral" versionScope="nonSxS"
+               xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <DriverPaths>
+        <PathAndCredentials wcm:action="add" wcm:keyValue="1">
+          <Path>D:\viostor\w10\amd64</Path>
+        </PathAndCredentials>
+        <PathAndCredentials wcm:action="add" wcm:keyValue="2">
+          <Path>D:\NetKVM\w10\amd64</Path>
+        </PathAndCredentials>
+        <PathAndCredentials wcm:action="add" wcm:keyValue="3">
+          <Path>E:\viostor\w10\amd64</Path>
+        </PathAndCredentials>
+        <PathAndCredentials wcm:action="add" wcm:keyValue="4">
+          <Path>E:\NetKVM\w10\amd64</Path>
+        </PathAndCredentials>
+        <PathAndCredentials wcm:action="add" wcm:keyValue="5">
+          <Path>F:\viostor\w10\amd64</Path>
+        </PathAndCredentials>
+        <PathAndCredentials wcm:action="add" wcm:keyValue="6">
+          <Path>F:\NetKVM\w10\amd64</Path>
+        </PathAndCredentials>
+      </DriverPaths>
+    </component>
+
+    <component name="Microsoft-Windows-Setup"
+               processorArchitecture="amd64"
+               publicKeyToken="31bf3856ad364e35"
+               language="neutral" versionScope="nonSxS"
+               xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+      <!-- GPT/UEFI partition layout: EFI system, MSR, Windows -->
+      <DiskConfiguration>
+        <Disk wcm:action="add">
+          <DiskID>0</DiskID>
+          <WillWipeDisk>true</WillWipeDisk>
+          <CreatePartitions>
+            <CreatePartition wcm:action="add">
+              <Order>1</Order>
+              <Size>100</Size>
+              <Type>EFI</Type>
+            </CreatePartition>
+            <CreatePartition wcm:action="add">
+              <Order>2</Order>
+              <Size>16</Size>
+              <Type>MSR</Type>
+            </CreatePartition>
+            <CreatePartition wcm:action="add">
+              <Order>3</Order>
+              <Extend>true</Extend>
+              <Type>Primary</Type>
+            </CreatePartition>
+          </CreatePartitions>
+          <ModifyPartitions>
+            <ModifyPartition wcm:action="add">
+              <Order>1</Order>
+              <PartitionID>1</PartitionID>
+              <Format>FAT32</Format>
+              <Label>System</Label>
+            </ModifyPartition>
+            <ModifyPartition wcm:action="add">
+              <Order>2</Order>
+              <PartitionID>3</PartitionID>
+              <Format>NTFS</Format>
+              <Label>Windows</Label>
+              <Letter>C</Letter>
+            </ModifyPartition>
+          </ModifyPartitions>
+        </Disk>
+      </DiskConfiguration>
+
+      <ImageInstall>
+        <OSImage>
+          <InstallFrom>
+            <MetaData wcm:action="add">
+              <Key>/IMAGE/NAME</Key>
+              <Value>{{ win10_edition }}</Value>
+            </MetaData>
+          </InstallFrom>
+          <InstallTo>
+            <DiskID>0</DiskID>
+            <PartitionID>3</PartitionID>
+          </InstallTo>
+        </OSImage>
+      </ImageInstall>
+
+      <UserData>
+        <AcceptEula>true</AcceptEula>
+        <ProductKey>
+          <Key>{{ win10_product_key }}</Key>
+        </ProductKey>
+      </UserData>
+    </component>
+  </settings>
+
+  <!-- Specialize pass: computer name, timezone -->
+  <settings pass="specialize">
+    <component name="Microsoft-Windows-Shell-Setup"
+               processorArchitecture="amd64"
+               publicKeyToken="31bf3856ad364e35"
+               language="neutral" versionScope="nonSxS"
+               xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <ComputerName>{{ win10_computer_name }}</ComputerName>
+      <TimeZone>{{ win10_timezone }}</TimeZone>
+    </component>
+  </settings>
+
+  <!-- OOBE pass: skip all interactive screens, create local admin account,
+       install drivers/apps and configure RDP for WinApps on first login -->
+  <settings pass="oobeSystem">
+    <!-- Set locale explicitly in OOBE to suppress the "choose a region"
+         screen — WinPE locale settings don't carry over to OOBE on Pro. -->
+    <component name="Microsoft-Windows-International-Core"
+               processorArchitecture="amd64"
+               publicKeyToken="31bf3856ad364e35"
+               language="neutral" versionScope="nonSxS"
+               xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <InputLocale>en-US</InputLocale>
+      <SystemLocale>en-US</SystemLocale>
+      <UILanguage>en-US</UILanguage>
+      <UserLocale>en-US</UserLocale>
+    </component>
+
+    <component name="Microsoft-Windows-Shell-Setup"
+               processorArchitecture="amd64"
+               publicKeyToken="31bf3856ad364e35"
+               language="neutral" versionScope="nonSxS"
+               xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <OOBE>
+        <HideEULAPage>true</HideEULAPage>
+        <HideLocalAccountScreen>true</HideLocalAccountScreen>
+        <HideOnlineAccountScreens>true</HideOnlineAccountScreens>
+        <HideWirelessSetupInOOBE>true</HideWirelessSetupInOOBE>
+        <ProtectYourPC>3</ProtectYourPC>
+      </OOBE>
+      <UserAccounts>
+        <LocalAccounts>
+          <LocalAccount wcm:action="add">
+            <Name>{{ username }}</Name>
+            <Group>Administrators</Group>
+            <Password>
+              <Value>{{ win10_password }}</Value>
+              <PlainText>true</PlainText>
+            </Password>
+          </LocalAccount>
+        </LocalAccounts>
+      </UserAccounts>
+      <AutoLogon>
+        <Enabled>true</Enabled>
+        <Username>{{ username }}</Username>
+        <Password>
+          <Value>{{ win10_password }}</Value>
+          <PlainText>true</PlainText>
+        </Password>
+        <LogonCount>1</LogonCount>
+      </AutoLogon>
+      <!-- Install drivers, apps, and configure RDP for WinApps on first login.
+           virtio-win-guest-tools.exe: storage, network, balloon, serial, QEMU GA
+           Searches CD-ROM drives D:-G: since letter depends on SATA port order. -->
+      <FirstLogonCommands>
+        <SynchronousCommand wcm:action="add">
+          <Order>1</Order>
+          <CommandLine>cmd /c for %d in (D E F G) do if exist %d:\virtio-win-guest-tools.exe %d:\virtio-win-guest-tools.exe /S</CommandLine>
+          <Description>Install virtio-win guest tools and QEMU Guest Agent</Description>
+        </SynchronousCommand>
+        <SynchronousCommand wcm:action="add">
+          <Order>2</Order>
+          <CommandLine>cmd /c for %d in (D E F G) do if exist %d:\1PasswordSetup.exe %d:\1PasswordSetup.exe --silent</CommandLine>
+          <Description>Install 1Password</Description>
+        </SynchronousCommand>
+        <SynchronousCommand wcm:action="add">
+          <Order>3</Order>
+          <CommandLine>cmd /c for %d in (D E F G) do if exist %d:\GoogleChrome.msi msiexec /i %d:\GoogleChrome.msi /qn /norestart</CommandLine>
+          <Description>Install Google Chrome</Description>
+        </SynchronousCommand>
+        <!-- WebView2 is required by new Teams — install before Teams bootstrapper -->
+        <SynchronousCommand wcm:action="add">
+          <Order>4</Order>
+          <CommandLine>cmd /c for %d in (D E F G) do if exist %d:\MicrosoftEdgeWebview2Setup.exe %d:\MicrosoftEdgeWebview2Setup.exe /silent /install</CommandLine>
+          <Description>Install Edge WebView2 Runtime</Description>
+        </SynchronousCommand>
+        <!-- Teams bootstrapper provisions the new Teams app (requires network,
+             which is available via the virtio NetKVM driver loaded in WinPE) -->
+        <SynchronousCommand wcm:action="add">
+          <Order>5</Order>
+          <CommandLine>cmd /c for %d in (D E F G) do if exist %d:\teamsbootstrapper.exe %d:\teamsbootstrapper.exe -p</CommandLine>
+          <Description>Install Microsoft Teams</Description>
+        </SynchronousCommand>
+
+        <!-- Enable Remote Desktop (required for WinApps RDP connection) -->
+        <SynchronousCommand wcm:action="add">
+          <Order>6</Order>
+          <CommandLine>reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 0 /f</CommandLine>
+          <Description>Enable Remote Desktop</Description>
+        </SynchronousCommand>
+        <SynchronousCommand wcm:action="add">
+          <Order>7</Order>
+          <CommandLine>reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" /v UserAuthentication /t REG_DWORD /d 1 /f</CommandLine>
+          <Description>Require NLA for Remote Desktop</Description>
+        </SynchronousCommand>
+
+        <!-- Disable RemoteApp allowlist so WinApps can launch any application -->
+        <SynchronousCommand wcm:action="add">
+          <Order>8</Order>
+          <CommandLine>reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Terminal Server\TSAppAllowList" /v fDisabledAllowList /t REG_DWORD /d 1 /f</CommandLine>
+          <Description>Disable RemoteApp allowlist</Description>
+        </SynchronousCommand>
+        <SynchronousCommand wcm:action="add">
+          <Order>9</Order>
+          <CommandLine>reg add "HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services" /v fAllowUnlistedRemotePrograms /t REG_DWORD /d 1 /f</CommandLine>
+          <Description>Allow unlisted RemoteApp programs</Description>
+        </SynchronousCommand>
+
+        <!-- Use server keyboard layout so RDP sessions match the VM -->
+        <SynchronousCommand wcm:action="add">
+          <Order>10</Order>
+          <CommandLine>reg add "HKLM\SYSTEM\CurrentControlSet\Control\Keyboard Layout" /v IgnoreRemoteKeyboardLayout /t REG_DWORD /d 1 /f</CommandLine>
+          <Description>Use server keyboard layout in RDP</Description>
+        </SynchronousCommand>
+
+        <!-- Disable auto admin logon after first-run setup -->
+        <SynchronousCommand wcm:action="add">
+          <Order>11</Order>
+          <CommandLine>reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v AutoAdminLogon /t REG_SZ /d 0 /f</CommandLine>
+          <Description>Disable automatic admin logon</Description>
+        </SynchronousCommand>
+
+        <!-- Suppress "network discoverable?" prompt on every host reboot -->
+        <SynchronousCommand wcm:action="add">
+          <Order>12</Order>
+          <CommandLine>reg add "HKLM\SYSTEM\CurrentControlSet\Control\Network\NewNetworkWindowOff"</CommandLine>
+          <Description>Disable network discovery prompt</Description>
+        </SynchronousCommand>
+
+        <!-- Open Windows Firewall for Remote Desktop -->
+        <SynchronousCommand wcm:action="add">
+          <Order>13</Order>
+          <CommandLine>powershell -Command "Enable-NetFirewallRule -DisplayGroup 'Remote Desktop'"</CommandLine>
+          <Description>Enable Remote Desktop firewall rule</Description>
+        </SynchronousCommand>
+
+        <!-- WinApps helper: clean up stale network profiles on startup -->
+        <SynchronousCommand wcm:action="add">
+          <Order>14</Order>
+          <CommandLine>cmd /c for %d in (D E F G) do if exist %d:\NetProfileCleanup.ps1 copy %d:\NetProfileCleanup.ps1 C:\Windows\NetProfileCleanup.ps1</CommandLine>
+          <Description>Copy NetProfileCleanup script</Description>
+        </SynchronousCommand>
+        <SynchronousCommand wcm:action="add">
+          <Order>15</Order>
+          <CommandLine>powershell -Command "Register-ScheduledTask -TaskName 'WinApps NetProfileCleanup' -Trigger (New-ScheduledTaskTrigger -AtStartup) -Action (New-ScheduledTaskAction -Execute 'powershell.exe' -Argument '-ExecutionPolicy Bypass -WindowStyle Hidden -File C:\Windows\NetProfileCleanup.ps1') -Principal (New-ScheduledTaskPrincipal -UserId 'SYSTEM' -RunLevel Highest) -Settings (New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries) -Force"</CommandLine>
+          <Description>Schedule NetProfileCleanup at startup</Description>
+        </SynchronousCommand>
+
+        <!-- WinApps helper: sync VM clock after host suspend/resume -->
+        <SynchronousCommand wcm:action="add">
+          <Order>16</Order>
+          <CommandLine>cmd /c for %d in (D E F G) do if exist %d:\TimeSync.ps1 copy %d:\TimeSync.ps1 C:\Windows\TimeSync.ps1</CommandLine>
+          <Description>Copy TimeSync script</Description>
+        </SynchronousCommand>
+        <SynchronousCommand wcm:action="add">
+          <Order>17</Order>
+          <CommandLine>powershell -Command "Register-ScheduledTask -TaskName 'WinApps TimeSync' -Trigger (New-ScheduledTaskTrigger -AtLogOn) -Action (New-ScheduledTaskAction -Execute 'powershell.exe' -Argument '-ExecutionPolicy Bypass -WindowStyle Hidden -File C:\Windows\TimeSync.ps1') -Settings (New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries) -Force"</CommandLine>
+          <Description>Schedule TimeSync at logon</Description>
+        </SynchronousCommand>
+      </FirstLogonCommands>
+    </component>
+  </settings>
+
+</unattend>

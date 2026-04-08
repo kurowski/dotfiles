@@ -80,5 +80,8 @@
       when: is_desktop | bool
     - role: firefox
       when: is_desktop | bool
+    - devpod
+    - role: libvirt
+      when: is_desktop | bool and 'work' in group_names
     - role: gnome
       when: is_desktop | bool
