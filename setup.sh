@@ -5,6 +5,10 @@ set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
 HOST="$(hostname)"
+# Devcontainer build/postCreate runs non-interactively and doesn't export USER,
+# which trips `set -u` further down. Fall back to `id -un` when unset.
+: "${USER:=$(id -un)}"
+export USER
 
 # --- Context detection -------------------------------------------------------
 
