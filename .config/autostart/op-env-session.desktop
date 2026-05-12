@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=1Password Env Session
+Exec=/home/brandt/.local/bin/op-env-session
+Hidden=false
+NoDisplay=true
+X-GNOME-Autostart-enabled=true

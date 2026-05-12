@@ -1,0 +1,34 @@
+#!/bin/bash
+# op-env-session — inject 1Password secrets into the KDE desktop session.
+# Runs at login via .config/autostart/op-env-session.desktop. Resolves
+# op:// references in ~/.config/zshrc-env.tmpl and pushes the resulting
+# env vars to the dbus + systemd user environment so all child apps
+# inherit them.
+
+export OP_BIOMETRIC_UNLOCK_ENABLED=true
+TEMPLATE="$HOME/.config/zshrc-env.tmpl"
+ACCOUNT="team-uceap"
+
+if [ -S "$HOME/.1password/agent.sock" ]; then
+  export SSH_AUTH_SOCK="$HOME/.1password/agent.sock"
+  dbus-update-activation-environment SSH_AUTH_SOCK
+  systemctl --user import-environment SSH_AUTH_SOCK
+fi
+
+# Wait for 1Password to be running, then give the user time to unlock it.
+# We avoid `op whoami` here because it triggers a biometric prompt when
+# the app is locked, which can wedge the desktop app.
+until pgrep -x 1password &>/dev/null; do sleep 2; done
+sleep 30
+
+ENV_EXPORTS=$(op inject --account "$ACCOUNT" -i "$TEMPLATE" 2>/dev/null)
+[ -z "$ENV_EXPORTS" ] && exit 1
+
+eval "$ENV_EXPORTS"
+VAR_NAMES=$(echo "$ENV_EXPORTS" | grep -oP '(?<=export )\w+')
+export OP_SESSION_LOADED=1
+
+# shellcheck disable=SC2086
+dbus-update-activation-environment OP_SESSION_LOADED $VAR_NAMES
+# shellcheck disable=SC2086
+systemctl --user import-environment OP_SESSION_LOADED $VAR_NAMES
