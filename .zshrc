@@ -33,7 +33,7 @@ if ! command -v bat >/dev/null 2>&1 && command -v batcat >/dev/null 2>&1; then
 fi
 
 if command -v devcontainer >/dev/null 2>&1; then
-  # All three accept an optional sub-config name (e.g. "portal") for repos
+  # All four accept an optional sub-config name (e.g. "portal") for repos
   # using the .devcontainer/<sub>/devcontainer.json layout. With no arg, the
   # CLI finds .devcontainer/devcontainer.json on its own.
   dcu() {
@@ -123,6 +123,10 @@ if command -v devcontainer >/dev/null 2>&1; then
       "${config_arg[@]}" \
       "${container_id_arg[@]}" \
       zellij attach "$session_name" --create
+  }
+  # Rebuild + reattach: VS Code's "Dev Container: Rebuild" equivalent.
+  dcr() {
+    dck "$1" && dcu "$1" && dce "$1" "$2"
   }
 fi
 

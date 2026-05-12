@@ -1,1 +1,6 @@
 theme "catppuccin-latte"
+
+// $SHELL is unreliable in `devcontainer exec` / `docker exec` — it carries
+// whatever the image baked in, not what chsh set. Pin it here so panes
+// always open zsh.
+default_shell "zsh"
