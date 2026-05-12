@@ -23,6 +23,15 @@ fi
 
 alias vim=nvim
 
+# Debian/Ubuntu rename these to dodge namespace clashes; restore the standard
+# names so muscle memory works the same as on Fedora.
+if ! command -v fd >/dev/null 2>&1 && command -v fdfind >/dev/null 2>&1; then
+  alias fd=fdfind
+fi
+if ! command -v bat >/dev/null 2>&1 && command -v batcat >/dev/null 2>&1; then
+  alias bat=batcat
+fi
+
 if command -v devcontainer >/dev/null 2>&1; then
   alias dcu='devcontainer up --id-label=project=$(basename $(pwd)) --workspace-folder . --dotfiles-repository kurowski/dotfiles'
   alias dck='docker ps --filter label=project=$(basename $(pwd)) --format "{{.ID}}" | xargs docker rm -f'

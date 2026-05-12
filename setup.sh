@@ -187,6 +187,76 @@ install_rust_toolchain() {
   rustup-init -y --default-toolchain stable --no-modify-path
 }
 
+# --- System packages (Debian — devcontainers) --------------------------------
+
+# Personal CLI tools only — no infra (terraform/kubectl) or GUI apps. Everything
+# in this list ships in trixie's main repo as of 2026-05; if a future tool isn't
+# packaged, prefer adding a dedicated installer (see install_zellij) over pulling
+# in a third-party apt repo.
+install_packages_debian() {
+  echo "==> installing apt packages"
+  export DEBIAN_FRONTEND=noninteractive
+  sudo apt-get update -qq
+  sudo apt-get install -y --no-install-recommends \
+    atuin \
+    bat \
+    fastfetch \
+    fd-find \
+    fzf \
+    glow \
+    lazygit \
+    ripgrep
+}
+
+# Debian trixie ships neovim 0.10, but AstroNvim needs >= 0.11. Pull the
+# upstream prebuilt and drop it under ~/.local/nvim, symlinked into
+# ~/.local/bin (which is ahead of /usr/bin on PATH per .zshrc).
+install_neovim() {
+  local prefix="$HOME/.local/nvim"
+  if [[ -x "$prefix/bin/nvim" ]]; then
+    return
+  fi
+  local arch
+  case "$(uname -m)" in
+    x86_64)  arch="linux-x86_64" ;;
+    aarch64) arch="linux-arm64" ;;
+    *) echo "  unsupported arch for neovim: $(uname -m); skipping"; return ;;
+  esac
+  echo "==> installing neovim to $prefix"
+  mkdir -p "$HOME/.local/bin"
+  local tmp
+  tmp="$(mktemp -d)"
+  curl -sSfL "https://github.com/neovim/neovim/releases/latest/download/nvim-${arch}.tar.gz" \
+    | tar xz -C "$tmp"
+  rm -rf "$prefix"
+  mv "$tmp/nvim-${arch}" "$prefix"
+  rm -rf "$tmp"
+  ln -snf "$prefix/bin/nvim" "$HOME/.local/bin/nvim"
+}
+
+# zellij isn't packaged in Debian. Grab the prebuilt musl binary from the
+# upstream release and drop it in ~/.local/bin (already on PATH via .zshrc).
+install_zellij() {
+  if command -v zellij >/dev/null 2>&1; then
+    return
+  fi
+  local arch
+  case "$(uname -m)" in
+    x86_64)  arch="x86_64-unknown-linux-musl" ;;
+    aarch64) arch="aarch64-unknown-linux-musl" ;;
+    *) echo "  unsupported arch for zellij: $(uname -m); skipping"; return ;;
+  esac
+  echo "==> installing zellij to ~/.local/bin"
+  mkdir -p "$HOME/.local/bin"
+  local tmp
+  tmp="$(mktemp -d)"
+  curl -sSfL "https://github.com/zellij-org/zellij/releases/latest/download/zellij-${arch}.tar.gz" \
+    | tar xz -C "$tmp"
+  mv "$tmp/zellij" "$HOME/.local/bin/zellij"
+  chmod +x "$HOME/.local/bin/zellij"
+  rm -rf "$tmp"
+}
+
 # --- User-space tools (works in containers too) ------------------------------
 
 install_starship() {
@@ -348,10 +418,14 @@ if [[ "$IS_CONTAINER" == 0 ]]; then
   install_rust_toolchain
   install_flatpaks
   set_default_shell
+  install_nerd_font
+else
+  install_packages_debian
+  install_neovim
+  install_zellij
 fi
 
 install_starship
-install_nerd_font
 setup_astronvim
 setup_atuin_sync
 if [[ "$IS_CONTAINER" == 0 ]]; then
