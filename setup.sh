@@ -148,6 +148,8 @@ EOF
     lazygit \
     make \
     neovim \
+    nodejs \
+    npm \
     openssh-server \
     python3-pip \
     rustup \
@@ -205,7 +207,8 @@ install_packages_debian() {
     fzf \
     glow \
     lazygit \
-    ripgrep
+    ripgrep \
+    zsh
 }
 
 # Debian trixie ships neovim 0.10, but AstroNvim needs >= 0.11. Pull the
@@ -255,6 +258,18 @@ install_zellij() {
   mv "$tmp/zellij" "$HOME/.local/bin/zellij"
   chmod +x "$HOME/.local/bin/zellij"
   rm -rf "$tmp"
+}
+
+# @devcontainers/cli has no standalone binary release; npm is the supported
+# install path. Use --prefix to land in ~/.local (already on PATH) instead of
+# writing to /usr with sudo.
+install_devcontainer_cli() {
+  if command -v devcontainer >/dev/null 2>&1; then
+    return
+  fi
+  echo "==> installing @devcontainers/cli to ~/.local"
+  mkdir -p "$HOME/.local"
+  npm install -g --prefix "$HOME/.local" @devcontainers/cli
 }
 
 # --- User-space tools (works in containers too) ------------------------------
@@ -447,8 +462,8 @@ link_dotfiles() {
 if [[ "$IS_CONTAINER" == 0 ]]; then
   install_packages
   install_rust_toolchain
+  install_devcontainer_cli
   install_flatpaks
-  set_default_shell
   install_nerd_font
 else
   install_packages_debian
@@ -456,6 +471,7 @@ else
   install_zellij
 fi
 
+set_default_shell
 install_starship
 setup_gitconfig_shim
 setup_astronvim
