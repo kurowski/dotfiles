@@ -382,6 +382,37 @@ setup_kde() {
   kwriteconfig6 --file kxkbrc --group Layout --key Options "caps:escape"
 }
 
+# --- Gitconfig shim ----------------------------------------------------------
+
+# Don't symlink ~/.gitconfig directly into the dotfiles repo: tools like the
+# VS Code devcontainer extension call `git config --global credential.helper
+# ...` on startup, and writes follow the symlink, polluting the repo with
+# session-scoped paths. Instead, write a small real file at ~/.gitconfig that
+# `[include]`s the dotfiles copy. Third-party writes land in the shim and
+# leave the repo clean.
+setup_gitconfig_shim() {
+  local target="$HOME/.gitconfig"
+  local include="$REPO_DIR/.gitconfig"
+  # Migrate an older symlinked layout in place.
+  if [[ -L "$target" ]]; then
+    rm "$target"
+  fi
+  if [[ -f "$target" ]]; then
+    if git config --file "$target" --get-all include.path 2>/dev/null \
+        | grep -qFx "$include"; then
+      return
+    fi
+    echo "==> adding dotfiles include to existing $target"
+    git config --file "$target" --add include.path "$include"
+    return
+  fi
+  echo "==> writing gitconfig shim to $target"
+  cat > "$target" <<EOF
+[include]
+	path = $include
+EOF
+}
+
 # --- Link dotfiles -----------------------------------------------------------
 
 # Walk the repo and symlink every file under a path starting with "." into
@@ -392,7 +423,7 @@ link_dotfiles() {
   while IFS= read -r -d '' file; do
     relpath="${file#./}"
     case "$relpath" in
-      .git/*|.gitignore) continue ;;
+      .git/*|.gitignore|.gitconfig) continue ;;
       .*) ;;
       *) continue ;;
     esac
@@ -426,6 +457,7 @@ else
 fi
 
 install_starship
+setup_gitconfig_shim
 setup_astronvim
 setup_atuin_sync
 if [[ "$IS_CONTAINER" == 0 ]]; then
