@@ -1,0 +1,9 @@
+#!/usr/bin/env zsh
+# devcontainer rebuild — VS Code's "Dev Container: Rebuild" equivalent.
+# dce auto-ups, so we only need kill + exec here.
+
+# Mirror dce's `--` parsing so the sub-config (if any) is forwarded to dck
+# while the full arg list — including any `--` and command — goes to dce.
+sub=""
+[[ "${1:-}" != "--" && -n "${1:-}" ]] && sub="$1"
+dck "$sub" && dce "$@"

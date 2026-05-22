@@ -515,6 +515,36 @@ link_dotfiles() {
   done < <(cd "$REPO_DIR" && find . -type f -not -path './.git/*' -print0)
 }
 
+# --- Link bin/ ---------------------------------------------------------------
+
+# Symlink every executable in the repo's bin/ into ~/.local/bin (already on
+# PATH per .zshrc). Dotfile entries (e.g. .dc-common.sh) are sourced helpers,
+# not standalone commands — they live alongside the scripts in the repo and
+# are skipped here. Each script resolves its sibling helpers via
+# ${0:A:h}/.dc-common.sh, which follows the symlink back to this directory.
+link_bin() {
+  local bindir="$REPO_DIR/bin"
+  [[ -d "$bindir" ]] || return
+  echo "==> linking bin/"
+  local target_dir="$HOME/.local/bin"
+  mkdir -p "$target_dir"
+  local file name target
+  for file in "$bindir"/*; do
+    [[ -f "$file" ]] || continue
+    name="$(basename "$file")"
+    target="$target_dir/$name"
+    if [[ -L "$target" && "$(readlink "$target")" == "$file" ]]; then
+      continue
+    fi
+    if [[ -e "$target" && ! -L "$target" ]]; then
+      mv "$target" "$target.bak.$(date +%s)"
+      echo "  backed up existing $name"
+    fi
+    ln -snf "$file" "$target"
+    echo "  linked $name"
+  done
+}
+
 # --- Run ---------------------------------------------------------------------
 
 if [[ "$IS_CONTAINER" == 0 ]]; then
@@ -540,5 +570,6 @@ if [[ "$IS_CONTAINER" == 0 ]]; then
   setup_kde
 fi
 link_dotfiles
+link_bin
 
 echo "==> done"

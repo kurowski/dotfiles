@@ -1,0 +1,93 @@
+#!/usr/bin/env zsh
+# devcontainer exec — ensure the dev container is up, then exec a command in
+# it (defaults to `zellij attach devcontainer --create`).
+#
+# Args: `dce [sub] [-- cmd...]`. The `--` lets you specify a command with the
+# default config — `dce -- zsh` runs zsh in the default config, vs `dce zsh`
+# which would look for a "zsh" sub-config.
+source "${0:A:h}/.dc-common.sh"
+
+sub=""
+if [[ "${1:-}" == "--" ]]; then
+  shift
+elif (( $# > 0 )); then
+  sub="$1"
+  shift
+  [[ "${1:-}" == "--" ]] && shift
+fi
+cmd=("$@")
+[[ ${#cmd[@]} -eq 0 ]] && cmd=(zellij attach devcontainer --create)
+
+# `devcontainer up` is idempotent (no-op if running, starts if stopped, creates
+# if missing), so calling it unconditionally here means a fresh reboot doesn't
+# strand us with a stopped container.
+dcu "$sub" || exit
+
+dir=".devcontainer"
+[[ -n "$sub" ]] && dir=".devcontainer/$sub"
+config_arg=()
+[[ -n "$sub" ]] && config_arg=(--config "$dir/devcontainer.json")
+
+# In compose mode the CLI doesn't apply the devcontainer.local_folder /
+# devcontainer.config_file labels that exec normally filters on, so the default
+# lookup fails. Identify the dev-container ourselves (it's the only service in
+# the compose project that carries a devcontainer.metadata label) and pass its
+# id via --container-id.
+container_id_arg=()
+container_id=""
+compose_file=""
+for candidate in docker-compose.yml docker-compose.yaml compose.yml compose.yaml; do
+  if [[ -f "$dir/$candidate" ]]; then
+    compose_file="$dir/$candidate"
+    break
+  fi
+done
+if [[ -n "$compose_file" ]]; then
+  project="$(_dc_project_name "$sub")"
+  # devcontainer.metadata alone isn't enough: other services in the project
+  # (e.g. a Drupal reference container whose own image is built from a
+  # devcontainer base) carry that label too. Disambiguate by the compose
+  # service name declared in devcontainer.json. devcontainer.json is JSONC so
+  # jq isn't reliable — grep the "service": line.
+  service=$(grep -oE '"service"[[:space:]]*:[[:space:]]*"[^"]+"' "$dir/devcontainer.json" 2>/dev/null \
+    | head -1 | sed -E 's/.*"([^"]+)"$/\1/')
+  if [[ -n "$service" ]]; then
+    container_id=$(docker ps \
+      --filter "label=com.docker.compose.project=$project" \
+      --filter "label=com.docker.compose.service=$service" \
+      --format "{{.ID}}" | head -1)
+    [[ -n "$container_id" ]] && container_id_arg=(--container-id "$container_id")
+  fi
+else
+  # Non-compose: dcu applied --id-label, so look up by that.
+  label="project=$(basename "$PWD")"
+  [[ -n "$sub" ]] && label="$label/$sub"
+  container_id=$(docker ps --filter "label=$label" --format "{{.ID}}" | head -1)
+fi
+
+# If the host runs Ghostty but the container's terminfo db doesn't know
+# xterm-ghostty, install it. Most images ship only bare xterm/screen entries,
+# and forwarding TERM=xterm-ghostty (below) without the matching entry leaves
+# interactive tools (zellij, vim, less) complaining the terminal is unknown.
+# Piping infocmp -x through tic is idempotent.
+if [[ "$TERM" == "xterm-ghostty" ]] \
+   && [[ -n "$container_id" ]] \
+   && command -v infocmp >/dev/null 2>&1 \
+   && ! docker exec "$container_id" sh -c 'infocmp xterm-ghostty >/dev/null 2>&1'; then
+  infocmp -x xterm-ghostty | docker exec -i -u root "$container_id" tic -x - 2>/dev/null
+fi
+
+# Forward host TERM/COLORTERM so the terminal Ghostty advertises
+# (xterm-ghostty + truecolor) reaches the container. `devcontainer exec` passes
+# through only explicit remoteEnv otherwise, so TERM defaults to whatever the
+# image baked in — typically a bare `xterm` that hides truecolor, hyperlinks,
+# and extended-key reporting.
+remote_env=()
+[[ -n "${TERM:-}" ]] && remote_env+=(--remote-env "TERM=$TERM")
+[[ -n "${COLORTERM:-}" ]] && remote_env+=(--remote-env "COLORTERM=$COLORTERM")
+devcontainer exec \
+  --workspace-folder . \
+  "${remote_env[@]}" \
+  "${config_arg[@]}" \
+  "${container_id_arg[@]}" \
+  "${cmd[@]}"

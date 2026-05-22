@@ -1,0 +1,29 @@
+#!/usr/bin/env zsh
+# devcontainer kill — remove the dev container for $PWD.
+#
+# Optional first arg is a sub-config name. Compose configs are torn down via
+# `docker compose down`; non-compose configs are looked up by the --id-label
+# that dcu applied and removed with `docker rm -f`.
+source "${0:A:h}/.dc-common.sh"
+
+sub="${1:-}"
+dir=".devcontainer"
+[[ -n "$sub" ]] && dir=".devcontainer/$sub"
+compose_file=""
+for candidate in docker-compose.yml docker-compose.yaml compose.yml compose.yaml; do
+  if [[ -f "$dir/$candidate" ]]; then
+    compose_file="$dir/$candidate"
+    break
+  fi
+done
+if [[ -n "$compose_file" ]]; then
+  # Compose path: dcu's --id-label was a no-op here. Use the same project name
+  # dcu forced via COMPOSE_PROJECT_NAME (see _dc_project_name).
+  docker compose --project-name "$(_dc_project_name "$sub")" -f "$compose_file" down
+else
+  # Non-compose path: dcu applied --id-label as a real Docker label, so filter
+  # on it to find the container.
+  label="project=$(basename "$PWD")"
+  [[ -n "$sub" ]] && label="$label/$sub"
+  docker ps --filter "label=$label" --format "{{.ID}}" | xargs -r docker rm -f
+fi

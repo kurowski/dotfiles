@@ -1,0 +1,25 @@
+#!/usr/bin/env zsh
+# devcontainer up — bring up the dev container for $PWD.
+#
+# Optional first arg is a sub-config name (e.g. "portal") for repos using the
+# .devcontainer/<sub>/devcontainer.json layout. With no arg, the CLI finds
+# .devcontainer/devcontainer.json on its own.
+source "${0:A:h}/.dc-common.sh"
+
+label="project=$(basename "$PWD")"
+config_arg=()
+if [[ -n "${1:-}" ]]; then
+  config_arg=(--config ".devcontainer/$1/devcontainer.json")
+  label="$label/$1"
+fi
+# --id-label is only applied as a real Docker label in the non-compose path
+# (CLI runs `docker run` itself); for compose configs it's a no-op because the
+# CLI delegates container creation to `docker compose`. It's kept here so dck's
+# non-compose branch can find the container by label.
+# COMPOSE_PROJECT_NAME forces the name dck/dce derive via _dc_project_name.
+COMPOSE_PROJECT_NAME="$(_dc_project_name "${1:-}")" \
+devcontainer up \
+  --id-label="$label" \
+  --workspace-folder . \
+  "${config_arg[@]}" \
+  --dotfiles-repository kurowski/dotfiles
