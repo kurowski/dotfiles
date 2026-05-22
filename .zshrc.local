@@ -15,5 +15,7 @@ if [ -z "$OP_SESSION_LOADED" ]; then
   unset _senv _vars _v
 fi
 
-export CLAUDE_CODE_USE_FOUNDRY="1"
-export ANTHROPIC_FOUNDRY_RESOURCE="uceap-claude-test-resource"
+if [[ -n "${ANTHROPIC_FOUNDRY_API_KEY:-}" ]]; then
+  export CLAUDE_CODE_USE_FOUNDRY="1"
+  export ANTHROPIC_FOUNDRY_RESOURCE="uceap-claude-test-resource"
+fi

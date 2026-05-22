@@ -179,7 +179,9 @@ EOF
       firefox
       mpv
       rclone
+      seadrive-gui
       steam
+      tailscale
       yt-dlp
     )
     # SeaDrive: Seafile's repo URL has shifted multiple times; install
@@ -193,6 +195,8 @@ EOF
     if rpm -q ffmpeg-free >/dev/null 2>&1 && ! rpm -q ffmpeg >/dev/null 2>&1; then
       sudo dnf swap -y --allowerasing ffmpeg-free ffmpeg
     fi
+
+    sudo systemctl enable --now tailscaled
   fi
 
   # Docker CE — separate install because docker-ce.repo was added above
@@ -310,6 +314,14 @@ install_devcontainer_cli() {
   echo "==> installing @devcontainers/cli to ~/.local"
   mkdir -p "$HOME/.local"
   npm install -g --prefix "$HOME/.local" @devcontainers/cli
+}
+
+install_claude_code() {
+  if command -v claude >/dev/null 2>&1; then
+    return
+  fi
+  echo "==> installing claude code"
+  curl -fsSL https://claude.ai/install.sh | bash
 }
 
 # --- User-space tools (works in containers too) ------------------------------
@@ -519,6 +531,7 @@ fi
 
 set_default_shell
 install_starship
+install_claude_code
 setup_gitconfig_shim
 setup_astronvim
 setup_atuin_sync
