@@ -36,6 +36,19 @@ if command -v devcontainer >/dev/null 2>&1; then
   # All four accept an optional sub-config name (e.g. "portal") for repos
   # using the .devcontainer/<sub>/devcontainer.json layout. With no arg, the
   # CLI finds .devcontainer/devcontainer.json on its own.
+  #
+  # Canonical compose project name: <workspace>_<configdir-sans-dot>, lowercased
+  # and stripped of any chars outside [-_a-z0-9] (matches the devcontainer CLI's
+  # own Rg sanitization). Forces a stable, unique name — otherwise compose
+  # defaults to basename(compose-dir), which collides across repos for common
+  # subdir names like "portal".
+  _dc_project_name() {
+    local sub="$1"
+    local cfg="${sub:-devcontainer}"
+    cfg="${cfg#.}"
+    local name="$(basename "$PWD")_${cfg}"
+    echo "$name" | tr '[:upper:]' '[:lower:]' | tr -cd '[:alnum:]_-'
+  }
   dcu() {
     local label="project=$(basename "$PWD")"
     local config_arg=()
@@ -47,6 +60,8 @@ if command -v devcontainer >/dev/null 2>&1; then
     # path (CLI runs `docker run` itself); for compose configs it's a no-op
     # because the CLI delegates container creation to `docker compose`. It's
     # kept here so dck's non-compose branch can find the container by label.
+    # COMPOSE_PROJECT_NAME forces the name dck/dce derive via _dc_project_name.
+    COMPOSE_PROJECT_NAME="$(_dc_project_name "$1")" \
     devcontainer up \
       --id-label="$label" \
       --workspace-folder . \
@@ -65,13 +80,9 @@ if command -v devcontainer >/dev/null 2>&1; then
       fi
     done
     if [[ -n "$compose_file" ]]; then
-      # Compose path: dcu's --id-label was a no-op here, so identify the
-      # containers by compose project name. Match the name the devcontainer
-      # CLI uses: basename of the config dir, with any leading dot stripped
-      # to match compose's sanitization.
-      local project="$(basename "$dir")"
-      project="${project#.}"
-      docker compose --project-name "$project" -f "$compose_file" down
+      # Compose path: dcu's --id-label was a no-op here. Use the same project
+      # name dcu forced via COMPOSE_PROJECT_NAME (see _dc_project_name).
+      docker compose --project-name "$(_dc_project_name "$sub")" -f "$compose_file" down
     else
       # Non-compose path: dcu applied --id-label as a real Docker label, so
       # filter on it to find the container.
@@ -81,12 +92,27 @@ if command -v devcontainer >/dev/null 2>&1; then
     fi
   }
   dce() {
-    local sub="$1"
+    # `devcontainer up` is idempotent (no-op if running, starts if stopped,
+    # creates if missing), so calling it unconditionally here means a fresh
+    # reboot doesn't strand us with a stopped container.
+    # Parse args: `dce [sub] [-- cmd...]`. The `--` lets you specify a
+    # command with the default config — `dce -- zsh` runs zsh in the default
+    # config, vs `dce zsh` which would look for a "zsh" sub-config.
+    local sub=""
+    if [[ "$1" == "--" ]]; then
+      shift
+    elif (( $# > 0 )); then
+      sub="$1"
+      shift
+      [[ "$1" == "--" ]] && shift
+    fi
+    local cmd=("$@")
+    [[ ${#cmd[@]} -eq 0 ]] && cmd=(zellij attach devcontainer --create)
+    dcu "$sub" || return
     local dir=".devcontainer"
     [[ -n "$sub" ]] && dir=".devcontainer/$sub"
     local config_arg=()
     [[ -n "$sub" ]] && config_arg=(--config "$dir/devcontainer.json")
-    local session_name="${2:-devcontainer}"
     # In compose mode the CLI doesn't apply the devcontainer.local_folder /
     # devcontainer.config_file labels that exec normally filters on, so the
     # default lookup fails. Identify the dev-container ourselves (it's the
@@ -101,8 +127,7 @@ if command -v devcontainer >/dev/null 2>&1; then
       fi
     done
     if [[ -n "$compose_file" ]]; then
-      local project="$(basename "$dir")"
-      project="${project#.}"
+      local project="$(_dc_project_name "$sub")"
       # devcontainer.metadata alone isn't enough: other services in the
       # project (e.g. a Drupal reference container whose own image is built
       # from a devcontainer base) carry that label too. Disambiguate by the
@@ -118,15 +143,31 @@ if command -v devcontainer >/dev/null 2>&1; then
         [[ -n "$container_id" ]] && container_id_arg=(--container-id "$container_id")
       fi
     fi
+    # Forward host TERM/COLORTERM so the terminal Ghostty advertises
+    # (xterm-ghostty + truecolor) reaches the container. `devcontainer exec`
+    # passes through only explicit remoteEnv otherwise, so TERM defaults to
+    # whatever the image baked in — typically a bare `xterm` that hides
+    # truecolor, hyperlinks, and extended-key reporting. The matching
+    # `xterm-ghostty` terminfo entry has to be provided by the image.
+    local remote_env=()
+    [[ -n "$TERM" ]] && remote_env+=(--remote-env "TERM=$TERM")
+    [[ -n "$COLORTERM" ]] && remote_env+=(--remote-env "COLORTERM=$COLORTERM")
     devcontainer exec \
       --workspace-folder . \
+      "${remote_env[@]}" \
       "${config_arg[@]}" \
       "${container_id_arg[@]}" \
-      zellij attach "$session_name" --create
+      "${cmd[@]}"
   }
   # Rebuild + reattach: VS Code's "Dev Container: Rebuild" equivalent.
+  # dce auto-ups, so we only need kill + exec here.
   dcr() {
-    dck "$1" && dcu "$1" && dce "$1" "$2"
+    # Mirror dce's `--` parsing so the sub-config (if any) is forwarded to
+    # dck while the full arg list — including any `--` and command — goes
+    # to dce.
+    local sub=""
+    [[ "$1" != "--" && -n "$1" ]] && sub="$1"
+    dck "$sub" && dce "$@"
   }
 fi
 
