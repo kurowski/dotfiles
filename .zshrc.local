@@ -2,7 +2,15 @@
 # at KDE login), fall back to `op inject` for shells outside the session
 # (e.g., SSH). $OP_SESSION_LOADED is the marker set after a successful
 # session-time inject.
-if [ -z "$OP_SESSION_LOADED" ]; then
+#
+# Skip entirely inside containers: there's no systemd user session and no
+# 1Password desktop app for `op inject` to talk to, so the call hangs
+# until it times out. Containers get their secrets via the devcontainer
+# CLI's containerEnv / remoteEnv instead.
+if [ -z "$OP_SESSION_LOADED" ] \
+   && [ ! -f /.dockerenv ] \
+   && [ -z "$REMOTE_CONTAINERS" ] \
+   && [ -z "$CODESPACES" ]; then
   _senv=$(systemctl --user show-environment 2>/dev/null)
   if echo "$_senv" | grep -q '^OP_SESSION_LOADED='; then
     _vars="OP_SESSION_LOADED $(grep -oP '(?<=export )\w+' "$HOME/.config/zshrc-env.tmpl" 2>/dev/null)"
