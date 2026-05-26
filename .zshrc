@@ -1,8 +1,9 @@
 export EDITOR=nvim
 export VISUAL=$EDITOR
 export LANG=en_US.UTF-8
+export GOPATH="$HOME/go"
 
-path=("$HOME/.cargo/bin" "$HOME/.atuin/bin" "$HOME/.local/bin" "$HOME/.devcontainers/bin" $path)
+path=("$HOME/.cargo/bin" "$HOME/.atuin/bin" "$HOME/.local/bin" "$HOME/.devcontainers/bin" "$GOPATH/bin" $path)
 
 if [[ -S "$HOME/.1password/agent.sock" ]]; then
   export SSH_AUTH_SOCK="$HOME/.1password/agent.sock"
