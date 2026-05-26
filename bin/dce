@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 # devcontainer exec — ensure the dev container is up, then exec a command in
-# it (defaults to `zellij attach devcontainer --create`).
+# it (defaults to `tmux new-session -A -s devcontainer`).
 #
 # Args: `dce [sub] [-- cmd...]`. The `--` lets you specify a command with the
 # default config — `dce -- zsh` runs zsh in the default config, vs `dce zsh`
@@ -16,7 +16,7 @@ elif (( $# > 0 )); then
   [[ "${1:-}" == "--" ]] && shift
 fi
 cmd=("$@")
-[[ ${#cmd[@]} -eq 0 ]] && cmd=(zellij attach devcontainer --create)
+[[ ${#cmd[@]} -eq 0 ]] && cmd=(tmux new-session -A -s devcontainer)
 
 # Repos that only ship sub-configs (e.g. uceap3 with .devcontainer/portal/)
 # have no default devcontainer.json — `dce` with no sub would fall through to
@@ -89,7 +89,7 @@ fi
 # If the host runs Ghostty but the container's terminfo db doesn't know
 # xterm-ghostty, install it. Most images ship only bare xterm/screen entries,
 # and forwarding TERM=xterm-ghostty (below) without the matching entry leaves
-# interactive tools (zellij, vim, less) complaining the terminal is unknown.
+# interactive tools (tmux, vim, less) complaining the terminal is unknown.
 # Piping infocmp -x through tic is idempotent.
 if [[ "$TERM" == "xterm-ghostty" ]] \
    && [[ -n "$container_id" ]] \

@@ -64,7 +64,6 @@ install_packages() {
 
   sudo dnf copr enable -y atim/lazygit
   sudo dnf copr enable -y scottames/ghostty
-  sudo dnf copr enable -y varlad/zellij
 
   sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
   sudo tee /etc/yum.repos.d/code.repo >/dev/null <<'EOF'
@@ -164,7 +163,7 @@ EOF
     openssh-server
     python3-pip
     rustup
-    zellij
+    tmux
     zsh
   )
   if [[ "$PROFILE" == "work" ]]; then
@@ -237,7 +236,7 @@ install_rust_toolchain() {
 
 # Personal CLI tools only — no infra (terraform/kubectl) or GUI apps. Everything
 # in this list ships in trixie's main repo as of 2026-05; if a future tool isn't
-# packaged, prefer adding a dedicated installer (see install_zellij) over pulling
+# packaged, prefer adding a dedicated installer (see install_tpack) over pulling
 # in a third-party apt repo.
 install_packages_debian() {
   echo "==> installing apt packages"
@@ -252,6 +251,7 @@ install_packages_debian() {
     glow \
     lazygit \
     ripgrep \
+    tmux \
     zsh
 }
 
@@ -281,26 +281,37 @@ install_neovim() {
   ln -snf "$prefix/bin/nvim" "$HOME/.local/bin/nvim"
 }
 
-# zellij isn't packaged in Debian. Grab the prebuilt musl binary from the
-# upstream release and drop it in ~/.local/bin (already on PATH via .zshrc).
-install_zellij() {
-  if command -v zellij >/dev/null 2>&1; then
+# tpack (tmux plugin manager, drop-in tpm replacement) isn't in any distro
+# repo. Grab the prebuilt linux binary from the upstream release and drop it
+# in ~/.local/bin (already on PATH via .zshrc). tpack embeds its version in
+# the asset filename, so resolve the URL via the GitHub API rather than the
+# /releases/latest/download/ redirect.
+install_tpack() {
+  if command -v tpack >/dev/null 2>&1; then
     return
   fi
   local arch
   case "$(uname -m)" in
-    x86_64)  arch="x86_64-unknown-linux-musl" ;;
-    aarch64) arch="aarch64-unknown-linux-musl" ;;
-    *) echo "  unsupported arch for zellij: $(uname -m); skipping"; return ;;
+    x86_64)  arch="linux_amd64" ;;
+    aarch64) arch="linux_arm64" ;;
+    *) echo "  unsupported arch for tpack: $(uname -m); skipping"; return ;;
   esac
-  echo "==> installing zellij to ~/.local/bin"
+  echo "==> installing tpack to ~/.local/bin"
   mkdir -p "$HOME/.local/bin"
+  local url
+  url=$(curl -sSfL https://api.github.com/repos/tmuxpack/tpack/releases/latest \
+    | grep -oE '"browser_download_url": *"[^"]*'"${arch}"'\.tar\.gz"' \
+    | head -1 \
+    | sed -E 's/.*"(https:[^"]+)"/\1/')
+  if [[ -z "$url" ]]; then
+    echo "  could not resolve tpack release for $arch; skipping"
+    return
+  fi
   local tmp
   tmp="$(mktemp -d)"
-  curl -sSfL "https://github.com/zellij-org/zellij/releases/latest/download/zellij-${arch}.tar.gz" \
-    | tar xz -C "$tmp"
-  mv "$tmp/zellij" "$HOME/.local/bin/zellij"
-  chmod +x "$HOME/.local/bin/zellij"
+  curl -sSfL "$url" | tar xz -C "$tmp"
+  mv "$tmp/tpack" "$HOME/.local/bin/tpack"
+  chmod +x "$HOME/.local/bin/tpack"
   rm -rf "$tmp"
 }
 
@@ -556,8 +567,8 @@ if [[ "$IS_CONTAINER" == 0 ]]; then
 else
   install_packages_debian
   install_neovim
-  install_zellij
 fi
+install_tpack
 
 set_default_shell
 install_starship

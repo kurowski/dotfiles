@@ -1,5 +1,6 @@
 export EDITOR=nvim
 export VISUAL=$EDITOR
+export LANG=en_US.UTF-8
 
 path=("$HOME/.cargo/bin" "$HOME/.atuin/bin" "$HOME/.local/bin" "$HOME/.devcontainers/bin" $path)
 
