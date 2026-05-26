@@ -315,6 +315,18 @@ install_tpack() {
   rm -rf "$tmp"
 }
 
+# Fetch the plugins declared in .config/tmux/tmux.conf so a fresh machine
+# doesn't drop into tmux with no theme until the user remembers to hit
+# `prefix + I`. Idempotent — tpack skips plugins already cloned. Must run
+# after link_dotfiles so tmux.conf is in place.
+install_tmux_plugins() {
+  if ! command -v tpack >/dev/null 2>&1 || ! command -v tmux >/dev/null 2>&1; then
+    return
+  fi
+  echo "==> installing tmux plugins"
+  tpack install >/dev/null 2>&1 || echo "  tpack install failed; run it manually"
+}
+
 # @devcontainers/cli has no standalone binary release; npm is the supported
 # install path. Use --prefix to land in ~/.local (already on PATH) instead of
 # writing to /usr with sudo.
@@ -582,5 +594,6 @@ if [[ "$IS_CONTAINER" == 0 ]]; then
 fi
 link_dotfiles
 link_bin
+install_tmux_plugins
 
 echo "==> done"
