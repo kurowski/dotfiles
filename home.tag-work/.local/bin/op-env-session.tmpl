@@ -1,13 +1,13 @@
 #!/bin/bash
 # op-env-session — inject 1Password secrets into the KDE desktop session.
 # Runs at login via .config/autostart/op-env-session.desktop. Resolves
-# op:// references in ~/.config/zshrc-env.tmpl and pushes the resulting
+# op:// references in ~/.config/zshrc-env.op-tmpl and pushes the resulting
 # env vars to the dbus + systemd user environment so all child apps
 # inherit them.
 
 export OP_BIOMETRIC_UNLOCK_ENABLED=true
-TEMPLATE="$HOME/.config/zshrc-env.tmpl"
-ACCOUNT="team-uceap"
+TEMPLATE="$HOME/.config/zshrc-env.op-tmpl"
+ACCOUNT="{{ .Vars.OP_ACCOUNT }}"
 
 if [ -S "$HOME/.1password/agent.sock" ]; then
   export SSH_AUTH_SOCK="$HOME/.1password/agent.sock"
