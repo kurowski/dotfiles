@@ -1,0 +1,25 @@
+[user]
+email = "bkurowski@uceap.universityofcalifornia.edu"
+
+[profile]
+name = "work"
+
+[tags]
+extra = ["kde"]
+
+[vars]
+THEME       = "light"
+OP_ACCOUNT  = "team-uceap"
+ATUIN_SYNC  = "true"
+ATUIN_VAULT = "Employee"
+
+[packages."tag:work"]
+fedora = [
+  "google-chrome-stable",
+  "helm",
+  "kubectl",
+  "terraform",
+]
+
+[packages."tag:work".flatpak]
+all = ["us.zoom.Zoom"]

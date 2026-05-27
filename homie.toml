@@ -1,0 +1,77 @@
+[user]
+name  = "Brandt Kurowski"
+email = "brandt@kurowski.net"
+
+[profile]
+name          = "personal"
+default_shell = "zsh"
+
+[packages]
+fedora = [
+  "1password",
+  "1password-cli",
+  "atuin",
+  "bat",
+  "code",
+  "containerd.io",
+  "curl",
+  "ddcutil",
+  "deskflow",
+  "docker-buildx-plugin",
+  "docker-ce",
+  "docker-ce-cli",
+  "docker-compose-plugin",
+  "fastfetch",
+  "fd-find",
+  "fprintd",
+  "fzf",
+  "gcc",
+  "gh",
+  "ghostty",
+  "git",
+  "glow",
+  "lazygit",
+  "make",
+  "neovim",
+  "nodejs",
+  "npm",
+  "openssh-server",
+  "python3-pip",
+  "ripgrep",
+  "rustup",
+  "starship",
+  "tmux",
+  "zsh",
+]
+debian = [
+  "atuin",
+  "bat",
+  "fastfetch",
+  "fd-find",
+  "fzf",
+  "glow",
+  "lazygit",
+  "ripgrep",
+  "tmux",
+  "zsh",
+]
+
+[packages.flatpak]
+all = ["md.obsidian.Obsidian"]
+
+[packages."tag:personal"]
+fedora = [
+  "firefox",
+  "mpv",
+  "rclone",
+  "seadrive-gui",
+  "steam",
+  "tailscale",
+  "yt-dlp",
+]
+
+[tags]
+extra = []
+
+[vars]
+EDITOR = "nvim"
