@@ -13,12 +13,12 @@ if [ -z "$OP_SESSION_LOADED" ] \
    && [ -z "$CODESPACES" ]; then
   _senv=$(systemctl --user show-environment 2>/dev/null)
   if echo "$_senv" | grep -q '^OP_SESSION_LOADED='; then
-    _vars="OP_SESSION_LOADED $(grep -oP '(?<=export )\w+' "$HOME/.config/zshrc-env.tmpl" 2>/dev/null)"
+    _vars="OP_SESSION_LOADED $(grep -oP '(?<=export )\w+' "$HOME/.config/zshrc-env.op-tmpl" 2>/dev/null)"
     for _v in ${=_vars}; do
       eval "export $(echo "$_senv" | grep "^${_v}=")"
     done
   elif command -v op >/dev/null 2>&1; then
-    eval "$(op inject --account team-uceap -i "$HOME/.config/zshrc-env.tmpl" 2>/dev/null)"
+    eval "$(op inject --account {{ .Vars.OP_ACCOUNT }} -i "$HOME/.config/zshrc-env.op-tmpl" 2>/dev/null)"
   fi
   unset _senv _vars _v
 fi
