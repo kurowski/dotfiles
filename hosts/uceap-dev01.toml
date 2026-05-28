@@ -18,6 +18,7 @@ fedora = [
   "google-chrome-stable",
   "helm",
   "kubectl",
+  "onedrive",
   "terraform",
 ]
 

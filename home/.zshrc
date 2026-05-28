@@ -31,6 +31,12 @@ fi
 
 alias vim=nvim
 
+if command -v eza >/dev/null 2>&1; then
+  alias ls='eza'
+  alias ll='eza -l --git --icons=auto'
+  alias la='eza -la --git --icons=auto'
+fi
+
 # Debian/Ubuntu rename these to dodge namespace clashes; restore the standard
 # names so muscle memory works the same as on Fedora.
 if ! command -v fd >/dev/null 2>&1 && command -v fdfind >/dev/null 2>&1; then
