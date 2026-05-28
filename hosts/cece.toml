@@ -1,3 +1,6 @@
+[profile]
+name = "personal"
+
 [tags]
 extra = ["desktop", "gnome"]
 

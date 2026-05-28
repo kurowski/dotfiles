@@ -1,5 +1,15 @@
+[profile]
+name = "personal"
+
+[tags]
+extra = ["server"]
+
 [vars]
 OP_ACCOUNT = "my"
 ATUIN_SYNC = "false"
+
+# winston isn't a "desktop" host but still needs docker.
+[packages]
+debian = ["docker.io", "docker-buildx"]
 
 # Deferred: seafile + rclone-backups (out of scope for the Ubuntu-merge pass).

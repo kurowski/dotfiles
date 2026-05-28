@@ -3,7 +3,6 @@ name  = "Brandt Kurowski"
 email = "brandt@kurowski.net"
 
 [profile]
-name          = "personal"
 default_shell = "zsh"
 
 [packages]
@@ -35,7 +34,6 @@ fedora = [
   "neovim",
   "nodejs22",
   "nodejs22-npm",
-  "openssh-server",
   "python3-pip",
   "ripgrep",
   "rustup",
@@ -46,8 +44,6 @@ debian = [
   "atuin",
   "bat",
   "curl",
-  "docker.io",
-  "docker-buildx",
   "fastfetch",
   "fd-find",
   "fzf",
@@ -57,7 +53,6 @@ debian = [
   "glow",
   "lazygit",
   "make",
-  "openssh-server",
   "python3-pip",
   "ripgrep",
   "tmux",
@@ -65,18 +60,26 @@ debian = [
 ]
 
 [packages."tag:desktop"]
+fedora = ["openssh-server"]
 debian = [
   "code",
   "ddcutil",
   "deskflow",
+  "docker.io",
+  "docker-buildx",
   "fprintd",
   "ghostty",
   "libpam-fprintd",
   "ncurses-term",
+  "openssh-server",
 ]
 
 [packages."tag:desktop".flatpak]
 all = ["md.obsidian.Obsidian"]
+
+[packages."tag:server"]
+fedora = ["openssh-server"]
+debian = ["openssh-server"]
 
 [packages."tag:gnome"]
 debian = [

@@ -1,3 +1,9 @@
+# Devcontainer shells often start without a login session, so $USER is
+# unset even though `id -un` knows the name. Normalize it before anything
+# else runs.
+: ${USER:=$(id -un)}
+export USER
+
 export EDITOR=nvim
 export VISUAL=$EDITOR
 export LANG=en_US.UTF-8

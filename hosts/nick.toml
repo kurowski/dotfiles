@@ -1,3 +1,9 @@
+[profile]
+name = "personal"
+
+[tags]
+extra = ["server"]
+
 [vars]
 OP_ACCOUNT = "my"
 ATUIN_SYNC = "false"
