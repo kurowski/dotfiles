@@ -104,7 +104,7 @@ debian = [
 [packages."tag:personal.tag:ubuntu".snap]
 all = ["aws-cli/classic"]
 
-[packages."tag:personal.tag:desktop".snap]
+[packages."tag:personal.tag:desktop.tag:ubuntu".snap]
 all = ["gimp", "spotify"]
 
 [tags]
