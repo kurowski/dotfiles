@@ -5,7 +5,7 @@ email = "bkurowski@uceap.universityofcalifornia.edu"
 name = "work"
 
 [tags]
-extra = ["kde"]
+extra = ["desktop", "kde"]
 
 [vars]
 THEME       = "light"

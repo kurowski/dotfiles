@@ -45,18 +45,45 @@ fedora = [
 debian = [
   "atuin",
   "bat",
+  "curl",
+  "docker.io",
+  "docker-buildx",
   "fastfetch",
   "fd-find",
   "fzf",
+  "gcc",
+  "gh",
+  "git",
   "glow",
   "lazygit",
+  "make",
+  "openssh-server",
+  "python3-pip",
   "ripgrep",
   "tmux",
   "zsh",
 ]
 
-[packages.flatpak]
+[packages."tag:desktop"]
+debian = [
+  "code",
+  "ddcutil",
+  "deskflow",
+  "fprintd",
+  "ghostty",
+  "libpam-fprintd",
+  "ncurses-term",
+]
+
+[packages."tag:desktop".flatpak]
 all = ["md.obsidian.Obsidian"]
+
+[packages."tag:gnome"]
+debian = [
+  "gnome-browser-connector",
+  "gnome-shell-extension-manager",
+  "gnome-tweaks",
+]
 
 [packages."tag:personal"]
 fedora = [
@@ -67,6 +94,11 @@ fedora = [
   "steam",
   "tailscale",
   "yt-dlp",
+]
+# Firefox on Ubuntu is installed in pre-02-ubuntu-repos.sh to handle
+# apt pinning + the snap-shim downgrade.
+debian = [
+  "tailscale",
 ]
 
 [tags]

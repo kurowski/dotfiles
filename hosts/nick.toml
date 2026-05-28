@@ -1,0 +1,6 @@
+[vars]
+OP_ACCOUNT = "my"
+ATUIN_SYNC = "false"
+
+[packages.snap]
+all = ["aws-cli/classic"]

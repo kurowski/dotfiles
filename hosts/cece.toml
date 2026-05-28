@@ -1,0 +1,12 @@
+[tags]
+extra = ["desktop", "gnome"]
+
+[vars]
+THEME      = "dark"
+OP_ACCOUNT = "my"
+ATUIN_SYNC = "false"
+
+# Snap is Ubuntu-only, so personal-snap declarations live in host overlays
+# rather than [packages."tag:personal".snap] (which would warn on Fedora).
+[packages.snap]
+all = ["aws-cli/classic", "gimp", "spotify"]

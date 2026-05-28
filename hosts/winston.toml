@@ -1,0 +1,8 @@
+[vars]
+OP_ACCOUNT = "my"
+ATUIN_SYNC = "false"
+
+[packages.snap]
+all = ["aws-cli/classic"]
+
+# Deferred: seafile + rclone-backups (out of scope for the Ubuntu-merge pass).

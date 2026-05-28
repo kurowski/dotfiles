@@ -5,8 +5,6 @@
 # its target is already in place so re-runs don't need sudo.
 set -euo pipefail
 
-case ",$HM_TAGS," in *,fedora,*) ;; *) exit 0 ;; esac
-
 copr_enabled() {
   # `dnf copr list` lists enabled COPRs as
   # `copr.fedorainfracloud.org/<owner>/<project>`. dnf5 dropped the
