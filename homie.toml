@@ -101,6 +101,12 @@ debian = [
   "tailscale",
 ]
 
+[packages."tag:personal.tag:ubuntu".snap]
+all = ["aws-cli/classic"]
+
+[packages."tag:personal.tag:desktop".snap]
+all = ["gimp", "spotify"]
+
 [tags]
 extra = []
 
