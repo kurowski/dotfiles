@@ -74,6 +74,7 @@ macos = [
   "lazygit",
   "neovim",
   "ripgrep",
+  "shellcheck",
   "starship",
   "tmux",
 ]
