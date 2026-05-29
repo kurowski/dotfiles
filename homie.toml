@@ -101,7 +101,13 @@ macos = [
   "obsidian/cask",
 ]
 
-[packages."tag:desktop".flatpak]
+[packages."tag:desktop.tag:fedora".flatpak]
+all = ["md.obsidian.Obsidian"]
+
+[packages."tag:desktop.tag:ubuntu".flatpak]
+all = ["md.obsidian.Obsidian"]
+
+[packages."tag:desktop.tag:debian".flatpak]
 all = ["md.obsidian.Obsidian"]
 
 [packages."tag:server"]
