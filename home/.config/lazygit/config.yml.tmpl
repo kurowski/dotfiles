@@ -1,0 +1,63 @@
+# Catppuccin (mauve accent) — flavor follows the host: latte on work, mocha
+# elsewhere. Theme blocks from catppuccin/lazygit themes-mergable/<flavor>/mauve.
+{{- if hasTag "work" }}
+gui:
+  theme:
+    activeBorderColor:
+      - '#8839ef'
+      - bold
+    inactiveBorderColor:
+      - '#6c6f85'
+    searchingActiveBorderColor:
+      - '#df8e1d'
+    optionsTextColor:
+      - '#1e66f5'
+    selectedLineBgColor:
+      - '#ccd0da'
+    inactiveViewSelectedLineBgColor:
+      - '#9ca0b0'
+    cherryPickedCommitFgColor:
+      - '#8839ef'
+    cherryPickedCommitBgColor:
+      - '#bcc0cc'
+    markedBaseCommitFgColor:
+      - '#1e66f5'
+    markedBaseCommitBgColor:
+      - '#df8e1d'
+    unstagedChangesColor:
+      - '#d20f39'
+    defaultFgColor:
+      - '#4c4f69'
+  authorColors:
+    '*': '#7287fd'
+{{- else }}
+gui:
+  theme:
+    activeBorderColor:
+      - '#cba6f7'
+      - bold
+    inactiveBorderColor:
+      - '#a6adc8'
+    searchingActiveBorderColor:
+      - '#f9e2af'
+    optionsTextColor:
+      - '#89b4fa'
+    selectedLineBgColor:
+      - '#313244'
+    inactiveViewSelectedLineBgColor:
+      - '#6c7086'
+    cherryPickedCommitFgColor:
+      - '#cba6f7'
+    cherryPickedCommitBgColor:
+      - '#45475a'
+    markedBaseCommitFgColor:
+      - '#89b4fa'
+    markedBaseCommitBgColor:
+      - '#f9e2af'
+    unstagedChangesColor:
+      - '#f38ba8'
+    defaultFgColor:
+      - '#cdd6f4'
+  authorColors:
+    '*': '#b4befe'
+{{- end }}

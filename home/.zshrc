@@ -9,6 +9,9 @@ export VISUAL=$EDITOR
 export LANG=en_US.UTF-8
 export GOPATH="$HOME/go"
 
+# Catppuccin colors for fzf (rendered per-host by homie; see ~/.config/fzf/fzfrc).
+[[ -f "$HOME/.config/fzf/fzfrc" ]] && export FZF_DEFAULT_OPTS_FILE="$HOME/.config/fzf/fzfrc"
+
 path=("$HOME/.cargo/bin" "$HOME/.atuin/bin" "$HOME/.local/bin" "$HOME/.devcontainers/bin" "$GOPATH/bin" $path)
 
 if [[ -S "$HOME/.1password/agent.sock" ]]; then
