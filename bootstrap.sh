@@ -12,11 +12,6 @@
 #   3. Clone this repo and exec `hm apply`.
 set -euo pipefail
 
-# Devcontainers often start processes without a login session, so $USER
-# is unset even though `id -un` knows the name. Normalize it here so
-# every script hm spawns can rely on it.
-export USER="${USER:-$(id -un)}"
-
 REPO_URL="https://github.com/kurowski/dotfiles.git"
 REPO_DIR="${HM_REPO:-$HOME/Projects/dotfiles}"
 HM_RELEASE="${HM_RELEASE:-latest}"
