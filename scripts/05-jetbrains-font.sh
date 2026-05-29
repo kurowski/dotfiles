@@ -4,6 +4,9 @@
 # ghostty need the Nerd-patched glyphs.
 set -euo pipefail
 
+# macOS gets nerd fonts via the homebrew-fonts cask; no fc-cache to run.
+case ",$HM_TAGS," in *,macos,*) exit 0 ;; esac
+
 font_dir="$HOME/.local/share/fonts/JetBrainsMono"
 if [[ -d "$font_dir" ]] && compgen -G "$font_dir/*.ttf" >/dev/null; then
   exit 0

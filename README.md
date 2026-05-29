@@ -1,6 +1,6 @@
 # dotfiles
 
-Personal multi-host setup for Fedora and Ubuntu, managed by [Homie](https://homie.sh).
+Personal multi-host setup for Fedora, Ubuntu, and macOS, managed by [Homie](https://homie.sh).
 
 ## Bootstrap a fresh machine
 
@@ -37,9 +37,11 @@ Packages are declared per distro and per backend, scoped by tag:
 [packages]                                     # always-applied base
 fedora = [...]                                 # only on fedora hosts
 debian = [...]                                 # only on ubuntu/debian hosts
+macos  = [...]                                 # only on macos hosts (brew)
 
 [packages."tag:desktop"]                       # one tag
 debian = [...]
+macos  = ["ghostty/cask"]                      # `/cask` suffix marks a brew cask
 
 [packages."tag:desktop".flatpak]               # backend-scoped
 all = [...]
@@ -48,12 +50,12 @@ all = [...]
 all = [...]
 ```
 
-Backends: `flatpak`, `snap`, `brew`. If the backend tool is missing, the block is skipped with a warning.
+On macOS the native manager is brew; append `/cask` to a name to mark it as a cask (e.g. `"1password/cask"`). Other backends: `flatpak`, `snap`. If the backend tool is missing, the block is skipped with a warning.
 
 ## Tags
 
 Auto-derived per host:
-- Distro: `fedora`, `ubuntu`, or `debian`.
+- Distro: `fedora`, `ubuntu`, `debian`, or `macos`.
 - Profile: `personal` or `work`, from `[profile].name`.
 - Misc: arch, short hostname, `root`, `container`.
 
@@ -67,6 +69,7 @@ Manual, set per-host via `[tags].extra`:
 | ------------- | ------ | -------- | -------------- |
 | `coach`       | fedora | personal | desktop, kde   |
 | `uceap-dev01` | fedora | work     | desktop, kde   |
+| `UCEAP-M1022` | macos  | work     | desktop        |
 | `cece`        | ubuntu | personal | desktop, gnome |
 | `nick`        | ubuntu | personal | server         |
 | `winston`     | ubuntu | personal | server         |

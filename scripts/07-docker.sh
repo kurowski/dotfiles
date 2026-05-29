@@ -11,14 +11,19 @@ case ",$HM_TAGS," in *,container,*) exit 0 ;; esac
 
 command -v docker >/dev/null 2>&1 || exit 0
 
-if ! systemctl is-enabled docker >/dev/null 2>&1; then
-  sudo systemctl enable --now docker
-fi
+# Docker Desktop on macOS self-manages its daemon and runs as the GUI
+# user — no systemctl service, no docker group. Skip both steps; GHCR
+# login below is still useful.
+case ",$HM_TAGS," in *,macos,*) ;; *)
+  if ! systemctl is-enabled docker >/dev/null 2>&1; then
+    sudo systemctl enable --now docker
+  fi
 
-if ! id -nG "$USER" | grep -qw docker; then
-  sudo usermod -aG docker "$USER"
-  echo "added $USER to docker group (takes effect on next login)"
-fi
+  if ! id -nG "$USER" | grep -qw docker; then
+    sudo usermod -aG docker "$USER"
+    echo "added $USER to docker group (takes effect on next login)"
+  fi
+;; esac
 
 if command -v gh >/dev/null 2>&1 \
   && docker system info >/dev/null 2>&1 \

@@ -1,17 +1,20 @@
 #!/usr/bin/env bash
 # tpack (tmux plugin manager, drop-in tpm replacement) — not in any
-# distro repo. Grab the prebuilt linux binary from the upstream
-# release and drop it in ~/.local/bin (on PATH via .zshrc). tpack
-# embeds its version in the asset filename, so resolve the URL via
-# the GitHub API rather than /releases/latest/download/.
+# distro repo. Grab the prebuilt binary from the upstream release and
+# drop it in ~/.local/bin (on PATH via .zshrc). tpack embeds its
+# version in the asset filename, so resolve the URL via the GitHub
+# API rather than /releases/latest/download/.
 set -euo pipefail
 
 command -v tpack >/dev/null 2>&1 && exit 0
 
-case "$(uname -m)" in
-  x86_64)  arch="linux_amd64" ;;
-  aarch64) arch="linux_arm64" ;;
-  *) echo "unsupported arch for tpack: $(uname -m); skipping" >&2; exit 0 ;;
+os_arch="$(uname -s)_$(uname -m)"
+case "$os_arch" in
+  Linux_x86_64)   arch="linux_amd64" ;;
+  Linux_aarch64)  arch="linux_arm64" ;;
+  Darwin_x86_64)  arch="darwin_amd64" ;;
+  Darwin_arm64)   arch="darwin_arm64" ;;
+  *) echo "unsupported os/arch for tpack: $os_arch; skipping" >&2; exit 0 ;;
 esac
 
 mkdir -p "$HOME/.local/bin"

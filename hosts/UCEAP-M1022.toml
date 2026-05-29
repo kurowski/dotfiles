@@ -1,0 +1,22 @@
+[user]
+email = "bkurowski@uceap.universityofcalifornia.edu"
+
+[profile]
+name = "work"
+
+[tags]
+extra = ["desktop"]
+
+[vars]
+THEME       = "light"
+OP_ACCOUNT  = "team-uceap"
+ATUIN_SYNC  = "true"
+ATUIN_VAULT = "Employee"
+
+[packages."tag:work"]
+macos = [
+  "awscli",
+  "azure-cli",
+  "helm",
+  "minikube",
+]

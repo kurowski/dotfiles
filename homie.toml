@@ -60,6 +60,23 @@ debian = [
   "tmux",
   "zsh",
 ]
+macos = [
+  "1password-cli/cask",
+  "atuin",
+  "bat",
+  "eza",
+  "fastfetch",
+  "fd",
+  "fzf",
+  "gh",
+  "git",
+  "glow",
+  "lazygit",
+  "neovim",
+  "ripgrep",
+  "starship",
+  "tmux",
+]
 
 [packages."tag:desktop"]
 fedora = ["openssh-server"]
@@ -74,6 +91,14 @@ debian = [
   "libpam-fprintd",
   "ncurses-term",
   "openssh-server",
+]
+macos = [
+  "1password/cask",
+  "deskflow/cask",
+  "font-monaspace-nerd-font/cask",
+  "ghostty/cask",
+  "google-chrome/cask",
+  "obsidian/cask",
 ]
 
 [packages."tag:desktop".flatpak]
