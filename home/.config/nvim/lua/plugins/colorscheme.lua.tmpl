@@ -1,10 +1,10 @@
 return {
   {
     "catppuccin",
-    opts = { flavour = "{{ if hasTag "work" }}latte{{ else }}mocha{{ end }}" },
+    opts = { flavour = "{{ if eq .Vars.THEME "dark" }}mocha{{ else }}latte{{ end }}" },
   },
   {
     "AstroNvim/astroui",
-    opts = { colorscheme = "catppuccin-{{ if hasTag "work" }}latte{{ else }}mocha{{ end }}" },
+    opts = { colorscheme = "catppuccin-{{ if eq .Vars.THEME "dark" }}mocha{{ else }}latte{{ end }}" },
   },
 }

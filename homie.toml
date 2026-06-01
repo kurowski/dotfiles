@@ -149,3 +149,6 @@ extra = []
 
 [vars]
 EDITOR = "nvim"
+# Appearance default for untagged hosts and anonymous devcontainers (work/light).
+# Personal hosts override this to "dark".
+THEME  = "light"

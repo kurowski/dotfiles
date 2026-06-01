@@ -1,6 +1,6 @@
 font-family = JetBrainsMono Nerd Font
 font-size = 10
-theme = {{ if hasTag "work" }}Catppuccin Latte{{ else }}Catppuccin Mocha{{ end }}
+theme = {{ if eq .Vars.THEME "dark" }}Catppuccin Mocha{{ else }}Catppuccin Latte{{ end }}
 
 # Claude Code reads ESC+CR as "insert newline" instead of "submit". Sending
 # it directly from the terminal avoids relying on tmux passing through

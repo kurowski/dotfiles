@@ -5,6 +5,7 @@ name = "personal"
 extra = ["server"]
 
 [vars]
+THEME      = "dark"
 OP_ACCOUNT = "my"
 ATUIN_SYNC = "false"
 

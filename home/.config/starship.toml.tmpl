@@ -1,6 +1,6 @@
 "$schema" = 'https://starship.rs/config-schema.json'
 
-palette = 'catppuccin_{{ if hasTag "work" }}latte{{ else }}mocha{{ end }}'
+palette = 'catppuccin_{{ if eq .Vars.THEME "dark" }}mocha{{ else }}latte{{ end }}'
 
 [palettes.catppuccin_mocha]
 rosewater = "#f5e0dc"

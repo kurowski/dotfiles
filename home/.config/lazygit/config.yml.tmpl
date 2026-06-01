@@ -1,6 +1,6 @@
-# Catppuccin (mauve accent) — flavor follows the host: latte on work, mocha
-# elsewhere. Theme blocks from catppuccin/lazygit themes-mergable/<flavor>/mauve.
-{{- if hasTag "work" }}
+# Catppuccin (mauve accent) — flavor follows the THEME var: latte unless THEME is
+# "dark", then mocha. Theme blocks from catppuccin/lazygit themes-mergable/<flavor>/mauve.
+{{- if ne .Vars.THEME "dark" }}
 gui:
   theme:
     activeBorderColor:

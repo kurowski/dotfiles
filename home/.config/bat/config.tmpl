@@ -1,4 +1,4 @@
 # bat has no built-in Catppuccin theme; the .tmTheme files live in
 # ~/.config/bat/themes/ and are compiled into bat's cache by
 # scripts/22-bat-cache.sh (runs `bat cache --build`).
---theme="Catppuccin {{ if hasTag "work" }}Latte{{ else }}Mocha{{ end }}"
+--theme="Catppuccin {{ if eq .Vars.THEME "dark" }}Mocha{{ else }}Latte{{ end }}"
