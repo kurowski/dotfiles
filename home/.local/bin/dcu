@@ -22,4 +22,6 @@ devcontainer up \
   --id-label="$label" \
   --workspace-folder . \
   "${config_arg[@]}" \
-  --dotfiles-repository kurowski/dotfiles
+  --dotfiles-repository "kurowski/dotfiles" \
+  --dotfiles-target-path "~/Projects/dotfiles"
+
