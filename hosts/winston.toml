@@ -11,6 +11,6 @@ ATUIN_SYNC = "false"
 
 # winston isn't a "desktop" host but still needs docker.
 [packages]
-debian = ["docker.io", "docker-buildx"]
+ubuntu = ["docker.io", "docker-buildx"]
 
 # Deferred: seafile + rclone-backups (out of scope for the Ubuntu-merge pass).

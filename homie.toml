@@ -42,7 +42,7 @@ fedora = [
   "tmux",
   "zsh",
 ]
-debian = [
+ubuntu = [
   "atuin",
   "bat",
   "curl",
@@ -83,7 +83,7 @@ macos = [
 
 [packages."tag:desktop"]
 fedora = ["openssh-server"]
-debian = [
+ubuntu = [
   "code",
   "ddcutil",
   "deskflow",
@@ -110,15 +110,12 @@ all = ["md.obsidian.Obsidian"]
 [packages."tag:desktop.tag:ubuntu".flatpak]
 all = ["md.obsidian.Obsidian"]
 
-[packages."tag:desktop.tag:debian".flatpak]
-all = ["md.obsidian.Obsidian"]
-
 [packages."tag:server"]
 fedora = ["openssh-server"]
-debian = ["openssh-server"]
+ubuntu = ["openssh-server"]
 
 [packages."tag:gnome"]
-debian = [
+ubuntu = [
   "gnome-browser-connector",
   "gnome-shell-extension-manager",
   "gnome-tweaks",
@@ -136,7 +133,7 @@ fedora = [
 ]
 # Firefox on Ubuntu is installed in pre-02-ubuntu-repos.sh to handle
 # apt pinning + the snap-shim downgrade.
-debian = [
+ubuntu = [
   "tailscale",
 ]
 
