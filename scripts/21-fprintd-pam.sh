@@ -9,4 +9,10 @@ case ",$HM_TAGS," in *,desktop,*) ;; *) exit 0 ;; esac
 command -v pam-auth-update >/dev/null 2>&1 || exit 0
 [[ -f /usr/lib/x86_64-linux-gnu/security/pam_fprintd.so ]] || exit 0
 
+# libpam-fprintd ships on Ubuntu desktop regardless of hardware, so the
+# .so check above isn't enough. fprintd-list exits non-zero ("No devices
+# available") when no fingerprint reader is present.
+command -v fprintd-list >/dev/null 2>&1 || exit 0
+fprintd-list "$USER" >/dev/null 2>&1 || exit 0
+
 sudo pam-auth-update --enable fprintd
