@@ -10,6 +10,7 @@ fedora = [
   "1password",
   "1password-cli",
   "atuin",
+  "awscli2",
   "bat",
   "code",
   "containerd.io",
@@ -63,6 +64,7 @@ debian = [
 macos = [
   "1password-cli/cask",
   "atuin",
+  "awscli",
   "bat",
   "eza",
   "fastfetch",
@@ -138,7 +140,7 @@ debian = [
   "tailscale",
 ]
 
-[packages."tag:personal.tag:ubuntu".snap]
+[packages."tag:ubuntu".snap]
 all = ["aws-cli/classic"]
 
 [packages."tag:personal.tag:desktop.tag:ubuntu".snap]
