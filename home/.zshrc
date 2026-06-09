@@ -32,6 +32,55 @@ if command -v starship >/dev/null 2>&1; then
   eval "$(starship init zsh)"
 fi
 
+# ── Completions ────────────────────────────────────────────────────────────
+# Cached completions generated at apply time (scripts/18-zsh-completions.sh)
+# for tools with a generator but no fpath file (gh, docker, op, cargo, rustup,
+# tailscale, starship). Prepended so current versions win over zsh's bundled
+# ones. Must be on fpath before compinit.
+fpath=("$HOME/.zsh/completions" $fpath)
+
+# Initialize the completion system, rebuilding the dump at most once a day so
+# fresh shells (devcontainers!) start fast.
+autoload -Uz compinit
+() {
+  local dump=${ZDOTDIR:-$HOME}/.zcompdump
+  local -a fresh=( $dump(Nmh-24) )
+  if (( $#fresh )); then compinit -C; else compinit; fi
+}
+
+# Completion UX: case-insensitive, colorized, grouped with headers. fzf-tab
+# owns the actual menu (so disable zsh's built-in select menu).
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+zstyle ':completion:*' menu no
+zstyle ':completion:*' group-name ''
+zstyle ':completion:*:descriptions' format '[%d]'
+
+# aws uses a bash-style dynamic completer (no static compdef file possible),
+# so it's wired here rather than cached on fpath above.
+if command -v aws_completer >/dev/null 2>&1; then
+  autoload -Uz bashcompinit && bashcompinit
+  complete -C aws_completer aws
+fi
+
+# ── Plugins ────────────────────────────────────────────────────────────────
+# Vendored by scripts/16-zsh-plugins.sh into ~/.zsh/plugins. Load order
+# matters: fzf-tab after compinit but before widget-wrapping plugins;
+# autosuggestions before the syntax highlighter (patina, activated at EOF).
+zsh_plug() { [[ -f "$HOME/.zsh/plugins/$1/$2" ]] && source "$HOME/.zsh/plugins/$1/$2" }
+
+zsh_plug fzf-tab fzf-tab.plugin.zsh
+zstyle ':fzf-tab:*' use-fzf-default-opts yes   # inherit catppuccin FZF opts
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always --icons=auto $realpath'
+
+zsh_plug zsh-autosuggestions zsh-autosuggestions.zsh
+ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+
+# zoxide: frecency-based smart cd (`z foo`, `zi` for interactive).
+if command -v zoxide >/dev/null 2>&1; then
+  eval "$(zoxide init zsh)"
+fi
+
 alias vim=nvim
 
 if command -v eza >/dev/null 2>&1; then
@@ -56,3 +105,12 @@ oc() {
 alias ocr='oc --resume'
 
 [[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
+
+# opencode
+export PATH=/home/brandt/.opencode/bin:$PATH
+
+# Syntax highlighting — MUST be last: patina wraps ZLE widgets and needs
+# every other plugin (autosuggestions, completion) already registered.
+if command -v zsh-patina >/dev/null 2>&1; then
+  eval "$(zsh-patina activate)"
+fi

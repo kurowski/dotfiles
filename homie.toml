@@ -40,6 +40,7 @@ fedora = [
   "ripgrep",
   "rustup",
   "tmux",
+  "zoxide",
   "zsh",
 ]
 ubuntu = [
@@ -59,6 +60,7 @@ ubuntu = [
   "python3-pip",
   "ripgrep",
   "tmux",
+  "zoxide",
   "zsh",
 ]
 macos = [
@@ -79,6 +81,7 @@ macos = [
   "shellcheck",
   "starship",
   "tmux",
+  "zoxide",
 ]
 
 [packages."tag:desktop"]
