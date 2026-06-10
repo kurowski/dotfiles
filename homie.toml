@@ -146,6 +146,15 @@ all = ["aws-cli/classic"]
 [packages."tag:personal.tag:desktop.tag:ubuntu".snap]
 all = ["gimp", "spotify"]
 
+# Source-only zsh plugins, vendored without a plugin manager and sourced
+# from .zshrc. homie clones them on first apply, fast-forwards on later
+# applies. Add `ref = "vX.Y.Z"` to freeze one on a long-lived host.
+[externals."~/.zsh/plugins/zsh-autosuggestions"]
+repo = "https://github.com/zsh-users/zsh-autosuggestions"
+
+[externals."~/.zsh/plugins/fzf-tab"]
+repo = "https://github.com/Aloxaf/fzf-tab"
+
 [tags]
 extra = []
 

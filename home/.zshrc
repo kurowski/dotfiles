@@ -64,7 +64,7 @@ if command -v aws_completer >/dev/null 2>&1; then
 fi
 
 # ── Plugins ────────────────────────────────────────────────────────────────
-# Vendored by scripts/16-zsh-plugins.sh into ~/.zsh/plugins. Load order
+# Cloned into ~/.zsh/plugins by homie's [externals] phase. Load order
 # matters: fzf-tab after compinit but before widget-wrapping plugins;
 # autosuggestions before the syntax highlighter (patina, activated at EOF).
 zsh_plug() { [[ -f "$HOME/.zsh/plugins/$1/$2" ]] && source "$HOME/.zsh/plugins/$1/$2" }
