@@ -1,0 +1,4 @@
+# rg skips hidden files by default, which hides most of a dotfiles-managed
+# $HOME. Search them everywhere, but stay out of the git object store.
+--hidden
+--glob=!.git/

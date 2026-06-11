@@ -12,6 +12,10 @@ export GOPATH="$HOME/go"
 # Catppuccin colors for fzf (rendered per-host by homie; see ~/.config/fzf/fzfrc).
 [[ -f "$HOME/.config/fzf/fzfrc" ]] && export FZF_DEFAULT_OPTS_FILE="$HOME/.config/fzf/fzfrc"
 
+# rg skips dotfiles by default; the config turns on --hidden (minus .git).
+# rg silently ignores a missing config file, so no existence guard needed.
+export RIPGREP_CONFIG_PATH="$HOME/.config/ripgrep/config"
+
 path=("$HOME/.cargo/bin" "$HOME/.atuin/bin" "$HOME/.local/bin" "$HOME/.devcontainers/bin" "$GOPATH/bin" $path)
 
 if [[ -S "$HOME/.1password/agent.sock" ]]; then
