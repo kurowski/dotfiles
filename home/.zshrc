@@ -80,9 +80,10 @@ zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --color=always --icons=auto 
 zsh_plug zsh-autosuggestions zsh-autosuggestions.zsh
 ZSH_AUTOSUGGEST_STRATEGY=(history completion)
 
-# zoxide: frecency-based smart cd (`z foo`, `zi` for interactive).
+# zoxide: frecency-based smart cd, replacing cd itself (`cd foo` jumps to the
+# best frecency match when no real path matches; `cdi` for interactive).
 if command -v zoxide >/dev/null 2>&1; then
-  eval "$(zoxide init zsh)"
+  eval "$(zoxide init --cmd cd zsh)"
 fi
 
 alias vim=nvim
