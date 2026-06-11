@@ -85,8 +85,9 @@ macos = [
 ]
 
 [packages."tag:desktop"]
-fedora = ["openssh-server"]
+fedora = ["btop", "openssh-server"]
 ubuntu = [
+  "btop",
   "code",
   "ddcutil",
   "deskflow",
@@ -100,6 +101,7 @@ ubuntu = [
 ]
 macos = [
   "1password/cask",
+  "btop",
   "deskflow/cask",
   "font-monaspace-nerd-font/cask",
   "ghostty/cask",
@@ -114,8 +116,8 @@ all = ["md.obsidian.Obsidian"]
 all = ["md.obsidian.Obsidian"]
 
 [packages."tag:server"]
-fedora = ["openssh-server"]
-ubuntu = ["openssh-server"]
+fedora = ["btop", "openssh-server"]
+ubuntu = ["btop", "openssh-server"]
 
 [packages."tag:gnome"]
 ubuntu = [
