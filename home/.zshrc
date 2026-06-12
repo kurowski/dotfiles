@@ -60,11 +60,12 @@ zstyle ':completion:*' menu no
 zstyle ':completion:*' group-name ''
 zstyle ':completion:*:descriptions' format '[%d]'
 
-# aws uses a bash-style dynamic completer (no static compdef file possible),
-# so it's wired here rather than cached on fpath above.
-if command -v aws_completer >/dev/null 2>&1; then
+# aws and terraform use bash-style dynamic completers (no static compdef file
+# possible), so they're wired here rather than cached on fpath above.
+if command -v aws_completer >/dev/null 2>&1 || command -v terraform >/dev/null 2>&1; then
   autoload -Uz bashcompinit && bashcompinit
-  complete -C aws_completer aws
+  command -v aws_completer >/dev/null 2>&1 && complete -C aws_completer aws
+  command -v terraform    >/dev/null 2>&1 && complete -o nospace -C terraform terraform
 fi
 
 # ── Plugins ────────────────────────────────────────────────────────────────
