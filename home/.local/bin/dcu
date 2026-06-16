@@ -6,6 +6,8 @@
 # .devcontainer/devcontainer.json on its own.
 source "${0:A:h}/.dc-common.sh"
 
+sub="${1:-}"
+_dc_check_sub dcu "$sub"
 label="project=$(basename "$PWD")"
 config_arg=()
 if [[ -n "${1:-}" ]]; then
