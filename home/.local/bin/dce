@@ -20,24 +20,8 @@ cmd=("$@")
 
 # Repos that only ship sub-configs (e.g. uceap3 with .devcontainer/portal/)
 # have no default devcontainer.json — `dce` with no sub would fall through to
-# `devcontainer up` and produce an opaque "config not found" failure. Detect
-# that case and surface the available sub-configs instead.
-if [[ -z "$sub" && ! -f .devcontainer/devcontainer.json ]]; then
-  subs=()
-  for f in .devcontainer/*/devcontainer.json(N); do
-    subs+=("${${f%/devcontainer.json}#.devcontainer/}")
-  done
-  if (( ${#subs[@]} > 0 )); then
-    print -ru2 -- "dce: no default config at .devcontainer/devcontainer.json"
-    print -ru2 -- ""
-    print -ru2 -- "did you mean:"
-    print -ru2 -- ""
-    for s in "${subs[@]}"; do
-      print -ru2 -- "    dce $s"
-    done
-    exit 1
-  fi
-fi
+# `devcontainer up` and produce an opaque "config not found" failure.
+_dc_check_sub dce "$sub"
 
 # `devcontainer up` is idempotent (no-op if running, starts if stopped, creates
 # if missing), so calling it unconditionally here means a fresh reboot doesn't

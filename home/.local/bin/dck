@@ -7,6 +7,7 @@
 source "${0:A:h}/.dc-common.sh"
 
 sub="${1:-}"
+_dc_check_sub dck "$sub"
 dir=".devcontainer"
 [[ -n "$sub" ]] && dir=".devcontainer/$sub"
 compose_file=""
