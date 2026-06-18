@@ -63,6 +63,32 @@ ubuntu = [
   "zoxide",
   "zsh",
 ]
+# Debian only shows up as devcontainers here (real hosts are Fedora). homie
+# runs in the container via the personal VS Code dotfiles integration, so this
+# list — not the project Dockerfile — is where my own CLI ergonomics belong.
+# Kept identical to the ubuntu list (sibling distro; all in trixie's apt).
+# The project Dockerfile still bakes the shared baseline (git, gh, zsh, build
+# deps, infra binaries) so the image stands alone for CI and teammates.
+debian = [
+  "atuin",
+  "bat",
+  "curl",
+  "eza",
+  "fastfetch",
+  "fd-find",
+  "fzf",
+  "gcc",
+  "gh",
+  "git",
+  "glow",
+  "lazygit",
+  "make",
+  "python3-pip",
+  "ripgrep",
+  "tmux",
+  "zoxide",
+  "zsh",
+]
 macos = [
   "1password-cli/cask",
   "atuin",
