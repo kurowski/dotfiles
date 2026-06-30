@@ -1,6 +1,7 @@
 # Catppuccin (mauve accent) — flavor follows the THEME var: latte unless THEME is
-# "dark", then mocha. Theme blocks from catppuccin/lazygit themes-mergable/<flavor>/mauve.
-{{- if ne .Vars.THEME "dark" }}
+# "dark" (or the host is Termux), then mocha. Theme blocks from
+# catppuccin/lazygit themes-mergable/<flavor>/mauve.
+{{- if and (ne .Vars.THEME "dark") (not (hasTag "termux")) }}
 gui:
   theme:
     activeBorderColor:

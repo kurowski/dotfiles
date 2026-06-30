@@ -109,6 +109,36 @@ macos = [
   "tmux",
   "zoxide",
 ]
+# Termux (Android) — its own repo, installed via `pkg`. CLI subset only;
+# GUI/daemon tools (1password, docker, ghostty, fprintd, code, …) have no
+# Android analog. Names follow Termux's repo, which differs from
+# Debian/Fedora: fd (not fd-find), python (bundles pip), nodejs (not
+# nodejs22), clang (Termux has no gcc). starship/neovim come from pkg here,
+# so 15-starship.sh and 14-neovim-debian.sh no-op on Termux.
+termux = [
+  "atuin",
+  "bat",
+  "clang",
+  "curl",
+  "eza",
+  "fastfetch",
+  "fd",
+  "fzf",
+  "gh",
+  "git",
+  "glow",
+  "lazygit",
+  "make",
+  "neovim",
+  "nodejs",
+  "openssh",
+  "python",
+  "ripgrep",
+  "starship",
+  "tmux",
+  "zoxide",
+  "zsh",
+]
 
 [packages."tag:desktop"]
 fedora = ["btop", "openssh-server"]
@@ -189,5 +219,7 @@ extra = []
 [vars]
 EDITOR = "nvim"
 # Appearance default for untagged hosts and anonymous devcontainers (work/light).
-# Personal hosts override this to "dark".
+# Personal hosts override this to "dark". Termux hosts render dark regardless,
+# via `hasTag "termux"` in the theme templates — no per-host THEME needed there
+# (its hostname is an unreliable "localhost", so we key off the distro tag).
 THEME  = "light"
