@@ -178,6 +178,11 @@ all = ["aws-cli/classic"]
 [packages."tag:personal.tag:desktop.tag:ubuntu".snap]
 all = ["gimp", "spotify"]
 
+# Fedora has no snap; these come from Flathub instead. Scoped to
+# personal so work Fedora desktops don't pick up Spotify.
+[packages."tag:personal.tag:desktop.tag:fedora".flatpak]
+all = ["com.spotify.Client", "org.gimp.GIMP"]
+
 # Source-only zsh plugins, vendored without a plugin manager and sourced
 # from .zshrc. homie clones them on first apply, fast-forwards on later
 # applies. Add `ref = "vX.Y.Z"` to freeze one on a long-lived host.

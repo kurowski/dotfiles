@@ -70,7 +70,7 @@ Manual, set per-host via `[tags].extra`:
 | `coach`       | fedora | personal | desktop, kde   |
 | `uceap-dev01` | fedora | work     | desktop, kde   |
 | `UCEAP-M1022` | macos  | work     | desktop        |
-| `cece`        | ubuntu | personal | desktop, gnome |
+| `cece`        | fedora | personal | desktop, kde   |
 | `nick`        | ubuntu | personal | server         |
 | `winston`     | ubuntu | personal | server         |
 
