@@ -28,14 +28,26 @@ end
 -- --remote-expr. That only flips the option; this is what turns it into a
 -- repaint. Catppuccin resolves "auto" once at load and then caches the result,
 -- so name the flavor explicitly rather than reloading "catppuccin" and hoping.
+--
+-- The already-loaded check is load-bearing, not a micro-optimization: loading a
+-- flavor sets 'background' itself (catppuccin's compiler emits it), so an
+-- unguarded handler re-triggers itself forever — ~400 colorscheme loads a
+-- second, pinning a core for as long as the editor stays open. Checked twice
+-- because g:colors_name and 'background' aren't updated in a guaranteed order,
+-- so the first pass can still see a stale name.
+local function retheme()
+  local want = "catppuccin-" .. flavour()
+  if vim.g.colors_name == want then return end
+  vim.schedule(function()
+    if vim.g.colors_name == want then return end
+    pcall(vim.cmd.colorscheme, want)
+  end)
+end
+
 vim.api.nvim_create_autocmd("OptionSet", {
   pattern = "background",
   desc = "Re-theme when the desktop switches between light and dark",
-  callback = function()
-    vim.schedule(function()
-      pcall(vim.cmd.colorscheme, "catppuccin-" .. flavour())
-    end)
-  end,
+  callback = retheme,
 })
 
 return {
