@@ -79,8 +79,17 @@ push_live() {
 
   # Re-sourcing tmux.conf is what makes catppuccin rebuild its status strings;
   # setting @catppuccin_flavor alone does nothing to an already-drawn status
-  # bar. Everything in tmux.conf is a `set`, so re-running it is idempotent.
+  # bar. Everything in tmux.conf is a `set`, so re-running it is idempotent
+  # (status-right is assigned before it's appended to, so it doesn't grow).
+  #
+  # Clearing @thm_* first is what makes the re-source take. Catppuccin's theme
+  # files declare every colour with `set -ogq`, and -o means "don't set if
+  # already set" — deliberate, so your own overrides survive, but it also means
+  # the first flavour a server loads is the only one it will ever load. Unset
+  # them and the theme file gets to define them again.
   if command -v tmux >/dev/null 2>&1 && tmux has-session 2>/dev/null; then
+    tmux show -g 2>/dev/null | awk '/^@thm_/ {print $1}' |
+      while read -r opt; do tmux set -gu "$opt" 2>/dev/null || true; done
     tmux source-file "${XDG_CONFIG_HOME:-$HOME/.config}/tmux/tmux.conf" \
       >/dev/null 2>&1 || true
   fi
