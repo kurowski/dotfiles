@@ -9,7 +9,6 @@ default_shell = "zsh"
 fedora = [
   "1password",
   "1password-cli",
-  "atuin",
   "awscli2",
   "bat",
   "code",
@@ -45,7 +44,6 @@ fedora = [
   "zsh",
 ]
 ubuntu = [
-  "atuin",
   "bat",
   "curl",
   "eza",
@@ -72,7 +70,6 @@ ubuntu = [
 # The project Dockerfile still bakes the shared baseline (git, gh, zsh, build
 # deps, infra binaries) so the image stands alone for CI and teammates.
 debian = [
-  "atuin",
   "bat",
   "curl",
   "eza",
@@ -94,7 +91,6 @@ debian = [
 ]
 macos = [
   "1password-cli/cask",
-  "atuin",
   "awscli",
   "bat",
   "eza",
