@@ -1,0 +1,18 @@
+[Unit]
+Description=Follow the desktop light/dark setting for CLI and TUI themes
+Documentation=https://github.com/kurowski/dotfiles
+# The portal lives on the session bus, and gdbus monitor needs it up front.
+After=dbus.socket
+Requires=dbus.socket
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/theme-mode watch
+Restart=on-failure
+RestartSec=5
+
+[Install]
+# graphical-session.target so it stops with the desktop; there's no portal to
+# watch without one. Only enabled on hosts with THEME = "auto" — see
+# scripts/23-theme-mode.sh.
+WantedBy=graphical-session.target

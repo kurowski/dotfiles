@@ -1,0 +1,12 @@
+# bat has no built-in Catppuccin theme; the .tmTheme files live in
+# ~/.config/bat/themes/ and are compiled into bat's cache by
+# scripts/22-bat-cache.sh (runs `bat cache --build`).
+#
+# No --theme line here on purpose. .zshrc exports $BAT_THEME from the resolved
+# mode, and a --theme in this file would win over it (bat prepends config-file
+# args to the command line, and --theme beats the env var). Left unset, bat
+# falls back to its own --theme=auto, which sniffs the terminal background and
+# picks one of the two below — so bat still themes itself correctly when it's
+# invoked from somewhere that isn't an interactive zsh.
+--theme-light="Catppuccin Latte"
+--theme-dark="Catppuccin Mocha"

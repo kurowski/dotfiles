@@ -47,6 +47,49 @@ self-update disabled), and `rustup update` keeps both it and the toolchain
 current. Deliberately different: Claude Code self-updates, and nvm pins its
 Node version on purpose.
 
+## Theming
+
+Everything is Catppuccin — latte when light, mocha when dark. Which one is
+decided by the `THEME` var: `light`, `dark`, or `auto` to follow the desktop's
+own light/dark setting. Only cece is `auto`; work stays pinned light and the
+servers stay pinned dark.
+
+`auto` works because KDE and GNOME both publish the setting over the XDG
+desktop portal (`org.freedesktop.appearance color-scheme`), and emit a signal
+when it changes. `~/.local/bin/theme-mode` resolves the setting into
+`~/.local/state/theme-mode/`, and `theme-mode.service` — enabled only on `auto`
+hosts by `scripts/23-theme-mode.sh` — watches the portal and re-resolves on
+every change, including KDE's own sunrise/sunset schedule.
+
+Getting from there to a repainted terminal takes three different mechanisms,
+because the tools don't agree on how to be told:
+
+- **ghostty needs nothing.** It reads the same portal setting itself, given
+  `theme = light:…,dark:…`. eza and zsh-patina only ever use the 8 ANSI colors,
+  so they follow ghostty for free.
+- **Anything that starts fresh reads the environment.** `.zshrc` re-exports
+  `BAT_THEME`, `DELTA_FEATURES`, `FZF_DEFAULT_OPTS_FILE`, `LG_CONFIG_FILE` and
+  `STARSHIP_CONFIG` on every prompt, so shells that were *already open* when the
+  desktop flipped follow along too — not just new ones. It's a builtin read of
+  a one-line state file, no fork, and the exports only fire when the value
+  actually changed.
+- **Long-running tmux and nvim get pushed to,** since neither rereads its
+  environment. `theme-mode reload` re-sources `tmux.conf` (catppuccin only
+  rebuilds the status bar on a fresh run) and sets `background` in every live
+  nvim over `--remote-expr`, which `colorscheme.lua` turns into a repaint.
+
+Two files are generated rather than symlinked, both into
+`~/.local/state/theme-mode/`: starship's config, because starship has no
+include mechanism and no env override for `palette` — so the one line gets
+rewritten into a copy, and `~/.config/starship.toml` stays the editable
+original — and a one-line tmux flavor file that `tmux.conf` sources.
+
+Adding a tool means giving it a per-flavor file (`fzfrc-latte` /
+`fzfrc-mocha`, `theme-latte.yml` / `theme-mocha.yml`) and an export in the
+`__theme_sync` block, not a new `{{ if eq .Vars.THEME }}` branch. The
+templates are down to the two that genuinely can't be switched at runtime:
+ghostty's config and delta's gitconfig fallback.
+
 ## Packages
 
 Packages are declared per distro and per backend, scoped by tag:
@@ -83,14 +126,14 @@ Manual, set per-host via `[tags].extra`:
 
 ## Hosts
 
-| host          | distro | profile  | extra tags     |
-| ------------- | ------ | -------- | -------------- |
-| `coach`       | fedora | personal | desktop, kde   |
-| `uceap-dev01` | fedora | work     | desktop, kde   |
-| `UCEAP-M1022` | macos  | work     | desktop        |
-| `cece`        | fedora | personal | desktop, kde   |
-| `nick`        | ubuntu | personal | server         |
-| `winston`     | ubuntu | personal | server         |
+| host          | distro | profile  | extra tags     | theme |
+| ------------- | ------ | -------- | -------------- | ----- |
+| `coach`       | fedora | personal | desktop, kde   | dark  |
+| `uceap-dev01` | fedora | work     | desktop, kde   | light |
+| `UCEAP-M1022` | macos  | work     | desktop        | light |
+| `cece`        | fedora | personal | desktop, kde   | auto  |
+| `nick`        | ubuntu | personal | server         | dark  |
+| `winston`     | ubuntu | personal | server         | dark  |
 
 ## Secrets
 

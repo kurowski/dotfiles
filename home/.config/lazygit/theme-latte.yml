@@ -1,0 +1,34 @@
+# Catppuccin Latte, mauve accent. From catppuccin/lazygit
+# themes-mergable/latte/mauve. Selected at runtime via $LG_CONFIG_FILE — see
+# the theme block in .zshrc. Any non-theme lazygit config wants its own file
+# added to that comma-separated list (every file in it must exist; lazygit
+# hard-errors on a missing one).
+gui:
+  theme:
+    activeBorderColor:
+      - '#8839ef'
+      - bold
+    inactiveBorderColor:
+      - '#6c6f85'
+    searchingActiveBorderColor:
+      - '#df8e1d'
+    optionsTextColor:
+      - '#1e66f5'
+    selectedLineBgColor:
+      - '#ccd0da'
+    inactiveViewSelectedLineBgColor:
+      - '#9ca0b0'
+    cherryPickedCommitFgColor:
+      - '#8839ef'
+    cherryPickedCommitBgColor:
+      - '#bcc0cc'
+    markedBaseCommitFgColor:
+      - '#1e66f5'
+    markedBaseCommitBgColor:
+      - '#df8e1d'
+    unstagedChangesColor:
+      - '#d20f39'
+    defaultFgColor:
+      - '#4c4f69'
+  authorColors:
+    '*': '#7287fd'

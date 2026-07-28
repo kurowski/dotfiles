@@ -1,6 +1,13 @@
 font-family = JetBrainsMono Nerd Font
 font-size = 10
+{{- if eq .Vars.THEME "auto" }}
+# ghostty reads the desktop's light/dark setting itself (the same portal
+# setting theme-mode watches), so this needs no help from us. eza and
+# zsh-patina ride on the 8 ANSI colors, so they follow along for free.
+theme = light:Catppuccin Latte,dark:Catppuccin Mocha
+{{- else }}
 theme = {{ if eq .Vars.THEME "dark" }}Catppuccin Mocha{{ else }}Catppuccin Latte{{ end }}
+{{- end }}
 
 # Claude Code reads ESC+CR as "insert newline" instead of "submit". Sending
 # it directly from the terminal avoids relying on tmux passing through
