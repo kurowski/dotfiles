@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Third-party repos for Fedora: COPRs, dnf repos (VS Code, 1Password,
-# Docker CE), profile-specific (Chrome/k8s/HashiCorp on work, RPM Fusion
-# on personal), and the Flathub remote. Each step short-circuits when
-# its target is already in place so re-runs don't need sudo.
+# Docker CE), desktop-only (Claude Desktop), profile-specific
+# (Chrome/k8s/HashiCorp on work, RPM Fusion on personal), and the
+# Flathub remote. Each step short-circuits when its target is already
+# in place so re-runs don't need sudo.
 set -euo pipefail
 
 copr_enabled() {
@@ -42,6 +43,15 @@ gpgcheck=1
 repo_gpgcheck=1
 gpgkey=https://downloads.1password.com/linux/keys/1password.asc
 EOF
+fi
+
+if [[ ",$HM_TAGS," == *,desktop,* ]]; then
+  # Claude Desktop, unofficial Fedora/RHEL packaging:
+  # https://github.com/aaddrick/claude-desktop-debian
+  if [[ ! -f /etc/yum.repos.d/claude-desktop-unofficial.repo ]]; then
+    sudo curl -fsSL https://pkg.claude-desktop-debian.dev/rpm/claude-desktop-unofficial.repo \
+      -o /etc/yum.repos.d/claude-desktop-unofficial.repo
+  fi
 fi
 
 if [[ ",$HM_TAGS," == *,work,* ]]; then
