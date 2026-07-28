@@ -32,16 +32,17 @@ hm status      # read-only summary of what hm sees
 
 ## Upstream binaries
 
-Tools with no usable distro package (atuin, starship, tpack, neovim on
-Debian, the devcontainer CLI) are installed straight from upstream releases
-into `~/.local/bin`, which `.zshrc` puts ahead of `/usr/bin`. Those scripts
-share `scripts/lib/upstream.bash` and all follow one shape: resolve the
-newest release, compare it to what's installed, no-op when they match. So
-`hm apply` keeps them current instead of freezing each one at whatever
-version its host was provisioned with.
+Tools whose packaged versions lag (atuin, neovim, starship, tpack, the
+devcontainer CLI) are installed straight from upstream releases into
+`~/.local/bin`, which `.zshrc` puts ahead of `/usr/bin` — so they win over
+any distro copy still lying around. Those scripts share
+`scripts/lib/upstream.bash` and all follow one shape: resolve the newest
+release, compare it to what's installed, no-op when they match. So `hm
+apply` keeps them current instead of freezing each one at whatever version
+its host was provisioned with.
 
-Deliberate exceptions: Claude Code and rustup update themselves, and nvm
-pins its Node version on purpose.
+Deliberately different: Claude Code self-updates, `rustup update` does the
+job for the Rust toolchain, and nvm pins its Node version on purpose.
 
 ## Packages
 
