@@ -105,7 +105,6 @@ macos = [
   "neovim",
   "ripgrep",
   "shellcheck",
-  "starship",
   "tmux",
   "zoxide",
 ]

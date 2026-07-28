@@ -28,6 +28,20 @@ hm status      # read-only summary of what hm sees
 - `scripts/pre-*.sh` — runs before `[packages]` install. Used for third-party repos.
 - `scripts/*.sh` — post-install setup. Each script is idempotent.
 - `scripts.tag-X/` — tag-gated scripts, same AND rule as `home.tag-X/`.
+- `scripts/lib/*.bash` — sourced helpers, not scripts (the `*.sh` glob skips them).
+
+## Upstream binaries
+
+Tools with no usable distro package (atuin, starship, tpack, neovim on
+Debian, the devcontainer CLI) are installed straight from upstream releases
+into `~/.local/bin`, which `.zshrc` puts ahead of `/usr/bin`. Those scripts
+share `scripts/lib/upstream.bash` and all follow one shape: resolve the
+newest release, compare it to what's installed, no-op when they match. So
+`hm apply` keeps them current instead of freezing each one at whatever
+version its host was provisioned with.
+
+Deliberate exceptions: Claude Code and rustup update themselves, and nvm
+pins its Node version on purpose.
 
 ## Packages
 
