@@ -37,7 +37,6 @@ fedora = [
   "nodejs22-npm",
   "python3-pip",
   "ripgrep",
-  "rustup",
   "tmux",
   "zoxide",
   "zsh",
@@ -108,7 +107,12 @@ macos = [
 ]
 
 [packages."tag:desktop"]
-fedora = ["btop", "openssh-server"]
+# wl-clipboard backs neovim's +/* registers on Wayland. Fedora's neovim
+# rpm used to pull in a clipboard tool as a weak dep (xsel, the X11 one);
+# dropping that package for the upstream build took the guarantee with it,
+# so declare it. Desktop-scoped: over SSH neovim uses OSC 52 instead, and
+# macOS has pbcopy built in.
+fedora = ["btop", "openssh-server", "wl-clipboard"]
 ubuntu = [
   "btop",
   "code",
@@ -121,6 +125,7 @@ ubuntu = [
   "libpam-fprintd",
   "ncurses-term",
   "openssh-server",
+  "wl-clipboard",
 ]
 macos = [
   "1password/cask",

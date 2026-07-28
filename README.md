@@ -41,8 +41,11 @@ release, compare it to what's installed, no-op when they match. So `hm
 apply` keeps them current instead of freezing each one at whatever version
 its host was provisioned with.
 
-Deliberately different: Claude Code self-updates, `rustup update` does the
-job for the Rust toolchain, and nvm pins its Node version on purpose.
+Rust follows the same rule with its own machinery: rustup is bootstrapped
+from upstream `rustup-init` (never a distro package, which builds it with
+self-update disabled), and `rustup update` keeps both it and the toolchain
+current. Deliberately different: Claude Code self-updates, and nvm pins its
+Node version on purpose.
 
 ## Packages
 
