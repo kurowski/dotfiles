@@ -13,6 +13,6 @@ RestartSec=5
 
 [Install]
 # graphical-session.target so it stops with the desktop; there's no portal to
-# watch without one. Only enabled on hosts with THEME = "auto" — see
+# watch without one. Enabled on every Linux desktop host — see
 # scripts/23-theme-mode.sh.
 WantedBy=graphical-session.target

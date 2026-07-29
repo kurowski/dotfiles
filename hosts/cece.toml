@@ -5,8 +5,6 @@ name = "personal"
 extra = ["desktop", "kde"]
 
 [vars]
-# Follows KDE's own light/dark switch; see scripts/23-theme-mode.sh. The other
-# personal hosts stay pinned dark, work stays pinned light.
-THEME      = "auto"
+THEME      = "dark"
 OP_ACCOUNT = "my"
 ATUIN_SYNC = "false"
