@@ -300,6 +300,17 @@ arch = [
   # client that reads it and calls hyprctl; this is the part that talks to the
   # hardware, and it's dbus-activated rather than a unit to enable.
   "iio-sensor-proxy",
+  # Secret Service. Everything that stores a credential — 1Password's unlocked
+  # session, Electron apps, anything on libsecret — wants org.freedesktop.secrets
+  # on the bus, and Plasma is what normally provides it by running ksecretd.
+  #
+  # Both are already here through plasma-meta on cece, and declared anyway so
+  # the tag stands on its own: a hyprland host without the kde tag still needs a
+  # keyring, and would otherwise get a working desktop where logins silently
+  # fail to persist. kwallet-pam is what unlocks the wallet at login via
+  # /etc/pam.d/sddm; ksecretd.service (home.tag-hyprland) starts the daemon.
+  "kwallet",
+  "kwallet-pam",
 ]
 
 [packages."tag:gnome"]

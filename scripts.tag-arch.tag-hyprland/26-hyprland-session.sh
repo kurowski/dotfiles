@@ -70,6 +70,10 @@ units=(
   hyprpolkitagent.service  # authentication dialogs
   swaync.service           # notifications
   waybar.service           # the bar
+  # org.freedesktop.secrets, which Plasma would otherwise be providing. Without
+  # it 1Password can't persist a session and Electron apps report no keyring.
+  # This one is ours (home.tag-hyprland), not a packaged unit.
+  ksecretd.service
 )
 
 for unit in "${units[@]}"; do
