@@ -1,0 +1,30 @@
+/* Catppuccin Latte for swaync. See flavor-mocha.css for how this is loaded.
+ *
+ * Keep in sync with the latte table in ../hypr/theme.lua. */
+
+@define-color text     #4c4f69;
+@define-color subtext1 #5c5f77;
+@define-color subtext0 #6c6f85;
+@define-color overlay1 #8c8fa1;
+@define-color overlay0 #9ca0b0;
+@define-color surface2 #acb0be;
+@define-color surface1 #bcc0cc;
+@define-color surface0 #ccd0da;
+@define-color base     #eff1f5;
+@define-color mantle   #e6e9ef;
+@define-color crust    #dce0e8;
+
+@define-color mauve    #8839ef;
+@define-color red      #d20f39;
+@define-color peach    #fe640b;
+@define-color green    #40a02b;
+
+/* onAccent is @base rather than @crust — latte's accents are dark. */
+@define-color accent   @mauve;
+@define-color onAccent @base;
+
+/* More opaque than mocha's: light surfaces over a blurred wallpaper lose
+ * contrast faster than dark ones. */
+@define-color panelBg   rgba(239, 241, 245, 0.90);
+@define-color cardBg    rgba(220, 224, 232, 0.80);
+@define-color cardHover rgba(204, 208, 218, 0.92);

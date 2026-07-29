@@ -1,12 +1,18 @@
 [profile]
 name = "personal"
 
+# Both kde and hyprland: sddm offers both sessions and cece boots into
+# whichever one was last used. Keeping kde is what makes Hyprland safe to live
+# in — a broken update is a logout, not a reinstall.
 [tags]
-extra = ["desktop", "kde"]
+extra = ["desktop", "kde", "hyprland"]
 
 [vars]
-# Follows KDE's own light/dark switch; see scripts/23-theme-mode.sh. The other
-# personal hosts stay pinned dark, work stays pinned light.
+# Follows whichever session is running: under Plasma that's KDE's own light/dark
+# switch, under Hyprland it's gsettings by way of xdg-desktop-portal-gtk. Both
+# publish org.freedesktop.appearance color-scheme, which is the only thing
+# theme-mode actually reads — see scripts/23-theme-mode.sh. The other personal
+# hosts stay pinned dark, work stays pinned light.
 THEME      = "auto"
 OP_ACCOUNT = "my"
 ATUIN_SYNC = "false"

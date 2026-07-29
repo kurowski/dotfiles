@@ -1,0 +1,199 @@
+/* SwayNotificationCenter styling.
+ *
+ * Colours are names from flavor-latte.css / flavor-mocha.css, concatenated in
+ * front of this file by theme-mode. Nothing below names a colour.
+ *
+ * Two surfaces to style: the toasts that appear at the top-right
+ * (.floating-notifications) and the panel behind SUPER+N (.control-center).
+ * They share a card design so a notification looks the same whether it just
+ * arrived or you went looking for it. */
+
+* {
+  font-family: "JetBrainsMono Nerd Font", sans-serif;
+  font-size: 13px;
+}
+
+/* ── toasts ─────────────────────────────────────────────────────────────── */
+
+.floating-notifications {
+  background: transparent;
+}
+
+.floating-notifications .notification-row .notification-background {
+  background: @panelBg;
+  border: 1px solid @surface0;
+  border-radius: 14px;
+  margin: 8px 10px 0 10px;
+  padding: 0;
+}
+
+/* ── control centre ─────────────────────────────────────────────────────── */
+
+.control-center {
+  background: @panelBg;
+  border: 1px solid @surface0;
+  border-radius: 16px;
+  padding: 12px;
+}
+
+.control-center .notification-row .notification-background {
+  background: @cardBg;
+  border: none;
+  border-radius: 12px;
+  margin: 0 0 8px 0;
+}
+
+.control-center .notification-row .notification-background:hover {
+  background: @cardHover;
+}
+
+/* ── the card itself ────────────────────────────────────────────────────── */
+
+.notification-background .notification {
+  padding: 10px 12px;
+  background: transparent;
+}
+
+.notification-content {
+  background: transparent;
+  color: @text;
+}
+
+.summary {
+  color: @text;
+  font-weight: 600;
+}
+
+.body {
+  color: @subtext0;
+}
+
+.time {
+  color: @overlay0;
+  font-size: 11px;
+}
+
+/* Critical notifications get an accent edge rather than a full red card —
+ * legible, and it doesn't turn an error into a wall of colour. */
+.notification-background .notification.critical {
+  border-left: 3px solid @red;
+}
+
+.notification-background .notification.low {
+  opacity: 0.9;
+}
+
+/* Close button stays invisible until you're on the card. */
+.close-button {
+  background: transparent;
+  color: @overlay0;
+  border-radius: 8px;
+  margin: 6px;
+  padding: 2px 6px;
+}
+
+.notification-background:hover .close-button {
+  color: @text;
+}
+
+.close-button:hover {
+  background: @red;
+  color: @onAccent;
+}
+
+/* Inline actions (Reply, Open, …). */
+.notification-action {
+  background: @cardBg;
+  color: @subtext1;
+  border: none;
+  border-radius: 9px;
+  margin: 4px 4px 0 0;
+  padding: 6px 10px;
+}
+
+.notification-action:hover {
+  background: @accent;
+  color: @onAccent;
+}
+
+/* ── widgets ────────────────────────────────────────────────────────────── */
+
+.widget-title {
+  color: @text;
+  font-size: 15px;
+  font-weight: 600;
+  margin: 4px 4px 12px 4px;
+}
+
+.widget-title > button {
+  background: @cardBg;
+  color: @subtext1;
+  border: none;
+  border-radius: 9px;
+  padding: 4px 12px;
+  font-size: 12px;
+}
+
+.widget-title > button:hover {
+  background: @accent;
+  color: @onAccent;
+}
+
+/* Do-not-disturb toggle. The switch turns accent when armed — the one control
+ * whose state you need to read at a glance. */
+.widget-dnd {
+  color: @subtext1;
+  margin: 0 4px 12px 4px;
+  font-size: 13px;
+}
+
+.widget-dnd > switch {
+  background: @surface1;
+  border: none;
+  border-radius: 12px;
+}
+
+.widget-dnd > switch:checked {
+  background: @accent;
+}
+
+.widget-dnd > switch slider {
+  background: @base;
+  border-radius: 12px;
+}
+
+/* Now-playing. */
+.widget-mpris {
+  background: @cardBg;
+  border-radius: 12px;
+  padding: 10px;
+  margin: 0 4px 12px 4px;
+}
+
+.widget-mpris-title {
+  color: @text;
+  font-weight: 600;
+}
+
+.widget-mpris-subtitle {
+  color: @subtext0;
+  font-size: 12px;
+}
+
+.widget-mpris > box > button {
+  background: transparent;
+  color: @subtext1;
+  border-radius: 8px;
+}
+
+.widget-mpris > box > button:hover {
+  background: @cardHover;
+  color: @text;
+}
+
+/* Empty state — no notifications. Quiet rather than absent, so the panel
+ * doesn't look broken when you open it. */
+.notification-group-empty,
+.control-center .notification-row:only-child .notification-background:empty {
+  color: @overlay0;
+}

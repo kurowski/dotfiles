@@ -218,6 +218,90 @@ ubuntu = ["btop", "openssh-server"]
 [packages."tag:kde"]
 arch = ["plasma-meta", "sddm"]
 
+# Hyprland, as a second session alongside Plasma rather than a replacement for
+# it. cece keeps both tags: sddm offers both at login, so a Hyprland release
+# that breaks something mid-week costs a logout instead of a reinstall. That's
+# also why nothing here removes a KDE package — dolphin, kdeconnect and
+# ark stay useful, and plasma-meta's closure is what keeps
+# xdg-desktop-portal-kde on disk for the Plasma session.
+#
+# The portal split is the one thing worth understanding here.
+# xdg-desktop-portal-hyprland implements ScreenCast, Screenshot and
+# GlobalShortcuts — it does *not* implement org.freedesktop.impl.portal.Settings,
+# which is what THEME = "auto" reads color-scheme from. Under a Hyprland
+# session that interface has to come from xdg-desktop-portal-gtk instead, which
+# answers out of gsettings; home.tag-hyprland/.config/xdg-desktop-portal/
+# hyprland-portals.conf is what pins that routing. Both portals are declared
+# because both are load-bearing, for different interfaces.
+#
+# Not declared, deliberately: wl-clipboard (already in tag:desktop),
+# ttf-jetbrains-mono-nerd (already in the base arch list), and the catppuccin
+# themes, wlogout, wvkbd and iio-hyprland, which are AUR-only and live in
+# scripts.tag-arch/00-aur-packages.sh.
+[packages."tag:hyprland"]
+arch = [
+  # Compositor and its first-party companions. hyprpolkitagent replaces the
+  # polkit agent plasma would otherwise be running — without one, anything
+  # asking for authentication just fails silently.
+  "hyprland",
+  # uwsm is not optional here, despite reading like a nicety.
+  #
+  # theme-mode.service — the thing that makes THEME = "auto" work — is
+  # WantedBy=graphical-session.target with ConditionEnvironment=WAYLAND_DISPLAY,
+  # and so is every daemon below that ships a unit (hyprpaper, hypridle, swaync,
+  # hyprpolkitagent). Plasma reaches that target and exports that variable.
+  # /usr/bin/start-hyprland does neither — it contains no systemd integration at
+  # all — so a bare Hyprland session would leave all of them dead and auto
+  # light/dark would silently stop following the desktop.
+  #
+  # uwsm wraps the compositor as a systemd unit, reaches graphical-session.target
+  # properly, and exports the session environment. Hyprland ships
+  # hyprland-uwsm.desktop for exactly this; 26-hyprland-session.sh makes it the
+  # session sddm offers. It also gives per-compositor targets, which is how the
+  # daemons below get bound to Hyprland *only* and stay out of the Plasma
+  # session where they'd fight powerdevil and plasma's own notifier.
+  "uwsm",
+  "hypridle",
+  "hyprlock",
+  "hyprpaper",
+  "hyprpicker",
+  "hyprpolkitagent",
+  "hyprshot",
+  "xdg-desktop-portal-gtk",
+  "xdg-desktop-portal-hyprland",
+  # Shell: bar, launcher, notification centre. rofi 2.0 merged the old
+  # rofi-wayland fork upstream, so the plain package is the Wayland one now.
+  "rofi",
+  "swaync",
+  "waybar",
+  # Screenshot and clipboard. hyprshot drives grim and slurp, swappy is the
+  # annotate-before-saving step, cliphist is the clipboard history rofi reads.
+  "cliphist",
+  "grim",
+  "slurp",
+  "swappy",
+  # Hardware keys. Plasma handled brightness, volume and media keys itself;
+  # under Hyprland each one is a bind shelling out to one of these.
+  "brightnessctl",
+  "pavucontrol",
+  "playerctl",
+  # Qt apps need the Wayland platform plugin to avoid falling back to XWayland,
+  # and qt6ct + kvantum are how Qt gets themed outside Plasma's own machinery.
+  "kvantum",
+  "qt5-wayland",
+  "qt6-wayland",
+  "qt6ct",
+  # GTK theming and display setup, both GUI-side conveniences: nwg-look writes
+  # the same gsettings keys by hand, nwg-displays writes hyprland monitor lines.
+  "nwg-displays",
+  "nwg-look",
+  "papirus-icon-theme",
+  # The accelerometer daemon behind auto-rotation. iio-hyprland (AUR) is the
+  # client that reads it and calls hyprctl; this is the part that talks to the
+  # hardware, and it's dbus-activated rather than a unit to enable.
+  "iio-sensor-proxy",
+]
+
 [packages."tag:gnome"]
 ubuntu = [
   "gnome-browser-connector",

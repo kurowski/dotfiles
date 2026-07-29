@@ -105,6 +105,168 @@ push_live() {
         "execute('set background=$mode')" >/dev/null 2>&1 || true
     done
   fi
+
+  push_hyprland "$mode"
+}
+
+# The GUI half of push_live. Split out only for length; it runs on the same
+# trigger and under the same rule — nothing here reads the environment, so each
+# program has to be told.
+#
+# Guarded on a *running* Hyprland instance rather than on the binaries existing:
+# in a Plasma session none of this should fire, and Plasma is where cece spends
+# half its life. Under Plasma, KDE owns the GTK theme and its own light/dark
+# switch is the thing that started this whole chain.
+push_hyprland() {
+  local mode=$1
+  command -v hyprctl >/dev/null 2>&1 || return 0
+
+  # Find the compositor rather than assuming we inherited a pointer to it.
+  #
+  # hyprctl locates its socket via $HYPRLAND_INSTANCE_SIGNATURE, and this script
+  # usually runs from theme-mode.service — which is WantedBy=graphical-session
+  # .target and therefore starts *before* the compositor does. Measured on cece:
+  # the service came up at 02:45:54 and Hyprland at 02:45:56. systemd fixes a
+  # unit's environment when it starts, so the variable `uwsm finalize` exports
+  # two seconds later never reaches the already-running watcher.
+  #
+  # The consequence was subtle and bad: reload() still wrote the mode file and
+  # regenerated every stylesheet, so the terminal, tmux and nvim all followed
+  # the desktop correctly — while this function returned early at the first
+  # hyprctl call and silently repainted nothing. The compositor, bar, wallpaper
+  # and GTK apps simply stayed on the old flavour, with no error anywhere. That
+  # applied to KDE-style sunrise/sunset switching too, not just a manual toggle.
+  #
+  # So: derive it from the runtime dir, which is where Hyprland actually puts
+  # its socket. Preferring a directory with a live .socket.sock skips instances
+  # left behind by a crashed session.
+  if [[ -z "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]]; then
+    local hypr_rt="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/hypr"
+    [[ -d "$hypr_rt" ]] || return 0
+    local candidate
+    for candidate in $(ls -1t "$hypr_rt" 2>/dev/null); do
+      if [[ -S "$hypr_rt/$candidate/.socket.sock" ]]; then
+        export HYPRLAND_INSTANCE_SIGNATURE="$candidate"
+        break
+      fi
+    done
+    [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]] || return 0
+  fi
+
+  # Still guarded: this is also the check that keeps every repaint below from
+  # firing inside a Plasma session, where KDE owns all of it.
+  hyprctl version >/dev/null 2>&1 || return 0
+
+  local flav
+  flav=$(flavor "$mode")
+
+  # Keep in sync with M.accent in ~/.config/hypr/theme.lua. Duplicated because
+  # the Lua config and this script are read by different interpreters and
+  # neither can source the other; the package list in
+  # scripts.tag-arch/00-aur-packages.sh installs both flavours of this accent.
+  local accent=mauve
+
+  # Re-running the config is what re-reads $state_dir/mode in theme.lua, so
+  # borders, shadows and the cursor variables all follow from this one call.
+  hyprctl reload >/dev/null 2>&1 || true
+
+  # waybar reloads its config and stylesheet on SIGUSR2, which is cheaper and
+  # far less visible than restarting the unit.
+  pkill -USR2 -x waybar 2>/dev/null || true
+
+  # swaync re-reads CSS on request; the control centre keeps its state.
+  if command -v swaync-client >/dev/null 2>&1; then
+    swaync-client --reload-css >/dev/null 2>&1 || true
+  fi
+
+  # rofi and wlogout are short-lived and read the generated file at launch, so
+  # they need nothing here.
+
+  # hyprpaper resolves the symlink at load time, so re-sending the *same*
+  # symlink path would be a no-op against its cache. Send the concrete
+  # per-flavour file instead — a path that genuinely differs between latte and
+  # mocha, so there's nothing to cache past.
+  #
+  # `hyprctl hyprpaper wallpaper 'mon,path,fit_mode'` is the 0.8 IPC. The older
+  # `unload all` + `reload` pair was removed in the same release that replaced
+  # `preload =` with `wallpaper { }` blocks, and both fail closed with "invalid
+  # hyprpaper request" — hence the restart fallback, which is correct for any
+  # future rename too.
+  if [[ -L "$state_dir/wallpaper.png" ]]; then
+    local wall
+    wall=$(readlink -f "$state_dir/wallpaper.png")
+    hyprctl hyprpaper wallpaper ",$wall,cover" >/dev/null 2>&1 \
+      || systemctl --user try-restart hyprpaper.service >/dev/null 2>&1 || true
+  fi
+
+  # GTK and cursor themes. Deliberately *not* color-scheme: under Hyprland that
+  # key is what xdg-desktop-portal-gtk publishes and what resolve() reads back,
+  # so writing it here would feed this script its own output.
+  if command -v gsettings >/dev/null 2>&1; then
+    local gtk_if=org.gnome.desktop.interface
+    gsettings set $gtk_if gtk-theme    "catppuccin-$flav-$accent-standard+default" 2>/dev/null || true
+    gsettings set $gtk_if cursor-theme "catppuccin-$flav-$accent-cursors"          2>/dev/null || true
+    gsettings set $gtk_if icon-theme   "Papirus-$( [[ $mode == dark ]] && echo Dark || echo Light )" 2>/dev/null || true
+  fi
+
+  # Qt, via Kvantum. kvantummanager writes the same file, but it's a GUI; this
+  # is the one line it would have changed.
+  local kv="${XDG_CONFIG_HOME:-$HOME/.config}/Kvantum/kvantum.kvconfig"
+  if [[ -d "${kv%/*}" ]]; then
+    printf '[General]\ntheme=catppuccin-%s-%s\n' "$flav" "$accent" \
+      | write_if_changed "$kv" || true
+  fi
+}
+
+# ── the Hyprland session ─────────────────────────────────────────────────────
+#
+# Everything below no-ops on a host without the hyprland tag: the source files
+# simply aren't there, and each block is guarded on its own input. That keeps
+# this script one file across servers, macOS and both desktops.
+#
+# The GUI shell has the same problem tmux and nvim do — none of it rereads the
+# environment — but a worse version of it: waybar, swaync, rofi and wlogout are
+# GTK, and GTK CSS has no variables you can set from outside. So the flavour is
+# baked in by concatenating a file of `@define-color` declarations in front of
+# the rules, and each program is pointed at the result.
+#
+# Concatenating rather than `@import`-ing matters: ~/.config/waybar/style.css is
+# a symlink into the dotfiles repo, and GTK resolves relative imports against a
+# symlink's *target*, so an import of ~/.local/state would be looked for inside
+# the repo and silently not found.
+generate_hyprland() {
+  local flav=$1
+  local cfg="${XDG_CONFIG_HOME:-$HOME/.config}"
+
+  # hyprlock and hyprpaper still parse hyprlang rather than Lua, so they get a
+  # copy of the matching variables file. The compositor itself needs nothing
+  # here — hypr/theme.lua reads $state_dir/mode directly.
+  if [[ -r "$cfg/hypr/colors-$flav.conf" ]]; then
+    write_if_changed "$state_dir/hypr-colors.conf" \
+      < "$cfg/hypr/colors-$flav.conf" || true
+  fi
+
+  # dir:flavour-prefix:rules-file:output
+  local spec dir prefix rules out
+  for spec in \
+    "waybar:flavor:style.css:waybar.css"   \
+    "swaync:flavor:style.css:swaync.css"   \
+    "wlogout:flavor:style.css:wlogout.css" \
+    "rofi:flavor:theme.rasi:rofi.rasi"
+  do
+    IFS=: read -r dir prefix rules out <<<"$spec"
+    local flavour_file="$cfg/$dir/$prefix-$flav.${rules##*.}"
+    [[ -r "$flavour_file" && -r "$cfg/$dir/$rules" ]] || continue
+    cat "$flavour_file" "$cfg/$dir/$rules" \
+      | write_if_changed "$state_dir/$out" || true
+  done
+
+  # The wallpaper is a symlink rather than a copy — it's a few megabytes and
+  # swapping the link is atomic. 27-hyprland-wallpaper.sh generates the pair.
+  local wall="${XDG_DATA_HOME:-$HOME/.local/share}/wallpapers/cece-$flav.png"
+  if [[ -r "$wall" ]]; then
+    ln -sfn "$wall" "$state_dir/wallpaper.png"
+  fi
 }
 
 reload() {
@@ -126,6 +288,8 @@ reload() {
   # Sourced from tmux.conf.
   printf "set -g @catppuccin_flavor '%s'\n" "$flav" \
     | write_if_changed "$state_dir/tmux.conf" || true
+
+  generate_hyprland "$flav"
 
   # Written last: it's the file .zshrc watches, so it should only flip once
   # everything it implies is already on disk.

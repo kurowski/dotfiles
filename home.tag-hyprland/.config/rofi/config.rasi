@@ -1,0 +1,40 @@
+/* Rofi behaviour. Appearance lives in theme.rasi + the flavour files, which
+ * binds.lua passes via -theme; nothing here sets a colour.
+ *
+ * rofi 2.0 merged the old rofi-wayland fork upstream, so this is the Wayland
+ * build despite the plain package name. */
+
+configuration {
+    modes: "drun,run,window";
+
+    /* Application names, not binary names. `run` is still in the mode list for
+     * the cases where only the binary exists. */
+    drun-display-format: "{name}";
+
+    /* Icons matter more in a launcher than anywhere else — they're how you
+     * recognise an entry before you've finished reading it.
+     *
+     * Plain "Papirus", not the -Dark/-Light variants, and deliberately not
+     * flavour-dependent: those variants differ only in their folder and
+     * symbolic icons, and a launcher shows neither. Application icons are
+     * identical across all three, so there's nothing here for theme-mode to
+     * switch. */
+    show-icons:   true;
+    icon-theme:   "Papirus";
+
+    /* Sort by how often you actually pick a thing, not alphabetically. */
+    sort:          true;
+    sorting-method: "fzf";
+    matching:       "fuzzy";
+
+    /* Cycle through results with Tab rather than completing — completion in a
+     * fuzzy matcher just fights the sort. */
+    terminal:      "ghostty";
+    display-drun:  "apps";
+    display-run:   "run";
+    display-window:"windows";
+
+    /* No "1 of 42" counter; the list is right there. */
+    disable-history: false;
+    hide-scrollbar:  true;
+}

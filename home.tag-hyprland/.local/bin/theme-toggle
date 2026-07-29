@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+# Flip the desktop between light and dark. Bound to SUPER+SHIFT+T.
+#
+# This sets the *source*, not the consequences. Under Hyprland the light/dark
+# authority is gsettings `org.gnome.desktop.interface color-scheme`, which
+# xdg-desktop-portal-gtk publishes as org.freedesktop.appearance color-scheme —
+# the same portal setting KDE publishes in a Plasma session, and the only thing
+# ~/.local/bin/theme-mode ever reads.
+#
+# So the chain is: this writes gsettings → the portal emits SettingChanged →
+# theme-mode.service wakes up → everything repaints. Nothing here touches a
+# terminal, a bar or a colour scheme directly, and nothing needs to: that's
+# theme-mode's job, and it does it identically for a manual flip and for KDE's
+# own sunrise/sunset schedule.
+#
+# Under Plasma this is the wrong tool — use KDE's own switch, which is what
+# publishes the setting there. Running it in a Plasma session would set a key
+# nothing is reading.
+set -euo pipefail
+
+command -v gsettings >/dev/null 2>&1 || {
+  echo "gsettings not found; is glib2 installed?" >&2
+  exit 1
+}
+
+key=org.gnome.desktop.interface
+current=$(gsettings get $key color-scheme 2>/dev/null || echo "''")
+
+# The key is a tri-state: 'default', 'prefer-dark', 'prefer-light'. 'default'
+# means "no preference", which the portal reports as 0 and theme-mode resolves
+# to dark — so treat it as dark here and flip to light, matching what the user
+# is actually looking at.
+case "$current" in
+  *prefer-light*) next=prefer-dark  ;;
+  *)              next=prefer-light ;;
+esac
+
+gsettings set $key color-scheme "$next"
+
+# Belt and braces for GTK3 apps, which predate color-scheme and look at this
+# older boolean instead. Harmless under GTK4.
+case "$next" in
+  prefer-dark)  gsettings set $key gtk-application-prefer-dark-theme true  2>/dev/null || true ;;
+  prefer-light) gsettings set $key gtk-application-prefer-dark-theme false 2>/dev/null || true ;;
+esac
+
+# theme-mode.service is watching the portal and will pick this up on its own.
+# Nudging it directly as well means the repaint is immediate rather than waiting
+# on D-Bus delivery, and `reload` is idempotent — it writes only what changed.
+if command -v theme-mode >/dev/null 2>&1; then
+  theme-mode reload || true
+elif [[ -x "$HOME/.local/bin/theme-mode" ]]; then
+  "$HOME/.local/bin/theme-mode" reload || true
+fi

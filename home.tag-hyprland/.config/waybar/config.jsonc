@@ -1,0 +1,176 @@
+// Waybar, for the Hyprland session.
+//
+// Sized for the Framework 12: 1536x960 logical. That is not much horizontal
+// room, so the bar carries what you'd otherwise have to open something to learn
+// — and nothing else. Anything that's one click away in a menu isn't here.
+{
+  "layer": "top",
+  "position": "top",
+  "height": 34,
+  // Margins on three sides only. The bar floats, and looks.lua already gives
+  // the top edge a smaller gaps_out so windows sit tight underneath it rather
+  // than double-spaced.
+  "margin-top": 6,
+  "margin-left": 10,
+  "margin-right": 10,
+  "spacing": 0,
+
+  "modules-left":   ["hyprland/workspaces", "hyprland/submap"],
+  "modules-center": ["hyprland/window"],
+  "modules-right":  ["tray", "privacy", "pulseaudio", "backlight", "bluetooth", "network", "battery", "clock", "custom/notification"],
+
+  "hyprland/workspaces": {
+    // Numbers, not glyphs. Two reasons, and the second is the real one:
+    //
+    // A dot-per-workspace tells you how many there are and which is focused,
+    // but not *which number* — so SUPER+3 is still a guess. The number answers
+    // the only question you actually ask the module.
+    //
+    // And a row of identical Nerd Font circles has no fallback: if the glyph
+    // fails to render, the module draws nothing at all and looks broken rather
+    // than degraded. That is not hypothetical — the first version of this file
+    // carried empty strings here and shipped a bar with invisible workspaces.
+    // A digit renders in any font.
+    "format": "{id}",
+
+    // Persistent 1-5 so the bar doesn't reflow every time a workspace empties.
+    // Beyond 5 they appear on demand — rare enough not to be worth the width.
+    "persistent-workspaces": { "1": [], "2": [], "3": [], "4": [], "5": [] },
+    "on-click": "activate",
+    // Scrolling the workspace list moves through them, matching SUPER+scroll.
+    "on-scroll-up":   "hyprctl dispatch workspace e-1",
+    "on-scroll-down": "hyprctl dispatch workspace e+1"
+  },
+
+  "hyprland/submap": {
+    "format": "󰌌 {}",
+    "tooltip": false
+  },
+
+  "hyprland/window": {
+    "format": "{title}",
+    "max-length": 44,
+    "separate-outputs": true,
+    // An empty workspace shows nothing rather than the word "Hyprland".
+    "rewrite": {
+      "": ""
+    }
+  },
+
+  "tray": {
+    "icon-size": 15,
+    "spacing": 10
+  },
+
+  // Shows an indicator when something is recording the screen, using the
+  // microphone, or reading the camera. Worth the width on a laptop that joins
+  // calls — and it's the one thing a tiling WM otherwise gives no feedback on.
+  "privacy": {
+    "icon-size": 13,
+    "icon-spacing": 6,
+    "modules": [
+      { "type": "screenshare" },
+      { "type": "audio-in" }
+    ]
+  },
+
+  "pulseaudio": {
+    "format": "{icon} {volume}%",
+    "format-muted": "󰝟",
+    "format-bluetooth": "{icon} {volume}%",
+    "format-icons": {
+      "headphone": "󰋋",
+      "headset":   "󰋎",
+      "default":   ["󰕿", "󰖀", "󰕾"]
+    },
+    "on-click": "pavucontrol",
+    "on-scroll-up":   "wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 2%+",
+    "on-scroll-down": "wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%-",
+    "tooltip-format": "{desc}"
+  },
+
+  "backlight": {
+    "device": "intel_backlight",
+    "format": "{icon} {percent}%",
+    "format-icons": ["󰃞", "󰃟", "󰃠"],
+    "on-scroll-up":   "brightnessctl -e4 -n2 set 2%+",
+    "on-scroll-down": "brightnessctl -e4 -n2 set 2%-",
+    "tooltip": false
+  },
+
+  "bluetooth": {
+    "format": "󰂯",
+    "format-disabled": "",
+    "format-off": "",
+    "format-connected": "󰂱",
+    "tooltip-format": "{controller_alias}",
+    "tooltip-format-connected": "{device_enumerate}",
+    "on-click": "blueman-manager"
+  },
+
+  "network": {
+    "format-wifi": "{icon}",
+    "format-ethernet": "󰈀",
+    "format-disconnected": "󰤮",
+    "format-icons": ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"],
+    "tooltip-format-wifi": "{essid}  {signalStrength}%\n{ipaddr}",
+    "tooltip-format-ethernet": "{ifname}\n{ipaddr}",
+    "tooltip-format-disconnected": "offline",
+    "on-click": "nm-connection-editor"
+  },
+
+  "battery": {
+    // Named explicitly. This machine also exposes a hid-*-battery for the
+    // stylus, and letting waybar auto-pick can surface the pen's charge as if
+    // it were the laptop's.
+    "bat": "BAT1",
+    "adapter": "ACAD",
+    "states": { "warning": 25, "critical": 12 },
+    "format": "{icon} {capacity}%",
+    "format-charging": "󰂄 {capacity}%",
+    "format-plugged": "󰚥 {capacity}%",
+    "format-icons": ["󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
+    "tooltip-format": "{timeTo}  ({power}W)"
+  },
+
+  "clock": {
+    "format": "{:%H:%M}",
+    "format-alt": "{:%a %e %b  %H:%M}",
+    "tooltip-format": "<tt>{calendar}</tt>",
+    "calendar": {
+      "mode": "month",
+      "on-scroll": 1,
+      "format": {
+        // Pango markup here is coloured by the flavour CSS's own palette only
+        // indirectly — these are fixed Catppuccin accents that read acceptably
+        // on both latte and mocha surfaces.
+        "today": "<span color='#cba6f7'><b>{}</b></span>"
+      }
+    },
+    "actions": {
+      "on-click-right": "mode",
+      "on-scroll-up":   "shift_up",
+      "on-scroll-down": "shift_down"
+    }
+  },
+
+  "custom/notification": {
+    "tooltip": false,
+    "format": "{icon}",
+    "format-icons": {
+      "notification":       "󰂚",
+      "none":               "󰂜",
+      "dnd-notification":   "󰂛",
+      "dnd-none":           "󰂛",
+      "inhibited-notification": "󰂚",
+      "inhibited-none":     "󰂜",
+      "dnd-inhibited-notification": "󰂛",
+      "dnd-inhibited-none": "󰂛"
+    },
+    "return-type": "json",
+    "exec": "swaync-client -swb",
+    "on-click": "swaync-client -t -sw",
+    "on-click-right": "swaync-client -d -sw",
+    "escape": true
+  }
+}

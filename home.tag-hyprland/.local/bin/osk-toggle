@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+# Show or hide the on-screen keyboard. Bound to SUPER+O, and the thing you
+# actually need when the Framework 12 is folded into tablet mode and there is no
+# physical keyboard facing you.
+#
+# wvkbd has no toggle of its own — it's a layer-shell surface that exists for as
+# long as the process does. So the toggle is process lifetime, and the one
+# subtlety is that it has to be SIGKILL-proof in the other direction: wvkbd
+# handles SIGUSR1/SIGUSR2 for hide/show, but only if it was started with
+# --hidden, which costs a permanently-resident process. Starting and stopping is
+# simpler and the startup cost is imperceptible.
+set -euo pipefail
+
+# The binary is wvkbd-mobintl, not wvkbd — the package builds the "mobile
+# international" layout variant and names the binary after it.
+readonly BIN=wvkbd-mobintl
+
+command -v "$BIN" >/dev/null 2>&1 || {
+  echo "$BIN not found" >&2
+  exit 1
+}
+
+if pgrep -x "$BIN" >/dev/null 2>&1; then
+  pkill -x "$BIN"
+  exit 0
+fi
+
+# -H and -L are separate heights for portrait and landscape, which is exactly
+# the distinction a convertible needs: the panel is 1536x960 logical in
+# landscape and 960x1536 rotated, so a single figure is either cramped one way
+# or swallows half the screen the other. Both land at roughly 30% of the height
+# in their own orientation.
+#
+# Colours are passed on the command line because wvkbd has no config file. They
+# track the current flavour by reading the same state file everything else does.
+flavor=$(cat "${XDG_STATE_HOME:-$HOME/.local/state}/theme-mode/mode" 2>/dev/null || echo dark)
+
+if [[ "$flavor" == light ]]; then
+  # Catppuccin Latte: base / surface0 / surface1 / text / mauve
+  bg=eff1f5 fg=ccd0da fgsp=bcc0cc text=4c4f69 press=8839ef
+else
+  # Catppuccin Mocha: base / surface0 / surface1 / text / mauve
+  bg=1e1e2e fg=313244 fgsp=45475a text=cdd6f4 press=cba6f7
+fi
+
+exec "$BIN" \
+  -H 420 \
+  -L 300 \
+  -R 10 \
+  --bg "$bg" \
+  --fg "$fg" \
+  --fg-sp "$fgsp" \
+  --text "$text" \
+  --text-sp "$text" \
+  --press "$press" \
+  --press-sp "$press" \
+  --fn "JetBrainsMono Nerd Font 14"

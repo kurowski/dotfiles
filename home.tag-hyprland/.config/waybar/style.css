@@ -1,0 +1,239 @@
+/* Waybar styling.
+ *
+ * Every colour here is a name defined in flavor-latte.css / flavor-mocha.css,
+ * which theme-mode concatenates in front of this file. Nothing below mentions a
+ * hex value or a Catppuccin colour name, so this file is flavour-agnostic and
+ * a theme flip is a re-concatenate plus SIGUSR2 — no rules change.
+ *
+ * The visual idea: the bar itself is a single translucent slab (blurred by the
+ * layer rule in hypr/rules.lua), and the modules on it are quiet until they
+ * have something to say. Only the active workspace and a warning battery get
+ * real colour. */
+
+* {
+  font-family: "JetBrainsMono Nerd Font", sans-serif;
+  font-size: 13px;
+  /* GTK draws a 1px focus outline on some widgets by default; it shows up as
+   * flecks between modules. */
+  border: none;
+  border-radius: 0;
+  min-height: 0;
+}
+
+window#waybar {
+  background: transparent;
+  color: @text;
+}
+
+/* The slab. Everything else is drawn on top of this. */
+.modules-left,
+.modules-center,
+.modules-right {
+  background: @barBg;
+  border-radius: 12px;
+  padding: 0 4px;
+}
+
+/* ── workspaces ─────────────────────────────────────────────────────────── */
+
+#workspaces {
+  padding: 0 2px;
+}
+
+#workspaces button {
+  padding: 0 6px;
+  margin: 4px 1px;
+  color: @overlay0;
+  background: transparent;
+  border-radius: 8px;
+  /* Animate the pill, not the colour — a colour transition on a dot reads as a
+   * flicker at this size. */
+  transition: background 160ms ease, color 160ms ease, padding 160ms ease;
+}
+
+#workspaces button:hover {
+  color: @text;
+  background: @chipBg;
+  /* GTK adds a box-shadow on hover by default; without this the pill gets a
+   * halo that doesn't match anything else on the bar. */
+  box-shadow: none;
+  text-shadow: none;
+}
+
+/* Occupied but not focused: full-strength text, so "there is something here"
+ * is legible without competing with the active pill.
+ *
+ * Every rule below is :not(.active), and .active comes last. Hyprland's active
+ * workspace is also a *visible* one, so it carries both classes — and at equal
+ * specificity the later rule wins, which had the effect of repainting the
+ * accent pill's label back to a light tone and burying it against the mauve. */
+#workspaces button.visible:not(.active),
+#workspaces button:not(.empty):not(.active) {
+  color: @subtext0;
+}
+
+/* Empty persistent workspaces. @surface2 sits barely above the bar's own fill
+ * and effectively disappears; @overlay0 is the first tone that reads as a
+ * deliberate placeholder rather than a rendering artefact. */
+#workspaces button.empty:not(.active) {
+  color: @overlay0;
+}
+
+#workspaces button.urgent:not(.active) {
+  color: @onAccent;
+  background: @red;
+}
+
+/* The active workspace is the one place on the bar that gets the accent, and
+ * it's a filled pill rather than tinted text — at 13px a coloured digit on a
+ * dark bar is not a strong enough anchor to find at a glance. The glow is
+ * subtle enough to read as emphasis rather than as a selection highlight.
+ *
+ * Last on purpose: see the note above. */
+#workspaces button.active {
+  color: @onAccent;
+  background: @accent;
+  padding: 0 14px;
+  box-shadow: 0 0 8px 0 alpha(@accent, 0.45);
+}
+
+/* ── window title / submap ──────────────────────────────────────────────── */
+
+#window {
+  color: @subtext0;
+  padding: 0 12px;
+}
+
+/* An empty title collapses the slab entirely rather than leaving a stub. */
+window#waybar.empty #window {
+  background: transparent;
+  padding: 0;
+  margin: 0;
+}
+
+#submap {
+  color: @onAccent;
+  background: @accent;
+  padding: 0 10px;
+  margin: 4px 2px;
+  border-radius: 8px;
+}
+
+/* ── right-hand modules ─────────────────────────────────────────────────── */
+
+#pulseaudio,
+#backlight,
+#bluetooth,
+#network,
+#battery,
+#clock,
+#tray,
+#privacy,
+#custom-notification {
+  padding: 0 8px;
+  margin: 4px 1px;
+  color: @subtext1;
+  background: transparent;
+  border-radius: 8px;
+  transition: background 160ms ease, color 160ms ease;
+}
+
+#pulseaudio:hover,
+#backlight:hover,
+#bluetooth:hover,
+#network:hover,
+#battery:hover,
+#clock:hover,
+#custom-notification:hover {
+  background: @chipBg;
+  color: @text;
+}
+
+/* The clock is the anchor of the right-hand group — full-strength text where
+ * its neighbours are one step down. */
+#clock {
+  color: @text;
+  font-weight: 600;
+  padding: 0 10px;
+}
+
+#pulseaudio.muted {
+  color: @overlay0;
+}
+
+#bluetooth.connected {
+  color: @accent;
+}
+
+#network.disconnected {
+  color: @overlay0;
+}
+
+/* ── battery ────────────────────────────────────────────────────────────── */
+
+#battery.charging,
+#battery.plugged {
+  color: @green;
+}
+
+#battery.warning:not(.charging) {
+  color: @peach;
+}
+
+/* Critical is the only thing on the bar allowed to move. Pulsing the
+ * foreground rather than the background keeps it from becoming a strobing
+ * block in peripheral vision. */
+#battery.critical:not(.charging) {
+  color: @red;
+  animation: batteryCritical 2s ease-in-out infinite alternate;
+}
+
+@keyframes batteryCritical {
+  from { color: @red; }
+  to   { color: @maroon; }
+}
+
+/* ── tray & privacy ─────────────────────────────────────────────────────── */
+
+#tray menu {
+  background: @base;
+  color: @text;
+  border: 1px solid @surface0;
+  border-radius: 10px;
+  padding: 4px;
+}
+
+#tray > .passive {
+  -gtk-icon-effect: dim;
+}
+
+#tray > .needs-attention {
+  -gtk-icon-effect: highlight;
+}
+
+/* Screen-share and mic-in indicators. Red because these are the two states
+ * where being wrong about them actually matters. */
+#privacy {
+  color: @red;
+  padding: 0 6px;
+}
+
+/* ── notifications ──────────────────────────────────────────────────────── */
+
+#custom-notification {
+  color: @subtext1;
+  padding: 0 10px 0 8px;
+}
+
+/* ── tooltips ───────────────────────────────────────────────────────────── */
+
+tooltip {
+  background: @base;
+  border: 1px solid @surface0;
+  border-radius: 10px;
+}
+
+tooltip label {
+  color: @text;
+  padding: 2px 4px;
+}

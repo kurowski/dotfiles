@@ -1,0 +1,52 @@
+/* wlogout — the session menu on SUPER+Escape.
+ *
+ * Colours come from the flavour file concatenated in front of this one. No
+ * background-image anywhere on purpose: wlogout's packaged icons are white
+ * PNGs, which vanish on latte. The buttons carry Nerd Font glyphs in their
+ * label text instead (see ../wlogout/layout), so they theme themselves. */
+
+* {
+  font-family: "JetBrainsMono Nerd Font", sans-serif;
+  /* No focus ring — the selected tile is indicated by its own fill. */
+  outline: none;
+  border: none;
+  box-shadow: none;
+}
+
+window {
+  background-color: @scrim;
+}
+
+button {
+  color: @subtext1;
+  background-color: @tileBg;
+  border-radius: 16px;
+  margin: 10px;
+  font-size: 17px;
+  /* Buttons are the only thing on screen, so they can afford to be generous —
+   * and generous targets matter when the lid is folded and this is being
+   * tapped rather than clicked. */
+  padding: 28px;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+button:focus,
+button:hover {
+  background-color: @accent;
+  color: @onAccent;
+}
+
+/* The two destructive actions warn on hover instead of taking the accent.
+ * Everything here is one keystroke away, so the difference between "log out"
+ * and "shut down" should be visible before you commit, not after. */
+#shutdown:focus,
+#shutdown:hover {
+  background-color: @red;
+  color: @onAccent;
+}
+
+#reboot:focus,
+#reboot:hover {
+  background-color: @peach;
+  color: @onAccent;
+}

@@ -61,6 +61,17 @@ when it changes. `~/.local/bin/theme-mode` resolves the setting into
 hosts by `scripts/23-theme-mode.sh` — watches the portal and re-resolves on
 every change, including KDE's own sunrise/sunset schedule.
 
+Under Hyprland the portal answer comes from somewhere else.
+`xdg-desktop-portal-hyprland` implements ScreenCast and GlobalShortcuts but
+*not* `org.freedesktop.impl.portal.Settings`, so
+`home.tag-hyprland/.config/xdg-desktop-portal/hyprland-portals.conf` routes that
+one interface to `xdg-desktop-portal-gtk`, which answers out of gsettings
+`org.gnome.desktop.interface color-scheme`. That makes gsettings the light/dark
+authority in a Hyprland session, exactly as kdeglobals is in a Plasma one —
+`theme-mode` reads the portal either way and never learns the difference.
+`~/.local/bin/theme-toggle` (SUPER+SHIFT+T) is the switch, standing in for the
+one Plasma has in its settings.
+
 Getting from there to a repainted terminal takes three different mechanisms,
 because the tools don't agree on how to be told:
 
@@ -138,18 +149,19 @@ Auto-derived per host:
 
 Manual, set per-host via `[tags].extra`:
 - `desktop` / `server` — workstation vs. headless.
-- `kde`, `gnome` — desktop environment.
+- `kde`, `gnome`, `hyprland` — desktop environment. Not mutually exclusive:
+  cece carries both `kde` and `hyprland` and picks a session at the greeter.
 
 ## Hosts
 
-| host          | distro | profile  | extra tags     | theme |
-| ------------- | ------ | -------- | -------------- | ----- |
-| `coach`       | fedora | personal | desktop, kde   | dark  |
-| `uceap-dev01` | fedora | work     | desktop, kde   | light |
-| `UCEAP-M1022` | macos  | work     | desktop        | light |
-| `cece`        | arch   | personal | desktop, kde   | auto  |
-| `nick`        | ubuntu | personal | server         | dark  |
-| `winston`     | ubuntu | personal | server         | dark  |
+| host          | distro | profile  | extra tags           | theme |
+| ------------- | ------ | -------- | -------------------- | ----- |
+| `coach`       | fedora | personal | desktop, kde         | dark  |
+| `uceap-dev01` | fedora | work     | desktop, kde         | light |
+| `UCEAP-M1022` | macos  | work     | desktop              | light |
+| `cece`        | arch   | personal | desktop, kde, hyprland | auto  |
+| `nick`        | ubuntu | personal | server               | dark  |
+| `winston`     | ubuntu | personal | server               | dark  |
 
 ## Secrets
 

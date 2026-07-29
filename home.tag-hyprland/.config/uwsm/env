@@ -1,0 +1,31 @@
+# Environment for the uwsm-managed graphical session.
+#
+# Sourced by `uwsm aux prepare-env` (the wayland-wm-env@ unit) before the
+# compositor starts, so everything Hyprland spawns inherits it — keybinds,
+# rofi, and anything rofi in turn launches.
+#
+# POSIX sh, not zsh: uwsm sources this with /bin/sh.
+#
+# ── why this file has to exist ───────────────────────────────────────────────
+#
+# ~/.local/bin holds the upstream binaries this repo installs in preference to
+# the distro's — neovim, atuin, starship, tpack, the devcontainer CLI, hm — plus
+# theme-toggle and osk-toggle. .zshrc puts it ahead of /usr/bin, which covers
+# every interactive shell and is why this was invisible for so long.
+#
+# But a graphical session is not a login shell. uwsm sources /etc/profile and
+# ~/.profile; it does not source ~/.zshrc, and it has no reason to. So the
+# session PATH was:
+#
+#   /usr/local/sbin:/usr/local/bin:/usr/bin:/var/lib/flatpak/exports/bin:...
+#
+# — no ~/.local/bin. A keybind calling `theme-toggle` found nothing and failed
+# silently, because a compositor has nowhere to report "command not found" to.
+# The same applied to launching nvim from rofi.
+#
+# Prepended, not appended, matching .zshrc: the whole point of these binaries is
+# that they outrank any distro copy still on disk.
+case ":${PATH}:" in
+  *":${HOME}/.local/bin:"*) ;;
+  *) export PATH="${HOME}/.local/bin:${PATH}" ;;
+esac

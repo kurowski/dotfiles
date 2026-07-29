@@ -1,0 +1,39 @@
+/* Catppuccin Mocha for rofi.
+ *
+ * Variable declarations only. theme-mode concatenates this in front of
+ * theme.rasi into ~/.local/state/theme-mode/rofi.rasi, and binds.lua launches
+ * rofi with -theme pointing there. Same reasoning as waybar: the repo copy is a
+ * symlink, so relative @import inside it resolves against the repo rather than
+ * ~/.config.
+ *
+ * Keep in sync with the mocha table in ../hypr/theme.lua. */
+
+* {
+    base:     #1e1e2e;
+    mantle:   #181825;
+    crust:    #11111b;
+
+    surface0: #313244;
+    surface1: #45475a;
+    surface2: #585b70;
+
+    overlay0: #6c7086;
+    overlay1: #7f849c;
+
+    subtext0: #a6adc8;
+    subtext1: #bac2de;
+    text:     #cdd6f4;
+
+    mauve:    #cba6f7;
+    blue:     #89b4fa;
+    red:      #f38ba8;
+    green:    #a6e3a1;
+
+    /* Semantic. theme.rasi refers only to these. */
+    accent:   var(mauve);
+    onAccent: var(crust);
+
+    /* The window fill. Translucent because hypr/rules.lua blurs the rofi layer;
+     * this is a tint over that blur. */
+    windowBg: #1e1e2ee6;
+}

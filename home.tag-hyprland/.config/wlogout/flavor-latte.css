@@ -1,0 +1,24 @@
+/* Catppuccin Latte for wlogout. See flavor-mocha.css for how this is loaded.
+ *
+ * Keep in sync with the latte table in ../hypr/theme.lua. */
+
+@define-color text     #4c4f69;
+@define-color subtext1 #5c5f77;
+@define-color surface1 #bcc0cc;
+@define-color surface0 #ccd0da;
+@define-color base     #eff1f5;
+@define-color crust    #dce0e8;
+
+@define-color mauve    #8839ef;
+@define-color red      #d20f39;
+@define-color peach    #fe640b;
+
+/* onAccent is @base rather than @crust — latte's accents are dark. */
+@define-color accent   @mauve;
+@define-color onAccent @base;
+
+/* A light scrim still has to read as modal, so it stays fairly opaque — but it
+ * dims toward the flavour's own crust rather than toward black, which would
+ * look like a rendering fault on a light desktop. */
+@define-color scrim    rgba(220, 224, 232, 0.86);
+@define-color tileBg   rgba(204, 208, 218, 0.80);

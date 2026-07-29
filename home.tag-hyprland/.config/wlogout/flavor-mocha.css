@@ -1,0 +1,24 @@
+/* Catppuccin Mocha for wlogout. Concatenated in front of style.css by
+ * theme-mode into ~/.local/state/theme-mode/wlogout.css; binds.lua passes it
+ * with -C.
+ *
+ * Keep in sync with the mocha table in ../hypr/theme.lua. */
+
+@define-color text     #cdd6f4;
+@define-color subtext1 #bac2de;
+@define-color surface1 #45475a;
+@define-color surface0 #313244;
+@define-color base     #1e1e2e;
+@define-color crust    #11111b;
+
+@define-color mauve    #cba6f7;
+@define-color red      #f38ba8;
+@define-color peach    #fab387;
+
+@define-color accent   @mauve;
+@define-color onAccent @crust;
+
+/* The dim behind the buttons. Heavier than the other surfaces because this
+ * overlay covers the whole screen and needs to read as "modal". */
+@define-color scrim    rgba(17, 17, 27, 0.80);
+@define-color tileBg   rgba(49, 50, 68, 0.72);

@@ -1,0 +1,34 @@
+/* Catppuccin Latte for rofi. See flavor-mocha.rasi for how this is loaded.
+ *
+ * Keep in sync with the latte table in ../hypr/theme.lua. */
+
+* {
+    base:     #eff1f5;
+    mantle:   #e6e9ef;
+    crust:    #dce0e8;
+
+    surface0: #ccd0da;
+    surface1: #bcc0cc;
+    surface2: #acb0be;
+
+    overlay0: #9ca0b0;
+    overlay1: #8c8fa1;
+
+    subtext0: #6c6f85;
+    subtext1: #5c5f77;
+    text:     #4c4f69;
+
+    mauve:    #8839ef;
+    blue:     #1e66f5;
+    red:      #d20f39;
+    green:    #40a02b;
+
+    /* onAccent is base rather than crust here — latte's accents are dark, so
+     * legible text on top of them is the lightest tone. */
+    accent:   var(mauve);
+    onAccent: var(base);
+
+    /* More opaque than mocha's: a light panel over a blurred wallpaper loses
+     * contrast faster than a dark one. */
+    windowBg: #eff1f5f2;
+}

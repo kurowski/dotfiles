@@ -39,4 +39,37 @@ if has_tag personal; then
   pkgs+=(seadrive-gui)
 fi
 
+if has_tag hyprland; then
+  # Both flavours of everything, installed together rather than picked by
+  # THEME. cece is the "auto" host, so the flavour isn't known at apply time —
+  # it's whatever the desktop is set to right now, and it changes on KDE's
+  # sunrise/sunset schedule. The switching is runtime (theme-mode), so both
+  # sets of assets have to already be on disk. This is the same reason
+  # home/.config/fzf carries fzfrc-latte *and* fzfrc-mocha.
+  #
+  # Plasma themes itself from its own settings and needs none of this; it's
+  # scoped to the hyprland tag because outside a Plasma session, GTK, Qt,
+  # cursors and the greeter each have to be told separately.
+  pkgs+=(
+    catppuccin-cursors-latte
+    catppuccin-cursors-mocha
+    catppuccin-gtk-theme-latte
+    catppuccin-gtk-theme-mocha
+    kvantum-theme-catppuccin-git
+    papirus-folders-catppuccin-git
+    # The greeter runs before login, so it has no session to follow and no
+    # THEME to read. Both are installed; 25-sddm.sh picks one.
+    catppuccin-sddm-theme-latte
+    catppuccin-sddm-theme-mocha
+    # Session exit menu, bound to a key under Hyprland — there's no Plasma
+    # application launcher to hang logout/reboot/suspend off of.
+    wlogout
+    # Convertible bits: iio-hyprland reads iio-sensor-proxy and calls hyprctl
+    # to rotate the display, wvkbd is the on-screen keyboard for tablet mode.
+    # Neither has a counterpart under Plasma, which handles both natively.
+    iio-hyprland-git
+    wvkbd
+  )
+fi
+
 paru -S --needed --noconfirm "${pkgs[@]}"
