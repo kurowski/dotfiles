@@ -5,3 +5,11 @@ ExceptionPattern=com.anthropic.claude com.anthropic.Claude
 ExceptionType=0
 HideTitleBar=true
 Mask=0
+
+[Windeco Exception 1]
+BorderSize=0
+Enabled=true
+ExceptionPattern=obsidian
+ExceptionType=0
+HideTitleBar=true
+Mask=0

@@ -1,6 +1,6 @@
 [General]
-count=1
-rules=cb17765b-92ef-4a30-a1e1-3b4892537c44
+count=2
+rules=cdaa6d88-84c8-4720-97cd-3937171de42a,cb17765b-92ef-4a30-a1e1-3b4892537c44
 
 [cb17765b-92ef-4a30-a1e1-3b4892537c44]
 Description=Window settings for com.anthropic.Claude
@@ -12,4 +12,15 @@ windowrole=browser-window
 windowrolematch=1
 wmclass=com.anthropic.claude com.anthropic.Claude
 wmclasscomplete=true
+wmclassmatch=1
+
+[cdaa6d88-84c8-4720-97cd-3937171de42a]
+Description=Window settings for obsidian
+clientmachine=localhost
+noborderrule=2
+title=dev meeting - Notes - Obsidian 1.12.7
+types=1
+windowrole=browser-window
+windowrolematch=1
+wmclass=obsidian
 wmclassmatch=1
