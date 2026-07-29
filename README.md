@@ -1,6 +1,6 @@
 # dotfiles
 
-Personal multi-host setup for Fedora, Ubuntu, and macOS, managed by [Homie](https://homie.sh).
+Personal multi-host setup for Fedora, Arch, Ubuntu, and macOS, managed by [Homie](https://homie.sh).
 
 ## Bootstrap a fresh machine
 
@@ -97,6 +97,7 @@ Packages are declared per distro and per backend, scoped by tag:
 ```toml
 [packages]                                     # always-applied base
 fedora = [...]                                 # only on fedora hosts
+arch   = [...]                                 # only on arch hosts (pacman)
 debian = [...]                                 # only on ubuntu/debian hosts
 macos  = [...]                                 # only on macos hosts (brew)
 
@@ -113,12 +114,27 @@ all = [...]
 
 On macOS the native manager is brew; append `/cask` to a name to mark it as a cask (e.g. `"1password/cask"`). Other backends: `flatpak`, `snap`. If the backend tool is missing, the block is skipped with a warning.
 
+On Arch, `arch = [...]` covers the official repos only — Homie's pacman
+backend stops there on purpose, and it never refreshes the sync database
+(`pacman -Sy` then install is the partial-upgrade footgun). The AUR is driven
+from `scripts.tag-arch/00-aur-packages.sh` via paru instead, which is where
+1Password, the Microsoft VS Code build, Claude Desktop and seadrive-gui come
+from — the Arch counterpart to the third-party dnf repos on Fedora. Name
+packages, never pacman *groups* (`plasma`, `xorg`): nothing records that you
+asked for a group, so Homie can't tell a complete one from a missing one.
+
+Arch is also the one distro where the desktop itself is declared here
+(`[packages."tag:kde"]` → `plasma-meta`, `sddm`). Everywhere else the KDE spin
+or the Ubuntu installer provides it. That makes `hm apply` enough to take a
+base Arch install to a working Plasma session on the next boot.
+
 ## Tags
 
 Auto-derived per host:
-- Distro: `fedora`, `ubuntu`, `debian`, or `macos`.
+- Distro: `fedora`, `arch`, `ubuntu`, `debian`, or `macos`.
 - Profile: `personal` or `work`, from `[profile].name`.
-- Misc: arch, short hostname, `root`, `container`.
+- Misc: CPU architecture (`amd64` / `arm64` — *not* the `arch` distro tag),
+  short hostname, `root`, `container`.
 
 Manual, set per-host via `[tags].extra`:
 - `desktop` / `server` — workstation vs. headless.
@@ -131,7 +147,7 @@ Manual, set per-host via `[tags].extra`:
 | `coach`       | fedora | personal | desktop, kde   | dark  |
 | `uceap-dev01` | fedora | work     | desktop, kde   | light |
 | `UCEAP-M1022` | macos  | work     | desktop        | light |
-| `cece`        | fedora | personal | desktop, kde   | auto  |
+| `cece`        | arch   | personal | desktop, kde   | auto  |
 | `nick`        | ubuntu | personal | server         | dark  |
 | `winston`     | ubuntu | personal | server         | dark  |
 

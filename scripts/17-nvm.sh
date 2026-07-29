@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Ubuntu doesn't have a current-enough Node in apt; install NVM into
-# ~/.nvm and grab Node 24. Fedora ships nodejs22 in dnf, so skip.
+# ~/.nvm and grab Node 24. Fedora ships nodejs22 in dnf and Arch ships a
+# current nodejs in extra, so both skip.
 # Both versions are pinned deliberately — this is a Node *version
 # manager*, so tracking upstream is `nvm install`'s job, not homie's.
 set -euo pipefail
