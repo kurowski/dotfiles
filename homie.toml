@@ -87,6 +87,53 @@ debian = [
   "zoxide",
   "zsh",
 ]
+# Arch names drift from Fedora's more than Ubuntu's do: `fd` not fd-find,
+# `github-cli` not gh, `aws-cli-v2` not awscli2, `python-pip` not python3-pip,
+# and docker is one package plus two plugins rather than five (containerd
+# comes along as a dependency). nodejs is unpinned because Arch's is already
+# current — the same reason 17-nvm.sh skips here.
+#
+# base-devel earns its place: paru rebuilds AUR packages from source on every
+# upgrade, so the toolchain is a lasting part of the system, not just bootstrap
+# scaffolding. pre-03-arch-repos.sh installs it earlier too, since the AUR
+# helper has to exist before this phase runs.
+#
+# Missing next to the Fedora list — 1password, 1password-cli and VS Code — are
+# AUR-only and live in scripts.tag-arch/00-aur-packages.sh instead.
+arch = [
+  "aws-cli-v2",
+  "base-devel",
+  "bat",
+  "curl",
+  "ddcutil",
+  "deskflow",
+  "docker",
+  "docker-buildx",
+  "docker-compose",
+  "eza",
+  "fastfetch",
+  "fd",
+  "fprintd",
+  "fzf",
+  "gcc",
+  "ghostty",
+  "git",
+  "git-delta",
+  "github-cli",
+  "glow",
+  "lazygit",
+  "make",
+  "nodejs",
+  "npm",
+  "python-pip",
+  "ripgrep",
+  "tmux",
+  # Arch packages the Nerd-patched build, so 05-jetbrains-font.sh's upstream
+  # download is redundant here and skips.
+  "ttf-jetbrains-mono-nerd",
+  "zoxide",
+  "zsh",
+]
 macos = [
   "1password-cli/cask",
   "awscli",
@@ -127,6 +174,12 @@ ubuntu = [
   "openssh-server",
   "wl-clipboard",
 ]
+# openssh is one package here (client + server), and it ships the unit
+# disabled — 24-sshd.sh enables it. flatpak isn't part of a base Arch install
+# the way it is on Fedora's KDE spin, and pre-03-arch-repos.sh needs it there
+# to add the Flathub remote; it's declared here as the lasting statement of
+# intent. Claude Desktop is AUR-only (00-aur-packages.sh).
+arch = ["btop", "flatpak", "openssh", "wl-clipboard"]
 macos = [
   "1password/cask",
   "btop",
@@ -141,6 +194,9 @@ macos = [
 all = ["md.obsidian.Obsidian"]
 
 [packages."tag:desktop.tag:ubuntu".flatpak]
+all = ["md.obsidian.Obsidian"]
+
+[packages."tag:desktop.tag:arch".flatpak]
 all = ["md.obsidian.Obsidian"]
 
 [packages."tag:server"]
@@ -164,6 +220,18 @@ fedora = [
   "tailscale",
   "yt-dlp",
 ]
+# steam is in multilib, which pre-03-arch-repos.sh enables — a stock
+# pacman.conf leaves it commented out. seadrive-gui is AUR-only
+# (00-aur-packages.sh). No ffmpeg entry: Arch ships the unrestricted build in
+# extra, so there's nothing for 09-ffmpeg-swap.sh to swap.
+arch = [
+  "firefox",
+  "mpv",
+  "rclone",
+  "steam",
+  "tailscale",
+  "yt-dlp",
+]
 # Firefox on Ubuntu is installed in pre-02-ubuntu-repos.sh to handle
 # apt pinning + the snap-shim downgrade.
 ubuntu = [
@@ -179,6 +247,12 @@ all = ["gimp", "spotify"]
 # Fedora has no snap; these come from Flathub instead. Scoped to
 # personal so work Fedora desktops don't pick up Spotify.
 [packages."tag:personal.tag:desktop.tag:fedora".flatpak]
+all = ["com.spotify.Client", "org.gimp.GIMP"]
+
+# Same on Arch, and for the same reason — no snap here either. Spotify is
+# AUR-only and GIMP is in extra, but Flathub matches what the Fedora desktops
+# already do and keeps one more proprietary build out of paru's hands.
+[packages."tag:personal.tag:desktop.tag:arch".flatpak]
 all = ["com.spotify.Client", "org.gimp.GIMP"]
 
 # Source-only zsh plugins, vendored without a plugin manager and sourced

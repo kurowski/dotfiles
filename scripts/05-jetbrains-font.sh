@@ -7,6 +7,11 @@ set -euo pipefail
 # macOS gets nerd fonts via the homebrew-fonts cask; no fc-cache to run.
 case ",$HM_TAGS," in *,macos,*) exit 0 ;; esac
 
+# Arch packages the patched build as ttf-jetbrains-mono-nerd, declared in
+# [packages]. Let pacman own the font there rather than shadowing a system
+# copy with an unmanaged one under ~/.local/share/fonts.
+case ",$HM_TAGS," in *,arch,*) exit 0 ;; esac
+
 font_dir="$HOME/.local/share/fonts/JetBrainsMono"
 if [[ -d "$font_dir" ]] && compgen -G "$font_dir/*.ttf" >/dev/null; then
   exit 0
