@@ -1,3 +1,8 @@
 *.retry
 .vault_pass
 *.homie-backup-*
+
+# Byte-compiled Python left behind by syntax checks; the scripts in
+# home*/.local/bin are run directly, never imported.
+__pycache__/
+*.pyc

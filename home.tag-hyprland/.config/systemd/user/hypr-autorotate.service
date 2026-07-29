@@ -1,0 +1,25 @@
+[Unit]
+Description=Rotate the display to follow the accelerometer (Hyprland)
+Documentation=file:%h/.local/bin/hypr-autorotate
+
+# Replaces iio-hyprland, which drives the compositor via `hyprctl keyword` —
+# rejected outright by Hyprland 0.55+ when the config is Lua ("keyword can't
+# work with non-legacy parsers. Use eval."). See the script's docstring.
+After=wayland-session-waitenv.service
+PartOf=wayland-session@hyprland.desktop.target
+After=wayland-session@hyprland.desktop.target
+ConditionEnvironment=WAYLAND_DISPLAY
+
+# iio-sensor-proxy is D-Bus activated, so it needs no ordering here — but
+# without it there is no accelerometer to claim and the daemon exits 1.
+Wants=iio-sensor-proxy.service
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/hypr-autorotate
+Restart=on-failure
+RestartSec=3
+Slice=session.slice
+
+[Install]
+WantedBy=wayland-session@hyprland.desktop.target

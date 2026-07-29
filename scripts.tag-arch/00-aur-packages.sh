@@ -64,10 +64,12 @@ if has_tag hyprland; then
     # Session exit menu, bound to a key under Hyprland — there's no Plasma
     # application launcher to hang logout/reboot/suspend off of.
     wlogout
-    # Convertible bits: iio-hyprland reads iio-sensor-proxy and calls hyprctl
-    # to rotate the display, wvkbd is the on-screen keyboard for tablet mode.
-    # Neither has a counterpart under Plasma, which handles both natively.
-    iio-hyprland-git
+    # On-screen keyboard for tablet mode. No counterpart under Plasma, which
+    # has one built in.
+    #
+    # iio-hyprland is deliberately absent: it drives the compositor with
+    # `hyprctl keyword`, which Hyprland 0.55+ rejects when the config is Lua.
+    # ~/.local/bin/hypr-autorotate does the same job through `hyprctl eval`.
     wvkbd
   )
 fi

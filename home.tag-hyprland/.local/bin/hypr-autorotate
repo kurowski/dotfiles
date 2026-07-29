@@ -1,0 +1,146 @@
+#!/usr/bin/env python3
+"""Rotate the display to follow the accelerometer, for the Framework 12's hinge.
+
+This replaces iio-hyprland, which cannot work here.
+
+iio-hyprland drives the compositor with `hyprctl keyword monitor …`, and since
+0.55 Hyprland refuses that outright when the config is Lua:
+
+    keyword can't work with non-legacy parsers. Use eval.
+
+Nothing else about it is broken — it claims the sensor correctly and wakes on
+every orientation change — but each event dies at the last step, silently,
+because the message goes to a stdout no one is reading. The screen simply never
+turns. Any third-party tool that shells out to `hyprctl keyword` has the same
+problem on a Lua config; it's the real cost of that choice, and worth knowing
+before adding another such tool.
+
+So: same job, `hyprctl eval` instead, which takes Lua and works.
+
+Talking to iio-sensor-proxy needs a *persistent* connection, which is the other
+reason this isn't a shell script. The daemon only polls the hardware while a
+client holds a claim, and it tracks that claim by the caller's bus name — so a
+one-shot `busctl call` claims and immediately releases as the process exits, and
+the orientation property then never changes again.
+"""
+
+import signal
+import subprocess
+import sys
+
+import gi
+
+gi.require_version("Gio", "2.0")
+from gi.repository import Gio, GLib  # noqa: E402
+
+# GLib.unix_signal_add moved to the GLibUnix namespace and warns on every call
+# from the old one. Preferring the new name keeps the journal readable, and the
+# fallback keeps this working on the older pygobject the other hosts may carry.
+try:
+    gi.require_version("GLibUnix", "2.0")
+    from gi.repository import GLibUnix  # noqa: E402
+
+    _signal_add = GLibUnix.signal_add
+except (ValueError, ImportError):  # pragma: no cover - older pygobject
+    _signal_add = GLib.unix_signal_add
+
+BUS_NAME = "net.hadess.SensorProxy"
+OBJ_PATH = "/net/hadess/SensorProxy"
+IFACE = "net.hadess.SensorProxy"
+
+# The internal panel. Passed as argv[1] to override for a different machine.
+MONITOR = sys.argv[1] if len(sys.argv) > 1 else "eDP-1"
+
+# iio-sensor-proxy names the edge that is pointing up; Hyprland wants a
+# wl_output_transform. If the screen ends up rotated the wrong way on this
+# hardware, swap the 1 and the 3 — that is the only thing that is ever wrong
+# about this mapping, and it differs by chassis.
+TRANSFORM = {
+    "normal": 0,
+    "left-up": 1,
+    "bottom-up": 2,
+    "right-up": 3,
+    # Reported before the sensor settles. Treated as "don't touch anything"
+    # rather than as normal, which would snap the screen upright mid-fold.
+    "undefined": None,
+}
+
+
+def apply_transform(orientation):
+    transform = TRANSFORM.get(orientation)
+    if transform is None:
+        return
+
+    # The touchscreen and the stylus are absolute-coordinate devices, so they
+    # have to be rotated with the display or every tap lands somewhere else.
+    # One eval so the three land together and the input never lags the screen.
+    lua = (
+        f'hl.monitor({{ output = "{MONITOR}", transform = {transform} }}) '
+        f"hl.config({{ input = {{ "
+        f"touchdevice = {{ transform = {transform} }}, "
+        f"tablet = {{ transform = {transform} }} "
+        f"}} }})"
+    )
+    result = subprocess.run(
+        ["hyprctl", "eval", lua], capture_output=True, text=True
+    )
+    out = (result.stdout or "").strip()
+    if result.returncode != 0 or out != "ok":
+        # Printed, not raised: a compositor that has gone away is a reason to
+        # keep waiting, not to die. systemd captures this.
+        print(f"hyprctl eval failed for {orientation}: {out or result.stderr}",
+              file=sys.stderr, flush=True)
+    else:
+        print(f"{orientation} -> transform {transform}", flush=True)
+
+
+def main():
+    bus = Gio.bus_get_sync(Gio.BusType.SYSTEM, None)
+    proxy = Gio.DBusProxy.new_sync(
+        bus, Gio.DBusProxyFlags.NONE, None, BUS_NAME, OBJ_PATH, IFACE, None
+    )
+
+    has_accel = proxy.get_cached_property("HasAccelerometer")
+    if has_accel is None or not has_accel.get_boolean():
+        print("no accelerometer reported by iio-sensor-proxy", file=sys.stderr)
+        return 1
+
+    # Claim it, and hold this connection open for the life of the process.
+    # Without the claim the daemon never reads the hardware.
+    proxy.call_sync("ClaimAccelerometer", None,
+                    Gio.DBusCallFlags.NONE, -1, None)
+
+    def on_properties_changed(_proxy, changed, _invalidated):
+        orientation = changed.lookup_value("AccelerometerOrientation", None)
+        if orientation is not None:
+            apply_transform(orientation.get_string())
+
+    proxy.connect("g-properties-changed", on_properties_changed)
+
+    # Apply once at startup: the lid may already be folded when this starts,
+    # and otherwise nothing would happen until the next time it moved.
+    current = proxy.get_cached_property("AccelerometerOrientation")
+    if current is not None:
+        apply_transform(current.get_string())
+
+    loop = GLib.MainLoop()
+
+    def stop(*_):
+        # Release explicitly so the daemon can stop polling the sensor as soon
+        # as the session ends, rather than waiting for the bus name to drop.
+        try:
+            proxy.call_sync("ReleaseAccelerometer", None,
+                            Gio.DBusCallFlags.NONE, -1, None)
+        except GLib.Error:
+            pass
+        loop.quit()
+
+    _signal_add(GLib.PRIORITY_DEFAULT, signal.SIGTERM, stop)
+    _signal_add(GLib.PRIORITY_DEFAULT, signal.SIGINT, stop)
+
+    loop.run()
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

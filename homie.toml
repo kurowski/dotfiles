@@ -296,10 +296,13 @@ arch = [
   "nwg-displays",
   "nwg-look",
   "papirus-icon-theme",
-  # The accelerometer daemon behind auto-rotation. iio-hyprland (AUR) is the
-  # client that reads it and calls hyprctl; this is the part that talks to the
-  # hardware, and it's dbus-activated rather than a unit to enable.
+  # Auto-rotation. iio-sensor-proxy is the part that talks to the hardware and
+  # is dbus-activated rather than a unit to enable; python-gobject is what
+  # ~/.local/bin/hypr-autorotate uses to hold a persistent claim on it over
+  # D-Bus, which a shell script cannot do — the daemon stops polling the sensor
+  # the moment the claiming connection closes.
   "iio-sensor-proxy",
+  "python-gobject",
   # Secret Service. Everything that stores a credential — 1Password's unlocked
   # session, Electron apps, anything on libsecret — wants org.freedesktop.secrets
   # on the bus, and Plasma is what normally provides it by running ksecretd.

@@ -21,9 +21,7 @@ hl.on("hyprland.start", function()
   hl.exec_cmd("wl-paste --type text --watch cliphist store")
   hl.exec_cmd("wl-paste --type image --watch cliphist store")
 
-  -- Auto-rotation. Reads iio-sensor-proxy's accelerometer and calls hyprctl to
-  -- rotate eDP-1 when the convertible is folded — which is why monitors.lua
-  -- leaves `transform` unset. It rotates the touchscreen and stylus along with
-  -- the display, so touch stays aligned in tablet orientation.
-  hl.exec_cmd("iio-hyprland")
+  -- Auto-rotation is *not* here. hypr-autorotate.service handles it, bound to
+  -- wayland-session@hyprland.desktop.target like the other daemons, so it gets
+  -- restart-on-failure and stops cleanly with the session.
 end)

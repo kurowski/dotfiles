@@ -74,6 +74,9 @@ units=(
   # it 1Password can't persist a session and Electron apps report no keyring.
   # This one is ours (home.tag-hyprland), not a packaged unit.
   ksecretd.service
+  # Accelerometer -> display rotation. Also ours, replacing iio-hyprland, which
+  # cannot drive a Lua-configured Hyprland.
+  hypr-autorotate.service
 )
 
 for unit in "${units[@]}"; do
