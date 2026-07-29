@@ -93,6 +93,17 @@ done
 # immediately after this.
 systemctl --user daemon-reload
 
+# Re-read D-Bus service files. The session bus scans its service directories
+# once at startup, so a newly-deployed activation file — notably
+# org.freedesktop.secrets — stays invisible until the bus is told, and clients
+# keep getting "The name is not activatable" for the rest of the session.
+# Harmless when nothing changed.
+if [[ -n "${DBUS_SESSION_BUS_ADDRESS:-}" ]] && command -v busctl >/dev/null 2>&1; then
+  busctl --user call org.freedesktop.DBus /org/freedesktop/DBus \
+    org.freedesktop.DBus ReloadConfig >/dev/null 2>&1 \
+    || echo "  could not reload the session bus (not fatal)" >&2
+fi
+
 # Deliberately not enabled and not started here. Starting them needs a running
 # Wayland session, which `hm apply` isn't; they come up with the target on the
 # next login. Nor is the sddm session preselected — cece keeps both Plasma and
