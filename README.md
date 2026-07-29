@@ -49,17 +49,20 @@ Node version on purpose.
 
 ## Theming
 
-Everything is Catppuccin — latte when light, mocha when dark. Which one is
-decided by the `THEME` var: `light`, `dark`, or `auto` to follow the desktop's
-own light/dark setting. Only cece is `auto`; work stays pinned light and the
-servers stay pinned dark.
+Everything is Catppuccin — latte when light, mocha when dark. On a desktop host
+the desktop decides and the CLI/TUI stack follows it live, so it doesn't matter
+whether the flip came from a schedule (KDE's own sunrise/sunset) or from
+toggling it by hand — both are the same signal. The `THEME`
+var (`light` / `dark`) is the fallback for when there's no desktop to ask: the
+servers, containers, an SSH session with no session bus of its own, and macOS.
 
-`auto` works because KDE and GNOME both publish the setting over the XDG
+Following works because KDE and GNOME both publish the setting over the XDG
 desktop portal (`org.freedesktop.appearance color-scheme`), and emit a signal
 when it changes. `~/.local/bin/theme-mode` resolves the setting into
-`~/.local/state/theme-mode/`, and `theme-mode.service` — enabled only on `auto`
-hosts by `scripts/23-theme-mode.sh` — watches the portal and re-resolves on
-every change, including KDE's own sunrise/sunset schedule.
+`~/.local/state/theme-mode/`, and `theme-mode.service` — enabled on every Linux
+desktop host by `scripts/23-theme-mode.sh` — watches the portal and re-resolves
+on every change. macOS is the one desktop left out: it keeps its appearance off
+the portal, so `UCEAP-M1022` stays pinned to `THEME`.
 
 Under Hyprland the portal answer comes from somewhere else.
 `xdg-desktop-portal-hyprland` implements ScreenCast and GlobalShortcuts but
@@ -154,14 +157,17 @@ Manual, set per-host via `[tags].extra`:
 
 ## Hosts
 
-| host          | distro | profile  | extra tags           | theme |
-| ------------- | ------ | -------- | -------------------- | ----- |
-| `coach`       | fedora | personal | desktop, kde         | dark  |
-| `uceap-dev01` | fedora | work     | desktop, kde         | light |
-| `UCEAP-M1022` | macos  | work     | desktop              | light |
-| `cece`        | arch   | personal | desktop, kde, hyprland | auto  |
-| `nick`        | ubuntu | personal | server               | dark  |
-| `winston`     | ubuntu | personal | server               | dark  |
+| host          | distro | profile  | extra tags             | `THEME` |
+| ------------- | ------ | -------- | ---------------------- | ------- |
+| `coach`       | fedora | personal | desktop, kde           | dark    |
+| `uceap-dev01` | fedora | work     | desktop, kde           | light   |
+| `UCEAP-M1022` | macos  | work     | desktop                | light   |
+| `cece`        | arch   | personal | desktop, kde, hyprland | dark    |
+| `nick`        | ubuntu | personal | server                 | dark    |
+| `winston`     | ubuntu | personal | server                 | dark    |
+
+`THEME` is only the fallback — the three Linux desktops follow their desktop's
+light/dark setting at runtime instead. See [Theming](#theming).
 
 ## Secrets
 

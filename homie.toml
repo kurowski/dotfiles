@@ -207,8 +207,8 @@ ubuntu = ["btop", "openssh-server"]
 # Plasma itself, because Arch has no KDE spin to install it for us — the
 # Fedora and Ubuntu KDE hosts get the desktop from their installer, so there's
 # nothing to declare for them here. plasma-meta already depends on
-# xdg-desktop-portal-kde, which is what THEME = "auto" reads the light/dark
-# setting from, and on noto-fonts somewhere in its closure.
+# xdg-desktop-portal-kde, which is what theme-mode reads the light/dark setting
+# from, and on noto-fonts somewhere in its closure.
 #
 # It does *not* pull a display manager: sddm is separate, and
 # scripts.tag-arch.tag-kde/25-sddm.sh enables the unit. plasma-meta does bring
@@ -382,6 +382,8 @@ extra = []
 
 [vars]
 EDITOR = "nvim"
-# Appearance default for untagged hosts and anonymous devcontainers (work/light).
-# Personal hosts override this to "dark".
+# Appearance fallback for hosts with no desktop to ask — servers, containers,
+# anonymous devcontainers (work/light), macOS. Desktop hosts follow the
+# desktop's own light/dark setting at runtime and only land here when there's
+# no portal answering. Personal hosts override this to "dark".
 THEME  = "light"

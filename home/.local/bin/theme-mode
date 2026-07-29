@@ -1,9 +1,13 @@
 #!/usr/bin/env bash
 # theme-mode — one source of truth for light vs. dark across the CLI/TUI stack.
 #
-# Hosts pin THEME to "light" or "dark" in [vars]; cece sets "auto", which
-# follows the desktop's own light/dark setting via the XDG desktop portal
-# (KDE and GNOME both implement org.freedesktop.appearance color-scheme).
+# The desktop decides. KDE and GNOME both publish their light/dark setting over
+# the XDG desktop portal (org.freedesktop.appearance color-scheme) and signal
+# when it changes, so every desktop host follows it — whether the flip came from
+# KDE's own sunrise/sunset schedule or from you toggling it by hand.
+#
+# THEME, from the host's [vars], is the fallback for when there's no desktop to
+# ask: a server, a container, or an SSH session with no session bus of its own.
 #
 # The resolved mode lands in a state file that everything else reads:
 #   - .zshrc re-exports BAT_THEME / DELTA_FEATURES / FZF_DEFAULT_OPTS_FILE /
@@ -27,6 +31,14 @@ THEME=dark
 # shellcheck source=/dev/null
 [[ -r "$config" ]] && . "$config"
 
+# Anything unrecognized means dark — including "auto", which is what a config
+# rendered before the desktop became the source of truth still says. Without
+# this, that word would reach nvim and tmux where a flavor name belongs.
+case "$THEME" in
+  light|dark) ;;
+  *) THEME=dark ;;
+esac
+
 light_flavor=latte
 dark_flavor=mocha
 
@@ -46,13 +58,10 @@ portal_mode() {
   esac
 }
 
+# The desktop wins wherever one answers. THEME covers everywhere else: no
+# portal, or a portal with no preference to state.
 resolve() {
-  case "$THEME" in
-    light|dark) echo "$THEME"; return ;;
-  esac
-  # auto. Fall back to dark when the portal is unreachable or the desktop has
-  # no preference — every auto host is a personal one.
-  portal_mode || echo dark
+  portal_mode || echo "$THEME"
 }
 
 flavor() {
@@ -299,8 +308,8 @@ reload() {
 }
 
 # Follow the desktop for as long as we're running. The portal emits
-# SettingChanged the moment KDE flips, including on its own sunrise/sunset
-# schedule, so there's nothing to poll.
+# SettingChanged the moment the desktop flips, and a manual toggle looks exactly
+# like KDE's own sunrise/sunset schedule from here, so there's nothing to poll.
 watch() {
   reload
   gdbus monitor --session \

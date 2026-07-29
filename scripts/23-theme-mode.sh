@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# theme-mode — resolve light/dark once per apply, and on THEME = "auto" hosts
-# keep following the desktop afterwards via a systemd user service.
+# theme-mode — resolve light/dark once per apply, and on desktop hosts keep
+# following the desktop afterwards via a systemd user service.
 #
-# The reload runs everywhere, not just on auto hosts: the state file it writes
-# is what .zshrc and nvim read, so a pinned light/dark host needs it too. It's
-# just that on those hosts the answer never changes.
+# The reload runs everywhere, not just where the watcher does: the state file it
+# writes is what .zshrc and nvim read, so a headless host needs it too. It's
+# just that there the answer never changes.
 set -euo pipefail
 
 # By path, not by name: scripts run under bash, which never sources .zshrc and
@@ -14,10 +14,16 @@ theme_mode="$HOME/.local/bin/theme-mode"
 
 "$theme_mode" reload
 
-# Everything below is the watcher, which only makes sense with a desktop
-# session and a portal to ask.
-[[ "${THEME:-}" == "auto" ]] || exit 0
-case ",$HM_TAGS," in *,macos,*|*,container,*) exit 0 ;; esac
+# Everything below is the watcher, which only makes sense with a desktop session
+# and a portal to ask. Every desktop host gets one, not just the ones whose
+# desktop switches on a schedule: a manual toggle is the same portal signal, and
+# tmux and nvim need the nudge either way. macOS publishes its appearance
+# somewhere else entirely, so those hosts stay pinned to THEME.
+case ",$HM_TAGS," in
+  *,macos,*|*,container,*) exit 0 ;;
+  *,desktop,*) ;;
+  *) exit 0 ;;  # servers: nothing to follow
+esac
 command -v systemctl >/dev/null 2>&1 || exit 0
 
 unit="$HOME/.config/systemd/user/theme-mode.service"

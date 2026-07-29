@@ -7,7 +7,7 @@
 # daemon this session wants — hyprpaper, hypridle, swaync, hyprpolkitagent,
 # waybar — ships a unit that is WantedBy=graphical-session.target with
 # ConditionEnvironment=WAYLAND_DISPLAY, and so does theme-mode.service, which is
-# what makes THEME = "auto" follow the desktop. All of them would sit dead.
+# what makes the CLI stack follow the desktop. All of them would sit dead.
 #
 # uwsm fixes that by running the compositor as a systemd unit. Hyprland ships
 # hyprland-uwsm.desktop for it; sddm lists it as "Hyprland (uwsm-managed)".

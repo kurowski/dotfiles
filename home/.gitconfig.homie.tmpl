@@ -24,9 +24,9 @@
 # $DELTA_FEATURES, exported per-prompt by .zshrc, replaces the features list
 # below (delta only *appends* the env var when it starts with a +). So this
 # line is the fallback for git invoked outside an interactive zsh — a GUI
-# client, an editor's VCS pane, a hook. On an auto host that fallback can't
-# be right for both modes; dark loses less than a light theme on a dark
-# terminal would.
+# client, an editor's VCS pane, a hook. On a desktop host, where the mode
+# changes underneath it, that fallback can't be right for both modes; dark
+# loses less than a light theme on a dark terminal would.
 [delta]
 	navigate = true
 	features = {{ if eq .Vars.THEME "light" }}catppuccin-latte{{ else }}catppuccin-mocha{{ end }}

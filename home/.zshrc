@@ -16,11 +16,12 @@ export RIPGREP_CONFIG_PATH="$HOME/.config/ripgrep/config"
 path=("$HOME/.cargo/bin" "$HOME/.local/bin" "$HOME/.devcontainers/bin" "$GOPATH/bin" $path)
 
 # ── Theme ──────────────────────────────────────────────────────────────────
-# ~/.local/bin/theme-mode resolves light vs. dark — pinned per host, or on cece
-# following KDE's auto-switch — and leaves the answer in a state file. Re-read
-# it every prompt so shells that were already open when the desktop flipped
-# follow along, not just new ones. That's a zsh builtin read of a one-line
-# file: no fork, and the exports only run when the value actually changed.
+# ~/.local/bin/theme-mode resolves light vs. dark — following the desktop's own
+# setting where there is one, pinned per host where there isn't — and leaves the
+# answer in a state file. Re-read it every prompt so shells that were already
+# open when the desktop flipped follow along, not just new ones. That's a zsh
+# builtin read of a one-line file: no fork, and the exports only run when the
+# value actually changed.
 #
 # ghostty, eza and zsh-patina are absent on purpose: ghostty switches itself
 # and the other two inherit its ANSI palette. Long-running tmux and nvim can't

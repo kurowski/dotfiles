@@ -27,9 +27,9 @@ key=org.gnome.desktop.interface
 current=$(gsettings get $key color-scheme 2>/dev/null || echo "''")
 
 # The key is a tri-state: 'default', 'prefer-dark', 'prefer-light'. 'default'
-# means "no preference", which the portal reports as 0 and theme-mode resolves
-# to dark — so treat it as dark here and flip to light, matching what the user
-# is actually looking at.
+# means "no preference", which the portal reports as 0 and theme-mode falls back
+# to $THEME for — "dark" on every host that runs Hyprland. So treat it as dark
+# here and flip to light, matching what the user is actually looking at.
 case "$current" in
   *prefer-light*) next=prefer-dark  ;;
   *)              next=prefer-light ;;

@@ -8,11 +8,11 @@ name = "personal"
 extra = ["desktop", "kde", "hyprland"]
 
 [vars]
-# Follows whichever session is running: under Plasma that's KDE's own light/dark
-# switch, under Hyprland it's gsettings by way of xdg-desktop-portal-gtk. Both
-# publish org.freedesktop.appearance color-scheme, which is the only thing
-# theme-mode actually reads — see scripts/23-theme-mode.sh. The other personal
-# hosts stay pinned dark, work stays pinned light.
-THEME      = "auto"
+# Only the fallback here, as on every host: cece follows whichever session is
+# running — under Plasma that's KDE's own light/dark switch, under Hyprland it's
+# gsettings by way of xdg-desktop-portal-gtk. Both publish
+# org.freedesktop.appearance color-scheme, which is the only thing theme-mode
+# actually reads. See scripts/23-theme-mode.sh.
+THEME      = "dark"
 OP_ACCOUNT = "my"
 ATUIN_SYNC = "false"

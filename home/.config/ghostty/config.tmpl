@@ -1,11 +1,14 @@
 font-family = JetBrainsMono Nerd Font
 font-size = 10
-{{- if eq .Vars.THEME "auto" }}
+{{- if and (hasTag "desktop") (not (hasTag "macos")) }}
 # ghostty reads the desktop's light/dark setting itself (the same portal
 # setting theme-mode watches), so this needs no help from us. eza and
 # zsh-patina ride on the 8 ANSI colors, so they follow along for free.
 theme = light:Catppuccin Latte,dark:Catppuccin Mocha
 {{- else }}
+# Nothing follows the desktop here — macOS keeps its appearance off the portal,
+# and a headless host has none — so match whatever THEME the rest of the stack
+# resolved to rather than letting ghostty guess on its own.
 theme = {{ if eq .Vars.THEME "dark" }}Catppuccin Mocha{{ else }}Catppuccin Latte{{ end }}
 {{- end }}
 
