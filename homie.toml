@@ -99,7 +99,9 @@ debian = [
 # helper has to exist before this phase runs.
 #
 # Missing next to the Fedora list — 1password, 1password-cli and VS Code — are
-# AUR-only and live in scripts.tag-arch/00-aur-packages.sh instead.
+# AUR-only and live in scripts.tag-arch/00-aur-packages.sh instead. fprintd is
+# missing for a different reason: cece has no fingerprint reader, and it's the
+# only arch host.
 arch = [
   "aws-cli-v2",
   "base-devel",
@@ -113,7 +115,6 @@ arch = [
   "eza",
   "fastfetch",
   "fd",
-  "fprintd",
   "fzf",
   "gcc",
   "ghostty",
@@ -202,6 +203,20 @@ all = ["md.obsidian.Obsidian"]
 [packages."tag:server"]
 fedora = ["btop", "openssh-server"]
 ubuntu = ["btop", "openssh-server"]
+
+# Plasma itself, because Arch has no KDE spin to install it for us — the
+# Fedora and Ubuntu KDE hosts get the desktop from their installer, so there's
+# nothing to declare for them here. plasma-meta already depends on
+# xdg-desktop-portal-kde, which is what THEME = "auto" reads the light/dark
+# setting from, and on noto-fonts somewhere in its closure.
+#
+# It does *not* pull a display manager: sddm is separate, and
+# scripts.tag-arch.tag-kde/25-sddm.sh enables the unit. plasma-meta does bring
+# plasma-login-manager along, but that claims neither the `display-manager`
+# alias nor a conflict with sddm, so the two coexist and whichever unit is
+# enabled wins.
+[packages."tag:kde"]
+arch = ["plasma-meta", "sddm"]
 
 [packages."tag:gnome"]
 ubuntu = [

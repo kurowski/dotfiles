@@ -123,6 +123,11 @@ from — the Arch counterpart to the third-party dnf repos on Fedora. Name
 packages, never pacman *groups* (`plasma`, `xorg`): nothing records that you
 asked for a group, so Homie can't tell a complete one from a missing one.
 
+Arch is also the one distro where the desktop itself is declared here
+(`[packages."tag:kde"]` → `plasma-meta`, `sddm`). Everywhere else the KDE spin
+or the Ubuntu installer provides it. That makes `hm apply` enough to take a
+base Arch install to a working Plasma session on the next boot.
+
 ## Tags
 
 Auto-derived per host:
