@@ -131,6 +131,9 @@ Arch is also the one distro where the desktop itself is declared here
 or the Ubuntu installer provides it. That makes `hm apply` enough to take a
 base Arch install to a working Plasma session on the next boot.
 
+No host currently carries the `arch` tag — cece moved to Arch and back — so all
+of the above is kept deliberately but goes untested until one does.
+
 ## Tags
 
 Auto-derived per host:
@@ -150,7 +153,7 @@ Manual, set per-host via `[tags].extra`:
 | `coach`       | fedora | personal | desktop, kde   | dark    |
 | `uceap-dev01` | fedora | work     | desktop, kde   | light   |
 | `UCEAP-M1022` | macos  | work     | desktop        | light   |
-| `cece`        | arch   | personal | desktop, kde   | dark    |
+| `cece`        | fedora | personal | desktop, kde   | dark    |
 | `nick`        | ubuntu | personal | server         | dark    |
 | `winston`     | ubuntu | personal | server         | dark    |
 

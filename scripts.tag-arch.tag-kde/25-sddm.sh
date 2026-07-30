@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Enable sddm. The Fedora and Ubuntu KDE hosts got a display manager enabled
 # by their installer; on Arch the DE comes from [packages."tag:kde"] and the
-# unit ships disabled, so without this cece boots to a TTY.
+# unit ships disabled, so without this an Arch KDE host boots to a TTY.
 set -euo pipefail
 
 [[ -f /usr/lib/systemd/system/sddm.service ]] || exit 0

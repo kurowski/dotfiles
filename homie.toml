@@ -23,7 +23,6 @@ fedora = [
   "eza",
   "fastfetch",
   "fd-find",
-  "fprintd",
   "fzf",
   "gcc",
   "gh",
@@ -99,9 +98,7 @@ debian = [
 # helper has to exist before this phase runs.
 #
 # Missing next to the Fedora list — 1password, 1password-cli and VS Code — are
-# AUR-only and live in scripts.tag-arch/00-aur-packages.sh instead. fprintd is
-# missing for a different reason: cece has no fingerprint reader, and it's the
-# only arch host.
+# AUR-only and live in scripts.tag-arch/00-aur-packages.sh instead.
 arch = [
   "aws-cli-v2",
   "base-devel",
