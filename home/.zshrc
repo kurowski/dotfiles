@@ -9,14 +9,55 @@ export VISUAL=$EDITOR
 export LANG=en_US.UTF-8
 export GOPATH="$HOME/go"
 
-# Catppuccin colors for fzf (rendered per-host by homie; see ~/.config/fzf/fzfrc).
-[[ -f "$HOME/.config/fzf/fzfrc" ]] && export FZF_DEFAULT_OPTS_FILE="$HOME/.config/fzf/fzfrc"
-
 # rg skips dotfiles by default; the config turns on --hidden (minus .git).
 # rg silently ignores a missing config file, so no existence guard needed.
 export RIPGREP_CONFIG_PATH="$HOME/.config/ripgrep/config"
 
-path=("$HOME/.cargo/bin" "$HOME/.atuin/bin" "$HOME/.local/bin" "$HOME/.devcontainers/bin" "$GOPATH/bin" $path)
+path=("$HOME/.cargo/bin" "$HOME/.local/bin" "$HOME/.devcontainers/bin" "$GOPATH/bin" $path)
+
+# ── Theme ──────────────────────────────────────────────────────────────────
+# ~/.local/bin/theme-mode resolves light vs. dark — following the desktop's own
+# setting where there is one, pinned per host where there isn't — and leaves the
+# answer in a state file. Re-read it every prompt so shells that were already
+# open when the desktop flipped follow along, not just new ones. That's a zsh
+# builtin read of a one-line file: no fork, and the exports only run when the
+# value actually changed.
+#
+# ghostty, eza and zsh-patina are absent on purpose: ghostty switches itself
+# and the other two inherit its ANSI palette. Long-running tmux and nvim can't
+# be reached through the environment at all — `theme-mode reload` pushes to
+# those directly.
+__theme_state="${XDG_STATE_HOME:-$HOME/.local/state}/theme-mode/mode"
+__theme_mode=""
+
+__theme_sync() {
+  local mode flavor
+  [[ -r $__theme_state ]] || return
+  mode=$(<$__theme_state)
+  [[ $mode == (light|dark) ]] || return
+  [[ $mode == $__theme_mode ]] && return
+  __theme_mode=$mode
+  [[ $mode == dark ]] && flavor=mocha || flavor=latte
+
+  # bat's own config sets --theme-light/--theme-dark but no --theme, so this
+  # wins; delta only appends $DELTA_FEATURES when it starts with a '+', so
+  # this replaces the features list in .gitconfig.
+  export BAT_THEME="Catppuccin ${(C)flavor}"
+  export DELTA_FEATURES="catppuccin-$flavor"
+  export FZF_DEFAULT_OPTS_FILE="$HOME/.config/fzf/fzfrc-$flavor"
+  export LG_CONFIG_FILE="$HOME/.config/lazygit/theme-$flavor.yml"
+}
+
+if [[ -x "$HOME/.local/bin/theme-mode" ]]; then
+  # First shell on a machine that hasn't been applied yet.
+  [[ -r $__theme_state ]] || "$HOME/.local/bin/theme-mode" reload >/dev/null 2>&1
+  # Fixed path, but its contents get rewritten on each switch. Must be set
+  # before `starship init` below, which reads the config itself.
+  export STARSHIP_CONFIG="${XDG_STATE_HOME:-$HOME/.local/state}/theme-mode/starship.toml"
+  autoload -Uz add-zsh-hook
+  add-zsh-hook precmd __theme_sync
+  __theme_sync
+fi
 
 if [[ -S "$HOME/.1password/agent.sock" ]]; then
   export SSH_AUTH_SOCK="$HOME/.1password/agent.sock"

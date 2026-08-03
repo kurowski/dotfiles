@@ -1,0 +1,11 @@
+# Rendered by homie. Read by ~/.local/bin/theme-mode, which turns it into the
+# mode state file that .zshrc, nvim, tmux and starship all key off.
+#
+# On a desktop host the desktop itself decides, over the XDG desktop portal —
+# see scripts/23-theme-mode.sh for the watcher. This is the fallback for when
+# there's nothing to ask: a server, a container, an SSH session with no bus.
+#
+# Termux has no portal and no host file of its own (its hostname is an
+# unreliable "localhost"), so it can't override THEME per-host like other
+# machines do — key off the distro tag instead and force dark.
+THEME={{ if hasTag "termux" }}dark{{ else }}{{ .Vars.THEME }}{{ end }}

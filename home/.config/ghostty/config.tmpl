@@ -1,6 +1,17 @@
 font-family = JetBrainsMono Nerd Font
 font-size = 10
+{{- if and (hasTag "desktop") (not (hasTag "macos")) }}
+# ghostty reads the desktop's light/dark setting itself (the same portal
+# setting theme-mode watches), so this needs no help from us. eza and
+# zsh-patina ride on the 8 ANSI colors, so they follow along for free.
+theme = light:Catppuccin Latte,dark:Catppuccin Mocha
+{{- else }}
+# Nothing follows the desktop here — macOS keeps its appearance off the portal,
+# a headless host has none, and Termux has neither a portal nor ghostty itself
+# — so match whatever THEME the rest of the stack resolved to rather than
+# letting ghostty guess on its own.
 theme = {{ if or (eq .Vars.THEME "dark") (hasTag "termux") }}Catppuccin Mocha{{ else }}Catppuccin Latte{{ end }}
+{{- end }}
 
 # Claude Code reads ESC+CR as "insert newline" instead of "submit". Sending
 # it directly from the terminal avoids relying on tmux passing through

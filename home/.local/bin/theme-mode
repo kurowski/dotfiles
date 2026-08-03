@@ -1,0 +1,170 @@
+#!/usr/bin/env bash
+# theme-mode — one source of truth for light vs. dark across the CLI/TUI stack.
+#
+# The desktop decides. KDE and GNOME both publish their light/dark setting over
+# the XDG desktop portal (org.freedesktop.appearance color-scheme) and signal
+# when it changes, so every desktop host follows it — whether the flip came from
+# KDE's own sunrise/sunset schedule or from you toggling it by hand.
+#
+# THEME, from the host's [vars], is the fallback for when there's no desktop to
+# ask: a server, a container, or an SSH session with no session bus of its own.
+#
+# The resolved mode lands in a state file that everything else reads:
+#   - .zshrc re-exports BAT_THEME / DELTA_FEATURES / FZF_DEFAULT_OPTS_FILE /
+#     LG_CONFIG_FILE / STARSHIP_CONFIG from it on every prompt, so shells that
+#     were already open follow along too.
+#   - nvim reads it at startup (colorscheme.lua).
+#   - `reload` pushes to already-running tmux servers and nvim instances,
+#     which can't be reached through the environment.
+#
+# ghostty is deliberately absent: it has native light:/dark: theme support and
+# reads the same portal setting itself. zsh-patina and eza ride on the 8 ANSI
+# colors, so they follow ghostty for free.
+set -euo pipefail
+
+config="${XDG_CONFIG_HOME:-$HOME/.config}/theme-mode/config"
+state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/theme-mode"
+
+# Rendered by homie from the host's THEME var. Absent on a machine that hasn't
+# been applied yet, in which case dark is the safer guess than a white flash.
+THEME=dark
+# shellcheck source=/dev/null
+[[ -r "$config" ]] && . "$config"
+
+# Anything unrecognized means dark — including "auto", which is what a config
+# rendered before the desktop became the source of truth still says. Without
+# this, that word would reach nvim and tmux where a flavor name belongs.
+case "$THEME" in
+  light|dark) ;;
+  *) THEME=dark ;;
+esac
+
+light_flavor=latte
+dark_flavor=mocha
+
+# Ask the portal what the desktop is set to: 0 = no preference, 1 = dark,
+# 2 = light. A non-zero exit means no portal at all (server, container, macOS).
+portal_mode() {
+  local out
+  out=$(gdbus call --session --timeout 2 \
+        --dest org.freedesktop.portal.Desktop \
+        --object-path /org/freedesktop/portal/desktop \
+        --method org.freedesktop.portal.Settings.ReadOne \
+        org.freedesktop.appearance color-scheme 2>/dev/null) || return 1
+  case "$out" in
+    *"uint32 1"*) echo dark ;;
+    *"uint32 2"*) echo light ;;
+    *) return 1 ;;
+  esac
+}
+
+# The desktop wins wherever one answers. THEME covers everywhere else: no
+# portal, or a portal with no preference to state.
+resolve() {
+  portal_mode || echo "$THEME"
+}
+
+flavor() {
+  if [[ "$1" == dark ]]; then echo "$dark_flavor"; else echo "$light_flavor"; fi
+}
+
+# Write only when the content actually changes, so watchers and `hm doctor`
+# don't see churn on every apply.
+write_if_changed() {
+  local dest=$1
+  local tmp="$dest.tmp.$$"
+  cat > "$tmp"
+  if [[ -r "$dest" ]] && cmp -s "$tmp" "$dest"; then
+    rm -f "$tmp"
+    return 1
+  fi
+  mv "$tmp" "$dest"
+}
+
+# Repaint the tmux servers and nvim instances that are already running. Neither
+# rereads the environment, so they need an explicit nudge.
+push_live() {
+  local mode=$1
+
+  # Re-sourcing tmux.conf is what makes catppuccin rebuild its status strings;
+  # setting @catppuccin_flavor alone does nothing to an already-drawn status
+  # bar. Everything in tmux.conf is a `set`, so re-running it is idempotent
+  # (status-right is assigned before it's appended to, so it doesn't grow).
+  #
+  # Clearing @thm_* first is what makes the re-source take. Catppuccin's theme
+  # files declare every colour with `set -ogq`, and -o means "don't set if
+  # already set" — deliberate, so your own overrides survive, but it also means
+  # the first flavour a server loads is the only one it will ever load. Unset
+  # them and the theme file gets to define them again.
+  if command -v tmux >/dev/null 2>&1 && tmux has-session 2>/dev/null; then
+    tmux show -g 2>/dev/null | awk '/^@thm_/ {print $1}' |
+      while read -r opt; do tmux set -gu "$opt" 2>/dev/null || true; done
+    tmux source-file "${XDG_CONFIG_HOME:-$HOME/.config}/tmux/tmux.conf" \
+      >/dev/null 2>&1 || true
+  fi
+
+  # nvim keeps a live TermResponse autocmd that reacts to 'background'
+  # changing, and colorscheme.lua hangs a re-colorscheme off OptionSet — so
+  # setting the option is enough to re-theme a running editor.
+  if command -v nvim >/dev/null 2>&1; then
+    local sock
+    for sock in "${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"/nvim.*; do
+      [[ -S "$sock" ]] || continue
+      nvim --server "$sock" --remote-expr \
+        "execute('set background=$mode')" >/dev/null 2>&1 || true
+    done
+  fi
+}
+
+reload() {
+  local mode flav
+  mode=$(resolve)
+  flav=$(flavor "$mode")
+
+  mkdir -p "$state_dir"
+
+  # starship has no include mechanism and no env override for `palette`, so
+  # generate a copy of the config with that one line swapped. $STARSHIP_CONFIG
+  # points here; ~/.config/starship.toml stays the editable original.
+  local starship_src="${XDG_CONFIG_HOME:-$HOME/.config}/starship.toml"
+  if [[ -r "$starship_src" ]]; then
+    sed "s/^palette = .*/palette = 'catppuccin_${flav}'/" "$starship_src" \
+      | write_if_changed "$state_dir/starship.toml" || true
+  fi
+
+  # Sourced from tmux.conf.
+  printf "set -g @catppuccin_flavor '%s'\n" "$flav" \
+    | write_if_changed "$state_dir/tmux.conf" || true
+
+  # Written last: it's the file .zshrc watches, so it should only flip once
+  # everything it implies is already on disk.
+  if printf '%s\n' "$mode" | write_if_changed "$state_dir/mode"; then
+    push_live "$mode"
+  fi
+}
+
+# Follow the desktop for as long as we're running. The portal emits
+# SettingChanged the moment the desktop flips, and a manual toggle looks exactly
+# like KDE's own sunrise/sunset schedule from here, so there's nothing to poll.
+watch() {
+  reload
+  gdbus monitor --session \
+    --dest org.freedesktop.portal.Desktop \
+    --object-path /org/freedesktop/portal/desktop 2>/dev/null |
+  while read -r line; do
+    case "$line" in
+      *SettingChanged*color-scheme*) reload ;;
+    esac
+  done
+}
+
+case "${1:-get}" in
+  get)    resolve ;;
+  flavor) flavor "$(resolve)" ;;
+  reload) reload ;;
+  watch)  watch ;;
+  *)
+    echo "usage: theme-mode [get|flavor|reload|watch]" >&2
+    exit 2
+    ;;
+esac

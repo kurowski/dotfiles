@@ -13,6 +13,16 @@ OP_ACCOUNT  = "team-uceap"
 ATUIN_SYNC  = "true"
 ATUIN_VAULT = "Employee"
 
+# The only host with a fingerprint reader, so fprintd is scoped here rather than
+# sitting in the base Fedora list where coach would pick it up too. Hardware, not
+# profile — hence a plain [packages] block rather than the work-tagged one below.
+#
+# Enrollment only: nothing here wires pam_fprintd into /etc/pam.d, because
+# scripts/21-fprintd-pam.sh is pam-auth-update and that's Debian-only. On Fedora
+# that's `authselect enable-feature with-fingerprint`, still done by hand.
+[packages]
+fedora = ["fprintd"]
+
 [packages."tag:work"]
 fedora = [
   "google-chrome-stable",

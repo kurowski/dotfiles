@@ -1,6 +1,11 @@
 "$schema" = 'https://starship.rs/config-schema.json'
 
-palette = 'catppuccin_{{ if or (eq .Vars.THEME "dark") (hasTag "termux") }}mocha{{ else }}latte{{ end }}'
+# This is the editable original, but it is NOT what starship reads: $STARSHIP_CONFIG
+# points at ~/.local/state/theme-mode/starship.toml, a copy with the palette line
+# below rewritten to the current mode. starship has no include mechanism and no env
+# override for `palette`, and duplicating 120 lines of palette per flavor is worse
+# than generating the one line. theme-mode regenerates it, so edit this file.
+palette = 'catppuccin_latte'
 
 [palettes.catppuccin_mocha]
 rosewater = "#f5e0dc"

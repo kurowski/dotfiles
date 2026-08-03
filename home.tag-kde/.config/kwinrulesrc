@@ -1,0 +1,23 @@
+[90118aa2-fdcf-47af-a26b-c2605fdf0121]
+Description=Window settings for obsidian
+noborderrule=2
+types=1
+wmclass=\sobsidian
+wmclasscomplete=true
+wmclassmatch=1
+
+[General]
+count=2
+rules=90118aa2-fdcf-47af-a26b-c2605fdf0121,cb17765b-92ef-4a30-a1e1-3b4892537c44
+
+[cb17765b-92ef-4a30-a1e1-3b4892537c44]
+Description=Window settings for com.anthropic.Claude
+clientmachine=localhost
+noborderrule=2
+title=Claude
+types=1
+windowrole=browser-window
+windowrolematch=1
+wmclass=com.anthropic.claude com.anthropic.Claude
+wmclasscomplete=true
+wmclassmatch=1

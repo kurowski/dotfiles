@@ -2,7 +2,7 @@
 name = "personal"
 
 [tags]
-extra = ["desktop", "gnome"]
+extra = ["desktop", "kde"]
 
 [vars]
 THEME      = "dark"

@@ -9,7 +9,6 @@ default_shell = "zsh"
 fedora = [
   "1password",
   "1password-cli",
-  "atuin",
   "awscli2",
   "bat",
   "code",
@@ -24,27 +23,24 @@ fedora = [
   "eza",
   "fastfetch",
   "fd-find",
-  "fprintd",
   "fzf",
   "gcc",
   "gh",
   "ghostty",
   "git",
+  "git-delta",
   "glow",
   "lazygit",
   "make",
-  "neovim",
   "nodejs22",
   "nodejs22-npm",
   "python3-pip",
   "ripgrep",
-  "rustup",
   "tmux",
   "zoxide",
   "zsh",
 ]
 ubuntu = [
-  "atuin",
   "bat",
   "curl",
   "eza",
@@ -54,6 +50,7 @@ ubuntu = [
   "gcc",
   "gh",
   "git",
+  "git-delta",
   "glow",
   "lazygit",
   "make",
@@ -70,7 +67,6 @@ ubuntu = [
 # The project Dockerfile still bakes the shared baseline (git, gh, zsh, build
 # deps, infra binaries) so the image stands alone for CI and teammates.
 debian = [
-  "atuin",
   "bat",
   "curl",
   "eza",
@@ -80,6 +76,7 @@ debian = [
   "gcc",
   "gh",
   "git",
+  "git-delta",
   "glow",
   "lazygit",
   "make",
@@ -89,9 +86,54 @@ debian = [
   "zoxide",
   "zsh",
 ]
+# Arch names drift from Fedora's more than Ubuntu's do: `fd` not fd-find,
+# `github-cli` not gh, `aws-cli-v2` not awscli2, `python-pip` not python3-pip,
+# and docker is one package plus two plugins rather than five (containerd
+# comes along as a dependency). nodejs is unpinned because Arch's is already
+# current — the same reason 17-nvm.sh skips here.
+#
+# base-devel earns its place: paru rebuilds AUR packages from source on every
+# upgrade, so the toolchain is a lasting part of the system, not just bootstrap
+# scaffolding. pre-03-arch-repos.sh installs it earlier too, since the AUR
+# helper has to exist before this phase runs.
+#
+# Missing next to the Fedora list — 1password, 1password-cli and VS Code — are
+# AUR-only and live in scripts.tag-arch/00-aur-packages.sh instead.
+arch = [
+  "aws-cli-v2",
+  "base-devel",
+  "bat",
+  "curl",
+  "ddcutil",
+  "deskflow",
+  "docker",
+  "docker-buildx",
+  "docker-compose",
+  "eza",
+  "fastfetch",
+  "fd",
+  "fzf",
+  "gcc",
+  "ghostty",
+  "git",
+  "git-delta",
+  "github-cli",
+  "glow",
+  "lazygit",
+  "make",
+  "nodejs",
+  "npm",
+  "python-pip",
+  "ripgrep",
+  "tmux",
+  # Arch packages the Nerd-patched build, so 05-jetbrains-font.sh's upstream
+  # download is redundant here and skips.
+  "ttf-jetbrains-mono-nerd",
+  "zoxide",
+  "zsh",
+]
 macos = [
   "1password-cli/cask",
-  "atuin",
   "awscli",
   "bat",
   "eza",
@@ -100,12 +142,11 @@ macos = [
   "fzf",
   "gh",
   "git",
+  "git-delta",
   "glow",
   "lazygit",
-  "neovim",
   "ripgrep",
   "shellcheck",
-  "starship",
   "tmux",
   "zoxide",
 ]
@@ -141,7 +182,12 @@ termux = [
 ]
 
 [packages."tag:desktop"]
-fedora = ["btop", "openssh-server"]
+# wl-clipboard backs neovim's +/* registers on Wayland. Fedora's neovim
+# rpm used to pull in a clipboard tool as a weak dep (xsel, the X11 one);
+# dropping that package for the upstream build took the guarantee with it,
+# so declare it. Desktop-scoped: over SSH neovim uses OSC 52 instead, and
+# macOS has pbcopy built in.
+fedora = ["btop", "claude-desktop-unofficial", "openssh-server", "wl-clipboard"]
 ubuntu = [
   "btop",
   "code",
@@ -154,7 +200,14 @@ ubuntu = [
   "libpam-fprintd",
   "ncurses-term",
   "openssh-server",
+  "wl-clipboard",
 ]
+# openssh is one package here (client + server), and it ships the unit
+# disabled — 24-sshd.sh enables it. flatpak isn't part of a base Arch install
+# the way it is on Fedora's KDE spin, and pre-03-arch-repos.sh needs it there
+# to add the Flathub remote; it's declared here as the lasting statement of
+# intent. Claude Desktop is AUR-only (00-aur-packages.sh).
+arch = ["btop", "flatpak", "openssh", "wl-clipboard"]
 macos = [
   "1password/cask",
   "btop",
@@ -171,9 +224,26 @@ all = ["md.obsidian.Obsidian"]
 [packages."tag:desktop.tag:ubuntu".flatpak]
 all = ["md.obsidian.Obsidian"]
 
+[packages."tag:desktop.tag:arch".flatpak]
+all = ["md.obsidian.Obsidian"]
+
 [packages."tag:server"]
 fedora = ["btop", "openssh-server"]
 ubuntu = ["btop", "openssh-server"]
+
+# Plasma itself, because Arch has no KDE spin to install it for us — the
+# Fedora and Ubuntu KDE hosts get the desktop from their installer, so there's
+# nothing to declare for them here. plasma-meta already depends on
+# xdg-desktop-portal-kde, which is what theme-mode reads the light/dark setting
+# from, and on noto-fonts somewhere in its closure.
+#
+# It does *not* pull a display manager: sddm is separate, and
+# scripts.tag-arch.tag-kde/25-sddm.sh enables the unit. plasma-meta does bring
+# plasma-login-manager along, but that claims neither the `display-manager`
+# alias nor a conflict with sddm, so the two coexist and whichever unit is
+# enabled wins.
+[packages."tag:kde"]
+arch = ["plasma-meta", "sddm"]
 
 [packages."tag:gnome"]
 ubuntu = [
@@ -192,6 +262,18 @@ fedora = [
   "tailscale",
   "yt-dlp",
 ]
+# steam is in multilib, which pre-03-arch-repos.sh enables — a stock
+# pacman.conf leaves it commented out. seadrive-gui is AUR-only
+# (00-aur-packages.sh). No ffmpeg entry: Arch ships the unrestricted build in
+# extra, so there's nothing for 09-ffmpeg-swap.sh to swap.
+arch = [
+  "firefox",
+  "mpv",
+  "rclone",
+  "steam",
+  "tailscale",
+  "yt-dlp",
+]
 # Firefox on Ubuntu is installed in pre-02-ubuntu-repos.sh to handle
 # apt pinning + the snap-shim downgrade.
 ubuntu = [
@@ -203,6 +285,17 @@ all = ["aws-cli/classic"]
 
 [packages."tag:personal.tag:desktop.tag:ubuntu".snap]
 all = ["gimp", "spotify"]
+
+# Fedora has no snap; these come from Flathub instead. Scoped to
+# personal so work Fedora desktops don't pick up Spotify.
+[packages."tag:personal.tag:desktop.tag:fedora".flatpak]
+all = ["com.spotify.Client", "org.gimp.GIMP"]
+
+# Same on Arch, and for the same reason — no snap here either. Spotify is
+# AUR-only and GIMP is in extra, but Flathub matches what the Fedora desktops
+# already do and keeps one more proprietary build out of paru's hands.
+[packages."tag:personal.tag:desktop.tag:arch".flatpak]
+all = ["com.spotify.Client", "org.gimp.GIMP"]
 
 # Source-only zsh plugins, vendored without a plugin manager and sourced
 # from .zshrc. homie clones them on first apply, fast-forwards on later
@@ -218,8 +311,11 @@ extra = []
 
 [vars]
 EDITOR = "nvim"
-# Appearance default for untagged hosts and anonymous devcontainers (work/light).
-# Personal hosts override this to "dark". Termux hosts render dark regardless,
-# via `hasTag "termux"` in the theme templates — no per-host THEME needed there
-# (its hostname is an unreliable "localhost", so we key off the distro tag).
+# Appearance fallback for hosts with no desktop to ask — servers, containers,
+# anonymous devcontainers (work/light), macOS. Desktop hosts follow the
+# desktop's own light/dark setting at runtime and only land here when there's
+# no portal answering. Personal hosts override this to "dark". Termux renders
+# dark regardless, via `hasTag "termux"` in theme-mode/config.tmpl — no
+# per-host THEME needed there (its hostname is an unreliable "localhost", so
+# we key off the distro tag instead).
 THEME  = "light"

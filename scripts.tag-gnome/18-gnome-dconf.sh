@@ -13,12 +13,22 @@ w /org/gnome/desktop/peripherals/mouse/natural-scroll "true"
 w /org/gnome/desktop/peripherals/touchpad/two-finger-scrolling-enabled "true"
 
 # --- Appearance ---
-if [[ "${THEME:-dark}" == "dark" ]]; then
-  w /org/gnome/desktop/interface/color-scheme "'prefer-dark'"
+# Seed light/dark from THEME on a fresh host, then never touch it again: the
+# desktop's own setting is what theme-mode follows, so an apply that rewrote it
+# would silently undo a manual toggle. An unset key reads back empty.
+if [[ -z "$(dconf read /org/gnome/desktop/interface/color-scheme)" ]]; then
+  if [[ "${THEME:-dark}" == "dark" ]]; then
+    w /org/gnome/desktop/interface/color-scheme "'prefer-dark'"
+  else
+    w /org/gnome/desktop/interface/color-scheme "'default'"
+  fi
+fi
+# The Yaru variant follows whatever the color scheme says now — seeded above or
+# toggled by hand — rather than THEME.
+if [[ "$(dconf read /org/gnome/desktop/interface/color-scheme)" == "'prefer-dark'" ]]; then
   w /org/gnome/desktop/interface/gtk-theme "'Yaru-dark'"
   w /org/gnome/desktop/interface/icon-theme "'Yaru-dark'"
 else
-  w /org/gnome/desktop/interface/color-scheme "'default'"
   w /org/gnome/desktop/interface/gtk-theme "'Yaru'"
   w /org/gnome/desktop/interface/icon-theme "'Yaru'"
 fi
