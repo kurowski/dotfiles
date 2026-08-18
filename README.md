@@ -47,6 +47,15 @@ self-update disabled), and `rustup update` keeps both it and the toolchain
 current. Deliberately different: Claude Code self-updates, and nvm pins its
 Node version on purpose.
 
+The Music Assistant desktop companion follows the same resolve-compare-no-op
+shape without being a `~/.local/bin` binary. It's in no distro repo and not on
+Flathub, so `scripts.tag-personal/26-music-assistant.sh` installs the rpm (or
+deb) straight from its GitHub release, which is what gets it a real `.desktop`
+entry and icons. It does carry Tauri's self-updater, but that ships AppImage
+payloads only on Linux — a native package install can't consume them, so the
+script stands in for it. Arch is the exception: the AUR already tracks upstream,
+so it's a name in `00-aur-packages.sh` instead.
+
 ## Theming
 
 Everything is Catppuccin — latte when light, mocha when dark. On a desktop host

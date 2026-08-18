@@ -37,6 +37,15 @@ fi
 
 if has_tag personal; then
   pkgs+=(seadrive-gui)
+
+  # Music Assistant's desktop companion, the Arch half of
+  # scripts.tag-personal/26-music-assistant.sh — same app, but here the AUR
+  # is already watching upstream so there's no release-polling to do. The
+  # -bin package takes the upstream deb rather than rebuilding the Tauri
+  # app from source, matching the visual-studio-code-bin choice above.
+  if has_tag desktop; then
+    pkgs+=(music-assistant-desktop-bin)
+  fi
 fi
 
 paru -S --needed --noconfirm "${pkgs[@]}"
