@@ -286,16 +286,32 @@ all = ["aws-cli/classic"]
 [packages."tag:personal.tag:desktop.tag:ubuntu".snap]
 all = ["gimp", "spotify"]
 
+# Fastmail and Ente Photos have no snap, so Ubuntu gets them from Flathub
+# even though GIMP and Spotify come from snap just above.
+[packages."tag:personal.tag:desktop.tag:ubuntu".flatpak]
+all = ["com.fastmail.Fastmail", "io.ente.photos"]
+
 # Fedora has no snap; these come from Flathub instead. Scoped to
 # personal so work Fedora desktops don't pick up Spotify.
 [packages."tag:personal.tag:desktop.tag:fedora".flatpak]
-all = ["com.spotify.Client", "org.gimp.GIMP"]
+all = [
+  "com.fastmail.Fastmail",
+  "com.spotify.Client",
+  "io.ente.photos",
+  "org.gimp.GIMP",
+]
 
 # Same on Arch, and for the same reason — no snap here either. Spotify is
 # AUR-only and GIMP is in extra, but Flathub matches what the Fedora desktops
-# already do and keeps one more proprietary build out of paru's hands.
+# already do and keeps one more proprietary build out of paru's hands. Fastmail
+# and Ente Photos are Flathub-only everywhere, so there's no choice to make.
 [packages."tag:personal.tag:desktop.tag:arch".flatpak]
-all = ["com.spotify.Client", "org.gimp.GIMP"]
+all = [
+  "com.fastmail.Fastmail",
+  "com.spotify.Client",
+  "io.ente.photos",
+  "org.gimp.GIMP",
+]
 
 # Source-only zsh plugins, vendored without a plugin manager and sourced
 # from .zshrc. homie clones them on first apply, fast-forwards on later
