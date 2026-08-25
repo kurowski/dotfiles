@@ -31,5 +31,8 @@
 	navigate = true
 	features = {{ if eq .Vars.THEME "light" }}catppuccin-latte{{ else }}catppuccin-mocha{{ end }}
 
+[diff]
+	algorithm = histogram
+
 [merge]
 	conflictStyle = zdiff3
