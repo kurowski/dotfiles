@@ -33,13 +33,13 @@ hm status      # read-only summary of what hm sees
 ## Upstream binaries
 
 Tools whose packaged versions lag (atuin, neovim, starship, tpack, the
-devcontainer CLI) are installed straight from upstream releases into
-`~/.local/bin`, which `.zshrc` puts ahead of `/usr/bin` — so they win over
-any distro copy still lying around. Those scripts share
-`scripts/lib/upstream.bash` and all follow one shape: resolve the newest
-release, compare it to what's installed, no-op when they match. So `hm
-apply` keeps them current instead of freezing each one at whatever version
-its host was provisioned with.
+devcontainer CLI), or that no distro here packages at all (superfile), are
+installed straight from upstream releases into `~/.local/bin`, which `.zshrc`
+puts ahead of `/usr/bin` — so they win over any distro copy still lying
+around. Those scripts share `scripts/lib/upstream.bash` and all follow one
+shape: resolve the newest release, compare it to what's installed, no-op when
+they match. So `hm apply` keeps them current instead of freezing each one at
+whatever version its host was provisioned with.
 
 Rust follows the same rule with its own machinery: rustup is bootstrapped
 from upstream `rustup-init` (never a distro package, which builds it with
