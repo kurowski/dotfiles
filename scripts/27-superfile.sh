@@ -3,8 +3,10 @@
 # Fedora's, not in Homebrew core), so take the prebuilt binary from the
 # upstream release into ~/.local/bin (ahead of /usr/bin on PATH per .zshrc).
 #
-# The vim-like hotkeys live in .config/superfile/hotkeys.toml, symlinked by
-# Homie's home phase — see the header there for why it's vendored.
+# No config or hotkeys in this repo on purpose: spf writes its own defaults
+# into ~/.config/superfile on first run, and the stock bindings are the ones
+# we want. Upstream ships a vim-like preset in its source tree
+# (src/superfile_config/vimHotkeys.toml) — tried it, didn't stick.
 set -euo pipefail
 
 # shellcheck source=lib/upstream.bash
