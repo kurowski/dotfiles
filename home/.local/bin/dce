@@ -1,6 +1,7 @@
 #!/usr/bin/env zsh
 # devcontainer exec — ensure the dev container is up, then exec a command in
-# it (defaults to `tmux new-session -A -s devcontainer`).
+# it (defaults to attaching a per-window view of the `devcontainer` tmux
+# session — see the cmd default below).
 #
 # Args: `dce [sub] [-- cmd...]`. The `--` lets you specify a command with the
 # default config — `dce -- zsh` runs zsh in the default config, vs `dce zsh`
@@ -16,7 +17,26 @@ elif (( $# > 0 )); then
   [[ "${1:-}" == "--" ]] && shift
 fi
 cmd=("$@")
-[[ ${#cmd[@]} -eq 0 ]] && cmd=(tmux new-session -A -s devcontainer)
+# Two clients attached to the SAME tmux session share one active-window
+# pointer, so a second `dce` window would mirror the first's tab switches.
+# Instead keep `devcontainer` as a never-attached holder and give each attach
+# its own session grouped with it (`new-session -t`): sessions in a group share
+# the window list — new/renamed/killed windows show up everywhere — but each
+# tracks its own current window, so every terminal views whichever tab it likes.
+# `destroy-unattached` garbage-collects the per-window session on detach (its
+# windows survive in the holder); it has to be set AFTER the attach, because
+# tmux destroys an unattached session carrying that option immediately — hence
+# one command sequence rather than a separate `tmux set-option` call. The bare
+# `;` elements are tmux's command separators, quoted so zsh doesn't eat them
+# (they survive `devcontainer exec` as their own argv entries).
+# To mirror another window on purpose: `dce <sub> -- tmux attach -t devcontainer`.
+if [[ ${#cmd[@]} -eq 0 ]]; then
+  cmd=(
+    tmux new-session -dA -s devcontainer
+    ';' new-session -t devcontainer
+    ';' set-option destroy-unattached on
+  )
+fi
 
 # Repos that only ship sub-configs (e.g. uceap3 with .devcontainer/portal/)
 # have no default devcontainer.json — `dce` with no sub would fall through to
