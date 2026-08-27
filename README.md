@@ -157,14 +157,15 @@ Manual, set per-host via `[tags].extra`:
 
 ## Hosts
 
-| host          | distro | profile  | extra tags     | `THEME` |
-| ------------- | ------ | -------- | -------------- | ------- |
-| `coach`       | fedora | personal | desktop, kde   | dark    |
-| `uceap-dev01` | fedora | work     | desktop, kde   | light   |
-| `UCEAP-M1022` | macos  | work     | desktop        | light   |
-| `cece`        | fedora | personal | desktop, kde   | dark    |
-| `nick`        | ubuntu | personal | server         | dark    |
-| `winston`     | ubuntu | personal | server         | dark    |
+| host             | distro | profile  | extra tags   | `THEME` |
+| ---------------- | ------ | -------- | ------------ | ------- |
+| `coach`          | fedora | personal | desktop, kde | dark    |
+| `uceap-dev01`    | fedora | work     | desktop, kde | light   |
+| `UCEAP-M1022`    | macos  | work     | desktop      | light   |
+| `cece`           | fedora | personal | desktop, kde | dark    |
+| `nick`           | ubuntu | personal | server       | dark    |
+| `winston`        | ubuntu | personal | server       | dark    |
+| `uceap3-devbox`  | fedora | work     | server       | light   |
 
 `THEME` is only the fallback — the three KDE hosts follow their desktop's
 light/dark setting at runtime instead. See [Theming](#theming).
