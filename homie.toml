@@ -90,7 +90,7 @@ debian = [
 # `github-cli` not gh, `aws-cli-v2` not awscli2, `python-pip` not python3-pip,
 # and docker is one package plus two plugins rather than five (containerd
 # comes along as a dependency). nodejs is unpinned because Arch's is already
-# current — the same reason 17-nvm.sh skips here.
+# current — the same reason 13-nvm.sh skips here.
 #
 # base-devel earns its place: paru rebuilds AUR packages from source on every
 # upgrade, so the toolchain is a lasting part of the system, not just bootstrap

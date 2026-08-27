@@ -6,7 +6,7 @@ set -euo pipefail
 
 # Devcontainers ship docker on PATH but expose the host's daemon via a
 # bind-mounted socket — there's no service to enable and no group to
-# join. Same convention used by 01-rust-toolchain.sh and 13-devcontainer-cli.sh.
+# join. Same convention used by 01-rust-toolchain.sh and 17-devcontainer-cli.sh.
 case ",$HM_TAGS," in *,container,*) exit 0 ;; esac
 
 command -v docker >/dev/null 2>&1 || exit 0
