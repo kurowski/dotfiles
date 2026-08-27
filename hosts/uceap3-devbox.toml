@@ -1,0 +1,35 @@
+# Ephemeral EC2 spot host for the uceap3 devcontainer stack, launched by
+# uceap3's scripts/devbox. Headless: reached over SSH-over-SSM from a terminal,
+# then `dce` into the container. Torn down and relaunched freely, so everything
+# here has to survive a from-scratch bootstrap.
+
+[user]
+email = "bkurowski@uceap.universityofcalifornia.edu"
+
+[profile]
+name = "work"
+
+[tags]
+extra = ["server"]
+
+[vars]
+THEME      = "light"
+OP_ACCOUNT = "team-uceap"
+# No atuin sync: it needs `op` signed in, and a headless box has no 1Password
+# desktop app to unlock the CLI with. "true" would be inert at best — and once
+# someone did `op account add`, 06-atuin-sync.sh's silenced `op vault list`
+# would swallow the password prompt and hang an interactive `hm apply`. So
+# shell history does not survive a teardown here; a service-account token is
+# what would change that.
+ATUIN_SYNC = "false"
+
+# No [packages] block: Fedora's base list already carries docker-ce, the compose
+# plugin, buildx, containerd, nodejs22 and npm, and
+# scripts.tag-fedora/pre-01-fedora-repos.sh adds Docker's repo — so a headless
+# Fedora host needs nothing extra. (The equivalent Ubuntu host would need all of
+# it declared here, which is why this box runs Fedora.)
+#
+# The base list also pulls the desktop apps — code, ghostty, 1password,
+# deskflow, ddcutil — since every other Fedora host here is a desktop. Kept
+# deliberately: a remote desktop on this box is a live possibility, and flipping
+# `extra` to ["desktop", ...] is then the only change needed.

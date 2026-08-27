@@ -10,6 +10,18 @@
 set -euo pipefail
 
 case ",$HM_TAGS," in *,container,*) exit 0 ;; esac
+
+# On Ubuntu/Debian nvm is the only source of node (13-nvm.sh), and it is
+# installed with PROFILE=/dev/null so it adds itself to no shell rc. .zshrc
+# sources it for interactive shells, which a non-interactive hm script never
+# is — so source it here the same way 13-nvm.sh does. Without this the probe
+# below always fails on those distros and the CLI silently never installs,
+# whatever order the scripts run in.
+if [[ -s "$HOME/.nvm/nvm.sh" ]]; then
+  # shellcheck disable=SC1091
+  . "$HOME/.nvm/nvm.sh"
+fi
+
 command -v npm >/dev/null 2>&1 || exit 0
 
 bin="$HOME/.local/bin/devcontainer"
