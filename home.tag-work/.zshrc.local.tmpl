@@ -1,7 +1,15 @@
+{{ if hasTag "desktop" -}}
 # Load secrets — prefer systemd user environment (seeded by op-env-session
 # at KDE login), fall back to `op inject` for shells outside the session
 # (e.g., SSH). $OP_SESSION_LOADED is the marker set after a successful
 # session-time inject.
+#
+# Desktop hosts only. Both paths need the 1Password desktop app: one reads
+# what op-env-session put in the session at graphical login, the other calls
+# `op inject`, which has no way to unlock the CLI without the app and so sits
+# at an account-setup prompt on every single login of a headless box. Work
+# hosts without a desktop (uceap3-devbox) get their secrets pushed in by
+# whatever provisions them — uceap3's scripts/devbox writes ~/.uceap3-env.
 #
 # Skip entirely inside containers: there's no systemd user session and no
 # 1Password desktop app for `op inject` to talk to, so the call hangs
@@ -23,6 +31,7 @@ if [ -z "$OP_SESSION_LOADED" ] \
   unset _senv _vars _v
 fi
 
+{{ end -}}
 if [[ -n "${ANTHROPIC_FOUNDRY_API_KEY:-}" ]]; then
   export CLAUDE_CODE_USE_FOUNDRY="1"
   export ANTHROPIC_FOUNDRY_RESOURCE="uceap-claude-test-resource"
