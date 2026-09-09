@@ -8,3 +8,11 @@ extra = ["desktop", "kde"]
 THEME      = "dark"
 OP_ACCOUNT = "my"
 ATUIN_SYNC = "false"
+
+# The only host with the Creative Pebble X Plus speakers, whose volume quirk
+# home.tag-coach/ and scripts.tag-coach/ carry. alsa-utils is here for amixer,
+# which 25-pebble-hw-volume.sh needs: nothing in the Fedora KDE spin depends on
+# it, so a fresh install can't be assumed to have it. Hardware, not profile —
+# a plain [packages] block, as with fprintd on uceap-dev01.
+[packages]
+fedora = ["alsa-utils"]
