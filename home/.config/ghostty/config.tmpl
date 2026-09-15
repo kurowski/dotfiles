@@ -1,5 +1,13 @@
 font-family = JetBrainsMono Nerd Font
+{{- if hasTag "macos" }}
+# macOS measures type in real points against a 72dpi logical display, while
+# every other desktop here reads "pt" at 96dpi — so the same number renders
+# about a quarter smaller on a Mac. 13 is the physical match for the 10 below,
+# and ghostty's own macOS default.
+font-size = 13
+{{- else }}
 font-size = 10
+{{- end }}
 {{- if and (hasTag "desktop") (not (hasTag "macos")) }}
 # ghostty reads the desktop's light/dark setting itself (the same portal
 # setting theme-mode watches), so this needs no help from us. eza and

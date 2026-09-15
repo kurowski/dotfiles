@@ -231,7 +231,7 @@ macos = [
   "1password/cask",
   "btop",
   "deskflow/cask",
-  "font-monaspace-nerd-font/cask",
+  "font-jetbrains-mono-nerd-font/cask",
   "ghostty/cask",
   "go",
   "google-chrome/cask",
