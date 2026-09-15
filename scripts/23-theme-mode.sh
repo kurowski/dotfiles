@@ -15,12 +15,28 @@ theme_mode="$HOME/.local/bin/theme-mode"
 "$theme_mode" reload
 
 # Everything below is the watcher, which only makes sense with a desktop session
-# and a portal to ask. Every desktop host gets one, not just the ones whose
-# desktop switches on a schedule: a manual toggle is the same portal signal, and
-# tmux and nvim need the nudge either way. macOS publishes its appearance
-# somewhere else entirely, so those hosts stay pinned to THEME.
+# to follow. Every desktop host gets one, not just the ones whose desktop
+# switches on a schedule: a manual toggle is the same signal, and tmux and nvim
+# need the nudge either way.
+#
+# macOS gets there by a different route. There's no appearance signal on a bus,
+# but the setting does land in a file, so launchd's WatchPaths is the watcher
+# and there's no long-running process to supervise — hence a one-shot `reload`
+# job rather than `theme-mode watch`. See the plist for the measurements.
 case ",$HM_TAGS," in
-  *,macos,*|*,container,*) exit 0 ;;
+  *,macos,*)
+    plist="$HOME/Library/LaunchAgents/net.kurowski.theme-mode.plist"
+    [[ -e "$plist" ]] || { echo "theme-mode.plist not applied yet; skipping" >&2; exit 0; }
+
+    # bootout-then-bootstrap for the same reason the Linux path does
+    # daemon-reload-then-restart: launchd caches the job it loaded, so an edited
+    # plist doesn't take until the old one is gone. Tolerate the bootout
+    # failing — on a first apply there's nothing loaded to remove.
+    launchctl bootout "gui/$(id -u)/net.kurowski.theme-mode" 2>/dev/null || true
+    launchctl bootstrap "gui/$(id -u)" "$plist"
+    exit 0
+    ;;
+  *,container,*) exit 0 ;;
   *,desktop,*) ;;
   *) exit 0 ;;  # servers: nothing to follow
 esac

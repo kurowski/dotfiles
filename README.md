@@ -63,22 +63,30 @@ the desktop decides and the CLI/TUI stack follows it live, so it doesn't matter
 whether the flip came from KDE's own sunrise/sunset schedule (cece) or from
 toggling it by hand (everywhere else) — both are the same signal. The `THEME`
 var (`light` / `dark`) is the fallback for when there's no desktop to ask: the
-servers, containers, an SSH session with no session bus of its own, and macOS.
+servers, containers, and an SSH session with no session bus of its own.
 
-Following works because KDE and GNOME both publish the setting over the XDG
+On Linux that works because KDE and GNOME both publish the setting over the XDG
 desktop portal (`org.freedesktop.appearance color-scheme`), and emit a signal
 when it changes. `~/.local/bin/theme-mode` resolves the setting into
 `~/.local/state/theme-mode/`, and `theme-mode.service` — enabled on every Linux
 desktop host by `scripts/23-theme-mode.sh` — watches the portal and re-resolves
-on every change. macOS is the one desktop left out: it keeps its appearance off
-the portal, so `UCEAP-M1022` stays pinned to `THEME`.
+on every change.
+
+macOS answers the same question from `AppleInterfaceStyle`, which reads `Dark`
+in dark mode and is absent entirely in light mode, and there's no bus to
+monitor. The change does reach the filesystem though — toggling the appearance
+rewrites `~/Library/Preferences/.GlobalPreferences.plist` a second or so later
+— so `net.kurowski.theme-mode.plist` hands the watching to launchd's own
+`WatchPaths` and runs `theme-mode reload` one-shot on each change. Nothing to
+supervise, so there's no macOS counterpart to `theme-mode watch`. The lag is
+whenever `cfprefsd` flushes: usually a second or two, up to about ten.
 
 Getting from there to a repainted terminal takes three different mechanisms,
 because the tools don't agree on how to be told:
 
-- **ghostty needs nothing.** It reads the same portal setting itself, given
-  `theme = light:…,dark:…`. eza and zsh-patina only ever use the 8 ANSI colors,
-  so they follow ghostty for free.
+- **ghostty needs nothing.** Given `theme = light:…,dark:…` it reads the system
+  setting itself — the portal on Linux, the appearance on macOS. eza and
+  zsh-patina only ever use the 8 ANSI colors, so they follow ghostty for free.
 - **Anything that starts fresh reads the environment.** `.zshrc` re-exports
   `BAT_THEME`, `DELTA_FEATURES`, `FZF_DEFAULT_OPTS_FILE`, `LG_CONFIG_FILE` and
   `STARSHIP_CONFIG` on every prompt, so shells that were *already open* when the
@@ -167,8 +175,8 @@ Manual, set per-host via `[tags].extra`:
 | `winston`        | ubuntu | personal | server       | dark    |
 | `uceap3-devbox`  | fedora | work     | server       | light   |
 
-`THEME` is only the fallback — the three KDE hosts follow their desktop's
-light/dark setting at runtime instead. See [Theming](#theming).
+`THEME` is only the fallback — the three KDE hosts and the Mac follow their
+desktop's light/dark setting at runtime instead. See [Theming](#theming).
 
 ## Secrets
 

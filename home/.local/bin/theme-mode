@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 # theme-mode — one source of truth for light vs. dark across the CLI/TUI stack.
 #
-# The desktop decides. KDE and GNOME both publish their light/dark setting over
-# the XDG desktop portal (org.freedesktop.appearance color-scheme) and signal
-# when it changes, so every desktop host follows it — whether the flip came from
-# KDE's own sunrise/sunset schedule or from you toggling it by hand.
+# The desktop decides, on every desktop host. KDE and GNOME both publish their
+# light/dark setting over the XDG desktop portal (org.freedesktop.appearance
+# color-scheme) and signal when it changes; macOS keeps the same answer in a
+# global preference (AppleInterfaceStyle) instead. Either way the flip is
+# followed whether it came from a sunrise/sunset schedule or from you toggling
+# it by hand.
 #
 # THEME, from the host's [vars], is the fallback for when there's no desktop to
 # ask: a server, a container, or an SSH session with no session bus of its own.
@@ -18,8 +20,9 @@
 #     which can't be reached through the environment.
 #
 # ghostty is deliberately absent: it has native light:/dark: theme support and
-# reads the same portal setting itself. zsh-patina and eza ride on the 8 ANSI
-# colors, so they follow ghostty for free.
+# reads the system setting itself — the portal on Linux, the appearance on
+# macOS. zsh-patina and eza ride on the 8 ANSI colors, so they follow ghostty
+# for free.
 set -euo pipefail
 
 config="${XDG_CONFIG_HOME:-$HOME/.config}/theme-mode/config"
@@ -58,10 +61,22 @@ portal_mode() {
   esac
 }
 
-# The desktop wins wherever one answers. THEME covers everywhere else: no
-# portal, or a portal with no preference to state.
+# macOS publishes the same setting as a global preference rather than over a
+# bus: AppleInterfaceStyle reads "Dark" in dark mode and is absent entirely in
+# light mode. `defaults` exits non-zero on the missing key, which is the light
+# answer and not an error, so only the uname check can rule the source out.
+macos_mode() {
+  [[ "$(uname -s)" == Darwin ]] || return 1
+  case "$(defaults read -g AppleInterfaceStyle 2>/dev/null)" in
+    Dark*) echo dark ;;
+    *)     echo light ;;
+  esac
+}
+
+# The desktop wins wherever one answers, whichever way it answers. THEME covers
+# everywhere else: no portal, or a portal with no preference to state.
 resolve() {
-  portal_mode || echo "$THEME"
+  portal_mode || macos_mode || echo "$THEME"
 }
 
 flavor() {
@@ -79,6 +94,16 @@ write_if_changed() {
     return 1
   fi
   mv "$tmp" "$dest"
+}
+
+nvim_run_dir() {
+  if [[ -n "${XDG_RUNTIME_DIR:-}" ]]; then
+    echo "$XDG_RUNTIME_DIR"
+  elif [[ "$(uname -s)" == Darwin ]]; then
+    echo "${TMPDIR:-/tmp}/nvim.${USER:-$(id -un)}"
+  else
+    echo "/run/user/$(id -u)"
+  fi
 }
 
 # Repaint the tmux servers and nvim instances that are already running. Neither
@@ -106,13 +131,16 @@ push_live() {
   # nvim keeps a live TermResponse autocmd that reacts to 'background'
   # changing, and colorscheme.lua hangs a re-colorscheme off OptionSet — so
   # setting the option is enough to re-theme a running editor.
-  if command -v nvim >/dev/null 2>&1; then
+  #
+  # Its sockets live under stdpath('run'), which is $XDG_RUNTIME_DIR where
+  # there is one and a per-session directory under $TMPDIR on macOS, where
+  # there isn't — so search a level down rather than assume either layout.
+  if command -v nvim >/dev/null 2>&1 && [[ -d "$(nvim_run_dir)" ]]; then
     local sock
-    for sock in "${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"/nvim.*; do
-      [[ -S "$sock" ]] || continue
+    while IFS= read -r sock; do
       nvim --server "$sock" --remote-expr \
         "execute('set background=$mode')" >/dev/null 2>&1 || true
-    done
+    done < <(find "$(nvim_run_dir)" -maxdepth 2 -type s -name 'nvim.*' 2>/dev/null)
   fi
 }
 
@@ -146,7 +174,17 @@ reload() {
 # Follow the desktop for as long as we're running. The portal emits
 # SettingChanged the moment the desktop flips, and a manual toggle looks exactly
 # like KDE's own sunrise/sunset schedule from here, so there's nothing to poll.
+#
+# Portal only. macOS has no bus to monitor, and nothing to supervise either:
+# launchd watches the preference file itself and runs `reload` on each change,
+# so the long-running half of this script has no macOS counterpart.
 watch() {
+  if [[ "$(uname -s)" == Darwin ]]; then
+    echo "no portal to watch on macOS; launchd runs 'reload' instead" >&2
+    reload
+    return 0
+  fi
+
   reload
   gdbus monitor --session \
     --dest org.freedesktop.portal.Desktop \

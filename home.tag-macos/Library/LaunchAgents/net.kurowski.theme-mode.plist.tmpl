@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Follow the macOS light/dark setting for CLI and TUI themes — the launchd
+  counterpart to theme-mode.service, loaded by scripts/23-theme-mode.sh.
+
+  It runs `theme-mode reload` one-shot rather than `theme-mode watch`: there is
+  no appearance signal on a bus to monitor here, and the change does reach the
+  filesystem, so launchd's own WatchPaths is the watcher and there's no daemon
+  to supervise. Toggling the appearance rewrites .GlobalPreferences.plist about
+  a second later — measured in both directions, and the same write happens when
+  macOS flips on its own sunrise/sunset schedule.
+
+  Paths are absolute because launchd expands neither ~ nor $HOME in WatchPaths;
+  homie renders them from the template.
+
+  PATH is spelled out because launchd hands an agent a bare
+  /usr/bin:/bin:/usr/sbin:/sbin, and `reload` reaches for tmux and nvim to
+  repaint what's already running — both of which live in the brew prefix.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>net.kurowski.theme-mode</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>{{ env "HOME" }}/.local/bin/theme-mode</string>
+    <string>reload</string>
+  </array>
+
+  <key>WatchPaths</key>
+  <array>
+    <string>{{ env "HOME" }}/Library/Preferences/.GlobalPreferences.plist</string>
+  </array>
+
+  <!-- Resolve once at login too, for the same reason the Linux script runs a
+       reload on every apply: a session that starts in dark mode shouldn't wait
+       for the next toggle to find out. -->
+  <key>RunAtLoad</key>
+  <true/>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+  </dict>
+
+  <key>ProcessType</key>
+  <string>Background</string>
+
+  <!-- journald's stand-in: without this the output of a failing reload is
+       dropped, and this job only ever speaks up when something is wrong. -->
+  <key>StandardErrorPath</key>
+  <string>{{ env "HOME" }}/Library/Logs/theme-mode.log</string>
+</dict>
+</plist>
