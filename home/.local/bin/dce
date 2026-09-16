@@ -59,6 +59,7 @@ config_arg=()
 # the compose project that carries a devcontainer.metadata label) and pass its
 # id via --container-id.
 container_id_arg=()
+id_label_arg=()
 container_id=""
 compose_file=""
 for candidate in docker-compose.yml docker-compose.yaml compose.yml compose.yaml; do
@@ -84,9 +85,14 @@ if [[ -n "$compose_file" ]]; then
     [[ -n "$container_id" ]] && container_id_arg=(--container-id "$container_id")
   fi
 else
-  # Non-compose: dcu applied --id-label, so look up by that.
+  # Non-compose: dcu passed --id-label, and the CLI treats those as a REPLACEMENT
+  # for the default devcontainer.local_folder / devcontainer.config_file labels
+  # rather than an addition — so exec's default lookup matches nothing and dies
+  # with "Dev container not found." Hand the same label back to exec.
+  # (Compose configs dodge this because they take the --container-id path above.)
   label="project=$(basename "$PWD")"
   [[ -n "$sub" ]] && label="$label/$sub"
+  id_label_arg=(--id-label "$label")
   container_id=$(docker ps --filter "label=$label" --format "{{.ID}}" | head -1)
 fi
 
@@ -115,4 +121,5 @@ devcontainer exec \
   "${remote_env[@]}" \
   "${config_arg[@]}" \
   "${container_id_arg[@]}" \
+  "${id_label_arg[@]}" \
   "${cmd[@]}"
