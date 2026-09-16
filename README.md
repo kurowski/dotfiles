@@ -56,6 +56,20 @@ payloads only on Linux — a native package install can't consume them, so the
 script stands in for it. Arch is the exception: the AUR already tracks upstream,
 so it's a name in `00-aur-packages.sh` instead.
 
+`asdbctl` — brightness for the Apple Studio Display on `uceap-dev01`, which
+answers no DDC/CI, so the `ddcutil` in the base list can't reach it — is the
+third variation. Upstream ships no prebuilt binaries for any platform, so it's
+`cargo install --git --tag` rather than a release download, and the version it
+compares against comes from `cargo install --list` because the binary carries no
+`--version` flag. Two things fall out of that. It's the one script that installs
+a file outside `$HOME` (upstream's udev rule, so hidraw isn't root-only and the
+tool works without sudo), written only when it differs so a re-apply doesn't
+prompt. And it's the first `scripts.tag-<hostname>/` directory: the short
+hostname is an auto-derived tag like any other, so gating on it needs no new
+machinery — it's just narrower than `desktop`, which is the right scope for a
+display sitting on exactly one desk. `systemd-devel`, the build dep its hidapi
+crate needs, is scoped the same way, next to `fprintd` in that host's overlay.
+
 ## Theming
 
 Everything is Catppuccin — latte when light, mocha when dark. On a desktop host

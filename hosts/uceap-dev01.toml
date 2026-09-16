@@ -13,15 +13,23 @@ OP_ACCOUNT  = "team-uceap"
 ATUIN_SYNC  = "true"
 ATUIN_VAULT = "Employee"
 
-# The only host with a fingerprint reader, so fprintd is scoped here rather than
-# sitting in the base Fedora list where coach would pick it up too. Hardware, not
-# profile — hence a plain [packages] block rather than the work-tagged one below.
+# Hardware, not profile — hence a plain [packages] block rather than the
+# work-tagged one below. Both entries here are things no other host has the
+# devices for.
 #
-# Enrollment only: nothing here wires pam_fprintd into /etc/pam.d, because
+# fprintd: the only host with a fingerprint reader, so it's scoped here rather
+# than sitting in the base Fedora list where coach would pick it up too.
+# Enrollment only — nothing here wires pam_fprintd into /etc/pam.d, because
 # scripts/21-fprintd-pam.sh is pam-auth-update and that's Debian-only. On Fedora
 # that's `authselect enable-feature with-fingerprint`, still done by hand.
+#
+# systemd-devel: the only host with an Apple Studio Display, whose brightness
+# needs asdbctl (scripts.tag-uceap-dev01/28-asdbctl.sh) because the display
+# speaks no DDC/CI for ddcutil to use. It's a build dep, not a runtime one —
+# asdbctl is built from source, and its hidapi crate compiles the bundled
+# hidraw backend against libudev. gcc and pkgconf are already in the base list.
 [packages]
-fedora = ["fprintd"]
+fedora = ["fprintd", "systemd-devel"]
 
 [packages."tag:work"]
 fedora = [
