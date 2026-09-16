@@ -18,7 +18,7 @@ OP_ACCOUNT = "team-uceap"
 # No atuin sync: it needs `op` signed in, and a headless box has no 1Password
 # desktop app to unlock the CLI with. "true" would be inert at best — and once
 # someone did `op account add`, 06-atuin-sync.sh's silenced `op vault list`
-# would swallow the password prompt and hang an interactive `hm apply`. So
+# would swallow the password prompt and hang an interactive `homie apply`. So
 # shell history does not survive a teardown here; a service-account token is
 # what would change that.
 ATUIN_SYNC = "false"

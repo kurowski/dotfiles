@@ -11,7 +11,7 @@
 # XDG config stays the only place terminal settings live.
 set -euo pipefail
 
-case ",$HM_TAGS," in *,macos,*) ;; *) exit 0 ;; esac
+case ",$HOMIE_TAGS," in *,macos,*) ;; *) exit 0 ;; esac
 
 native="$HOME/Library/Application Support/com.mitchellh.ghostty/config"
 [[ -e "$native" ]] || exit 0

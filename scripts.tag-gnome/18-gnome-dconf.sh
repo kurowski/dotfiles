@@ -61,7 +61,7 @@ w /org/gnome/shell/extensions/dash-to-dock/show-trash "false"
 
 # Dock favorites — personal default; future work GNOME hosts would
 # need a host-overlay-driven list (not modeled yet).
-if case ",$HM_TAGS," in *,personal,*) true ;; *) false ;; esac; then
+if case ",$HOMIE_TAGS," in *,personal,*) true ;; *) false ;; esac; then
   w /org/gnome/shell/favorite-apps "['org.gnome.Nautilus.desktop', '1password.desktop', 'md.obsidian.Obsidian.desktop', 'com.mitchellh.ghostty.desktop', 'firefox.desktop', 'code_code.desktop', 'spotify_spotify.desktop', 'snap-store_snap-store.desktop']"
 fi
 

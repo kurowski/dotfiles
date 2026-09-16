@@ -15,7 +15,7 @@ if systemctl is-enabled display-manager.service >/dev/null 2>&1; then
 fi
 
 # No --now. Starting a display manager takes over the console, which mid-apply
-# means yanking the session running `hm apply`. Enabling it is enough — it
+# means yanking the session running `homie apply`. Enabling it is enough — it
 # comes up on the next boot, and provisioning a fresh install ends in one
 # anyway.
 sudo systemctl enable sddm

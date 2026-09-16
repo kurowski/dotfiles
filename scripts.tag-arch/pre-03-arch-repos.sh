@@ -6,7 +6,7 @@
 # is already in place so re-runs don't need sudo.
 set -euo pipefail
 
-has_tag() { case ",$HM_TAGS," in *,"$1",*) return 0 ;; *) return 1 ;; esac; }
+has_tag() { case ",$HOMIE_TAGS," in *,"$1",*) return 0 ;; *) return 1 ;; esac; }
 
 # steam is in multilib, which a stock install ships commented out. Append the
 # stanza rather than uncommenting the one in place: the check and the edit
@@ -20,7 +20,7 @@ if ! grep -qE '^\[multilib\]' /etc/pacman.conf; then
   # deliberately never refreshes one — homie treats `pacman -Sy` followed by
   # an install as the partial-upgrade footgun it is. A full -Syu is the only
   # safe refresh, so it runs here, once, on the apply that flips multilib on.
-  # Not on every apply: `hm apply` shouldn't hold the power to upgrade a
+  # Not on every apply: `homie apply` shouldn't hold the power to upgrade a
   # rolling system unattended.
   sudo pacman -Syu --noconfirm
 fi

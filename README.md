@@ -8,15 +8,15 @@ Personal multi-host setup for Fedora, Arch, Ubuntu, and macOS, managed by [Homie
 curl -fsSL https://raw.githubusercontent.com/kurowski/dotfiles/main/bootstrap.sh | bash
 ```
 
-That downloads `hm`, clones this repo to `~/Projects/dotfiles`, and runs `hm apply`.
+That downloads `homie`, clones this repo to `~/Projects/dotfiles`, and runs `homie apply`.
 
 ## Day-to-day
 
 ```sh
-hm apply       # full reconcile (packages + dotfiles + scripts)
-hm home        # just refresh dotfile symlinks + templates
-hm doctor      # check for broken symlinks / drift
-hm status      # read-only summary of what hm sees
+homie apply   # full reconcile (packages + dotfiles + scripts)
+homie home    # just refresh dotfile symlinks + templates
+homie doctor  # check for broken symlinks / drift
+homie status  # read-only summary of what homie sees
 ```
 
 ## Layout
@@ -38,7 +38,7 @@ installed straight from upstream releases into `~/.local/bin`, which `.zshrc`
 puts ahead of `/usr/bin` — so they win over any distro copy still lying
 around. Those scripts share `scripts/lib/upstream.bash` and all follow one
 shape: resolve the newest release, compare it to what's installed, no-op when
-they match. So `hm apply` keeps them current instead of freezing each one at
+they match. So `homie apply` keeps them current instead of freezing each one at
 whatever version its host was provisioned with.
 
 Rust follows the same rule with its own machinery: rustup is bootstrapped
@@ -145,7 +145,7 @@ asked for a group, so Homie can't tell a complete one from a missing one.
 
 Arch is also the one distro where the desktop itself is declared here
 (`[packages."tag:kde"]` → `plasma-meta`, `sddm`). Everywhere else the KDE spin
-or the Ubuntu installer provides it. That makes `hm apply` enough to take a
+or the Ubuntu installer provides it. That makes `homie apply` enough to take a
 base Arch install to a working Plasma session on the next boot.
 
 No host currently carries the `arch` tag — cece moved to Arch and back — so all

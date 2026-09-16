@@ -45,7 +45,7 @@ gpgkey=https://downloads.1password.com/linux/keys/1password.asc
 EOF
 fi
 
-if [[ ",$HM_TAGS," == *,desktop,* ]]; then
+if [[ ",$HOMIE_TAGS," == *,desktop,* ]]; then
   # Claude Desktop, unofficial Fedora/RHEL packaging:
   # https://github.com/aaddrick/claude-desktop-debian
   if [[ ! -f /etc/yum.repos.d/claude-desktop-unofficial.repo ]]; then
@@ -54,7 +54,7 @@ if [[ ",$HM_TAGS," == *,desktop,* ]]; then
   fi
 fi
 
-if [[ ",$HM_TAGS," == *,work,* ]]; then
+if [[ ",$HOMIE_TAGS," == *,work,* ]]; then
   if [[ ! -f /etc/yum.repos.d/google-chrome.repo ]]; then
     sudo rpm --import https://dl.google.com/linux/linux_signing_key.pub
     sudo tee /etc/yum.repos.d/google-chrome.repo >/dev/null <<'EOF'
@@ -98,7 +98,7 @@ EOF
   fi
 fi
 
-if [[ ",$HM_TAGS," == *,personal,* ]]; then
+if [[ ",$HOMIE_TAGS," == *,personal,* ]]; then
   # RPM Fusion free + nonfree — required for Steam (nonfree) and full
   # ffmpeg/codecs (free). The release RPMs drop the .repo file + GPG key.
   if ! rpm -q rpmfusion-free-release >/dev/null 2>&1; then

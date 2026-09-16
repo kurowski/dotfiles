@@ -31,7 +31,7 @@ gen() {
   fi
 }
 
-command -v hm        >/dev/null 2>&1 && gen _hm        hm completion zsh
+command -v homie     >/dev/null 2>&1 && gen _homie     homie completion zsh
 command -v atuin     >/dev/null 2>&1 && gen _atuin     atuin gen-completions --shell zsh
 command -v gh        >/dev/null 2>&1 && gen _gh        gh completion -s zsh
 command -v docker    >/dev/null 2>&1 && gen _docker    docker completion zsh

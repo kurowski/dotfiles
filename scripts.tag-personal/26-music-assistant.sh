@@ -3,7 +3,7 @@
 # COPR — upstream publishes a per-release rpm and deb on GitHub and
 # nothing is watching those for new versions. So this follows the same
 # shape as the upstream-binary scripts: resolve the newest release,
-# compare it to what's installed, no-op when they match. `hm apply`
+# compare it to what's installed, no-op when they match. `homie apply`
 # carries the upgrades instead of freezing the app at whatever version
 # the host was provisioned with.
 #
@@ -21,12 +21,12 @@
 set -euo pipefail
 
 # upstream.bash lives beside the untagged scripts; this one is gated by
-# its directory, so reach across rather than through $HM_REPO — same
+# its directory, so reach across rather than through $HOMIE_REPO — same
 # reasoning as the comment in the lib itself, just one level further out.
 # shellcheck source=../scripts/lib/upstream.bash
 . "$(dirname "${BASH_SOURCE[0]}")/../scripts/lib/upstream.bash"
 
-has_tag() { case ",$HM_TAGS," in *,"$1",*) return 0 ;; *) return 1 ;; esac; }
+has_tag() { case ",$HOMIE_TAGS," in *,"$1",*) return 0 ;; *) return 1 ;; esac; }
 
 has_tag desktop || exit 0
 

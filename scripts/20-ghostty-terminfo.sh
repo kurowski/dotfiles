@@ -4,7 +4,7 @@
 # `ghostty` entry; alias it so curses apps and remote sshd find it.
 set -euo pipefail
 
-case ",$HM_TAGS," in *,debian,*|*,ubuntu,*) ;; *) exit 0 ;; esac
+case ",$HOMIE_TAGS," in *,debian,*|*,ubuntu,*) ;; *) exit 0 ;; esac
 [[ -f /usr/share/terminfo/g/ghostty ]] || exit 0
 [[ -f /usr/share/terminfo/x/xterm-ghostty ]] && exit 0
 

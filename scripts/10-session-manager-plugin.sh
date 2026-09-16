@@ -4,7 +4,7 @@
 # that version, upgrades when AWS publishes a new one.
 set -euo pipefail
 
-case ",$HM_TAGS," in *,work,*) ;; *) exit 0 ;; esac
-case ",$HM_TAGS," in *,fedora,*) ;; *) exit 0 ;; esac
+case ",$HOMIE_TAGS," in *,work,*) ;; *) exit 0 ;; esac
+case ",$HOMIE_TAGS," in *,fedora,*) ;; *) exit 0 ;; esac
 
 sudo dnf install -y https://s3.amazonaws.com/session-manager-downloads/plugin/latest/linux_64bit/session-manager-plugin.rpm

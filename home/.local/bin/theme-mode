@@ -83,7 +83,7 @@ flavor() {
   if [[ "$1" == dark ]]; then echo "$dark_flavor"; else echo "$light_flavor"; fi
 }
 
-# Write only when the content actually changes, so watchers and `hm doctor`
+# Write only when the content actually changes, so watchers and `homie doctor`
 # don't see churn on every apply.
 write_if_changed() {
   local dest=$1

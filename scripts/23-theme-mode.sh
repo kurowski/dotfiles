@@ -23,7 +23,7 @@ theme_mode="$HOME/.local/bin/theme-mode"
 # but the setting does land in a file, so launchd's WatchPaths is the watcher
 # and there's no long-running process to supervise — hence a one-shot `reload`
 # job rather than `theme-mode watch`. See the plist for the measurements.
-case ",$HM_TAGS," in
+case ",$HOMIE_TAGS," in
   *,macos,*)
     plist="$HOME/Library/LaunchAgents/net.kurowski.theme-mode.plist"
     [[ -e "$plist" ]] || { echo "theme-mode.plist not applied yet; skipping" >&2; exit 0; }

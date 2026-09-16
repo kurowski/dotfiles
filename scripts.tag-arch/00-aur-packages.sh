@@ -17,7 +17,7 @@ set -euo pipefail
 command -v paru >/dev/null 2>&1 \
   || { echo "paru not found; skipping AUR packages" >&2; exit 0; }
 
-has_tag() { case ",$HM_TAGS," in *,"$1",*) return 0 ;; *) return 1 ;; esac; }
+has_tag() { case ",$HOMIE_TAGS," in *,"$1",*) return 0 ;; *) return 1 ;; esac; }
 
 pkgs=(
   # Fedora gets both of these from 1Password's own dnf repo.

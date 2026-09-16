@@ -10,7 +10,7 @@
 # apply, and a real download when a release lands.
 set -euo pipefail
 
-case ",$HM_TAGS," in *,container,*) exit 0 ;; esac
+case ",$HOMIE_TAGS," in *,container,*) exit 0 ;; esac
 
 case "$(uname -s)_$(uname -m)" in
   Linux_x86_64)  target="x86_64-unknown-linux-gnu" ;;

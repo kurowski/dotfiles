@@ -7,14 +7,14 @@ set -euo pipefail
 # Devcontainers ship docker on PATH but expose the host's daemon via a
 # bind-mounted socket — there's no service to enable and no group to
 # join. Same convention used by 01-rust-toolchain.sh and 17-devcontainer-cli.sh.
-case ",$HM_TAGS," in *,container,*) exit 0 ;; esac
+case ",$HOMIE_TAGS," in *,container,*) exit 0 ;; esac
 
 command -v docker >/dev/null 2>&1 || exit 0
 
 # Docker Desktop on macOS self-manages its daemon and runs as the GUI
 # user — no systemctl service, no docker group. Skip both steps; GHCR
 # login below is still useful.
-case ",$HM_TAGS," in *,macos,*) ;; *)
+case ",$HOMIE_TAGS," in *,macos,*) ;; *)
   if ! systemctl is-enabled docker >/dev/null 2>&1; then
     sudo systemctl enable --now docker
   fi

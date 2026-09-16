@@ -24,7 +24,7 @@ command -v flatpak >/dev/null 2>&1 || exit 0
 
 # Desktop hosts only, and never macOS: there Obsidian is a brew cask and flatpak
 # doesn't exist at all.
-case ",$HM_TAGS," in
+case ",$HOMIE_TAGS," in
   *,macos,*) exit 0 ;;
   *,desktop,*) ;;
   *) exit 0 ;;  # servers: no flatpak apps

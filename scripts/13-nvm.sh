@@ -6,7 +6,7 @@
 # manager*, so tracking upstream is `nvm install`'s job, not homie's.
 set -euo pipefail
 
-case ",$HM_TAGS," in *,ubuntu,*|*,debian,*) ;; *) exit 0 ;; esac
+case ",$HOMIE_TAGS," in *,ubuntu,*|*,debian,*) ;; *) exit 0 ;; esac
 
 NVM_VERSION="v0.40.3"
 NVM_DIR="$HOME/.nvm"

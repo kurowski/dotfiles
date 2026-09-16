@@ -3,13 +3,13 @@
 #
 #   . "$(dirname "${BASH_SOURCE[0]}")/lib/upstream.bash"
 #
-# (rather than via $HM_REPO, so the scripts still run when invoked by hand)
+# (rather than via $HOMIE_REPO, so the scripts still run when invoked by hand)
 #
-# Lives in a subdirectory with a .bash extension so `hm run`'s scripts/*.sh
+# Lives in a subdirectory with a .bash extension so `homie run`'s scripts/*.sh
 # glob never picks it up as a script in its own right.
 #
 # The shape every caller follows: resolve the newest release, compare it to
-# what's installed, and no-op when they match. That keeps `hm apply` cheap on
+# what's installed, and no-op when they match. That keeps `homie apply` cheap on
 # a current host while still pulling upgrades — the install-once guard these
 # scripts used to carry meant a binary was frozen at whatever version the
 # host happened to be provisioned with.

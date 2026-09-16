@@ -16,7 +16,7 @@
 # same brief audio gap the rule needs anyway.
 set -euo pipefail
 
-case ",$HM_TAGS," in *,container,*) exit 0 ;; esac
+case ",$HOMIE_TAGS," in *,container,*) exit 0 ;; esac
 command -v amixer >/dev/null 2>&1 || exit 0
 command -v pw-dump >/dev/null 2>&1 || exit 0
 command -v systemctl >/dev/null 2>&1 || exit 0

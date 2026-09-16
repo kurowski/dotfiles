@@ -9,11 +9,11 @@
 # it's worth the ~10s of running it.
 set -euo pipefail
 
-case ",$HM_TAGS," in *,container,*) exit 0 ;; esac
+case ",$HOMIE_TAGS," in *,container,*) exit 0 ;; esac
 
 # On Ubuntu/Debian nvm is the only source of node (13-nvm.sh), and it is
 # installed with PROFILE=/dev/null so it adds itself to no shell rc. .zshrc
-# sources it for interactive shells, which a non-interactive hm script never
+# sources it for interactive shells, which a non-interactive homie script never
 # is — so source it here the same way 13-nvm.sh does. Without this the probe
 # below always fails on those distros and the CLI silently never installs,
 # whatever order the scripts run in.

@@ -5,7 +5,7 @@
 # Each step short-circuits when its target is already in place.
 set -euo pipefail
 
-has_tag() { case ",$HM_TAGS," in *,"$1",*) return 0 ;; *) return 1 ;; esac; }
+has_tag() { case ",$HOMIE_TAGS," in *,"$1",*) return 0 ;; *) return 1 ;; esac; }
 
 sudo install -d -m 0755 /etc/apt/keyrings
 

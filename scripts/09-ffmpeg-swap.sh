@@ -4,7 +4,7 @@
 # the swap has happened.
 set -euo pipefail
 
-case ",$HM_TAGS," in *,personal,*) ;; *) exit 0 ;; esac
+case ",$HOMIE_TAGS," in *,personal,*) ;; *) exit 0 ;; esac
 command -v rpm >/dev/null 2>&1 || exit 0
 
 if rpm -q ffmpeg-free >/dev/null 2>&1 && ! rpm -q ffmpeg >/dev/null 2>&1; then
