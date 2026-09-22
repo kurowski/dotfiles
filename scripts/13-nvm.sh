@@ -25,3 +25,5 @@ fi
 if ! nvm ls 24 >/dev/null 2>&1; then
   nvm install 24
 fi
+
+corepack enable pnpm
