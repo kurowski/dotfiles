@@ -24,10 +24,11 @@ OP_ACCOUNT = "team-uceap"
 ATUIN_SYNC = "false"
 
 # No [packages] block: Fedora's base list already carries docker-ce, the compose
-# plugin, buildx, containerd, nodejs22 and npm, and
-# scripts.tag-fedora/pre-01-fedora-repos.sh adds Docker's repo — so a headless
-# Fedora host needs nothing extra. (The equivalent Ubuntu host would need all of
-# it declared here, which is why this box runs Fedora.)
+# plugin, buildx, and containerd, and scripts.tag-fedora/pre-01-fedora-repos.sh
+# adds Docker's repo — so a headless Fedora host needs nothing extra. Node
+# comes from scripts/13-nvm.sh (nvm), which runs on Fedora too. (The
+# equivalent Ubuntu host would need all of it declared here, which is why
+# this box runs Fedora.)
 #
 # The base list also pulls the desktop apps — code, ghostty, 1password,
 # deskflow, ddcutil — since every other Fedora host here is a desktop. Kept
