@@ -8,6 +8,11 @@
 # manager*, so tracking upstream is `nvm install`'s job, not homie's.
 set -euo pipefail
 
+# Containers bring their own Node (and often pnpm) in the image, and nvm's
+# bin dir would shadow both on PATH. Nothing here needs node in a container
+# either — 17-devcontainer-cli.sh, nvm's only consumer, skips there too.
+case ",$HOMIE_TAGS," in *,container,*) exit 0 ;; esac
+
 case ",$HOMIE_TAGS," in *,ubuntu,*|*,debian,*|*,fedora,*) ;; *) exit 0 ;; esac
 
 NVM_VERSION="v0.40.3"
