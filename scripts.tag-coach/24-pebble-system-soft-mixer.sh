@@ -20,7 +20,7 @@
 # it repairs the symptom.
 set -euo pipefail
 
-case ",${HOMIE_TAGS:-}," in *,container,*) exit 0 ;; esac
+case ",$HOMIE_TAGS," in *,container,*) exit 0 ;; esac
 
 # Reach across from the script rather than through $HOMIE_REPO, so this still
 # runs when invoked by hand.
