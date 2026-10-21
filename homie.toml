@@ -32,8 +32,6 @@ fedora = [
   "glow",
   "lazygit",
   "make",
-  "nodejs22",
-  "nodejs22-npm",
   "python3-pip",
   "ripgrep",
   "tmux",
@@ -158,9 +156,9 @@ macos = [
 # Termux (Android) — its own repo, installed via `pkg`. CLI subset only;
 # GUI/daemon tools (1password, docker, ghostty, fprintd, code, …) have no
 # Android analog. Names follow Termux's repo, which differs from
-# Debian/Fedora: fd (not fd-find), python (bundles pip), nodejs (not
-# nodejs22), clang (Termux has no gcc). starship/neovim come from pkg here,
-# so 15-starship.sh and 14-neovim-debian.sh no-op on Termux.
+# Debian/Fedora: fd (not fd-find), python (bundles pip), clang (Termux has
+# no gcc). starship/neovim come from pkg here, so 15-starship.sh and
+# 14-neovim-debian.sh no-op on Termux.
 termux = [
   "atuin",
   "bat",

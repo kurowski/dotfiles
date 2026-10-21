@@ -4,3 +4,21 @@
 
 [include]
     path = ~/.gitconfig.homie
+
+# UCEAP repos commit as work wherever they're cloned — including devcontainers,
+# whose random hostnames match no hosts/*.toml and so fall back to the personal
+# .Email above. Keyed off the remote URL, so a repo with no remote yet gets the
+# default. hasconfig globs are case-sensitive and the org appears as both uceap
+# and UCEAP, hence each URL form twice.
+[includeIf "hasconfig:remote.*.url:https://github.com/uceap/**"]
+    path = ~/.gitconfig.work
+[includeIf "hasconfig:remote.*.url:https://github.com/UCEAP/**"]
+    path = ~/.gitconfig.work
+[includeIf "hasconfig:remote.*.url:git@github.com:uceap/**"]
+    path = ~/.gitconfig.work
+[includeIf "hasconfig:remote.*.url:git@github.com:UCEAP/**"]
+    path = ~/.gitconfig.work
+[includeIf "hasconfig:remote.*.url:ssh://git@github.com/uceap/**"]
+    path = ~/.gitconfig.work
+[includeIf "hasconfig:remote.*.url:ssh://git@github.com/UCEAP/**"]
+    path = ~/.gitconfig.work

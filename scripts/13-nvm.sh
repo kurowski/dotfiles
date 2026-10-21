@@ -1,12 +1,19 @@
 #!/usr/bin/env bash
-# Ubuntu doesn't have a current-enough Node in apt; install NVM into
-# ~/.nvm and grab Node 24. Fedora ships nodejs22 in dnf and Arch ships a
-# current nodejs in extra, so both skip.
-# Both versions are pinned deliberately — this is a Node *version
+# Ubuntu/Debian's apt and Fedora's dnf never have a current-enough Node —
+# Fedora's own package is versioned per major (nodejs22, nodejs24, ...) and
+# drifts out of date here every time Fedora rotates its default. Install
+# NVM into ~/.nvm and grab Node 24 instead. Arch ships a current nodejs in
+# extra, so it skips.
+# The Node version is pinned deliberately — this is a Node *version
 # manager*, so tracking upstream is `nvm install`'s job, not homie's.
 set -euo pipefail
 
-case ",$HOMIE_TAGS," in *,ubuntu,*|*,debian,*) ;; *) exit 0 ;; esac
+# Containers bring their own Node (and often pnpm) in the image, and nvm's
+# bin dir would shadow both on PATH. Nothing here needs node in a container
+# either — 17-devcontainer-cli.sh, nvm's only consumer, skips there too.
+case ",$HOMIE_TAGS," in *,container,*) exit 0 ;; esac
+
+case ",$HOMIE_TAGS," in *,ubuntu,*|*,debian,*|*,fedora,*) ;; *) exit 0 ;; esac
 
 NVM_VERSION="v0.40.3"
 NVM_DIR="$HOME/.nvm"
@@ -23,3 +30,5 @@ fi
 if ! nvm ls 24 >/dev/null 2>&1; then
   nvm install 24
 fi
+
+corepack enable pnpm
