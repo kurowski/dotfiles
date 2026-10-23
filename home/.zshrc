@@ -13,7 +13,7 @@ export GOPATH="$HOME/go"
 # rg silently ignores a missing config file, so no existence guard needed.
 export RIPGREP_CONFIG_PATH="$HOME/.config/ripgrep/config"
 
-path=("$HOME/.cargo/bin" "$HOME/.local/bin" "$HOME/.devcontainers/bin" "$GOPATH/bin" $path)
+path=("$HOME/.cargo/bin" "$HOME/.local/bin" "$GOPATH/bin" $path)
 
 # ── Theme ──────────────────────────────────────────────────────────────────
 # ~/.local/bin/theme-mode resolves light vs. dark — following the desktop's own
