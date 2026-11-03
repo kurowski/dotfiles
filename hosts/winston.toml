@@ -9,8 +9,11 @@ THEME      = "dark"
 OP_ACCOUNT = "my"
 ATUIN_SYNC = "false"
 
-# winston isn't a "desktop" host but still needs docker.
+# winston isn't a "desktop" host but still needs docker. rclone runs the
+# B2 backups (scripts.tag-winston/30-backups.sh).
 [packages]
-ubuntu = ["docker.io", "docker-buildx"]
+ubuntu = ["docker.io", "docker-buildx", "rclone"]
 
-# Deferred: seafile + rclone-backups (out of scope for the Ubuntu-merge pass).
+# Readeck and the backup timers live in system.tag-winston/ and are installed
+# by scripts.tag-winston/. Still deferred: the seafile and arr-stack compose
+# stacks in /opt (their .env files hold secrets).

@@ -192,6 +192,55 @@ Manual, set per-host via `[tags].extra`:
 `THEME` is only the fallback — the three KDE hosts and the Mac follow their
 desktop's light/dark setting at runtime instead. See [Theming](#theming).
 
+## winston: services and backups
+
+winston is the one host with system state outside `$HOME`, and Homie only
+knows how to put files under `$HOME`. So `system.tag-winston/` mirrors the
+paths under `/` that it owns, and the scripts in `scripts.tag-winston/` copy
+those files into place, comparing first, the same way `28-asdbctl.sh`
+installs its udev rule. Homie never reads `system.tag-winston/` itself. The
+files are copied rather than symlinked: the units belong to root in `/etc`,
+and compose resolves `./data` against the directory the compose file sits
+in. Edit the repo copy, then re-apply.
+
+- `29-readeck.sh` installs `/opt/readeck/docker-compose.yml`, brings the
+  stack up only when the file changed, and makes sure `tailscale serve`
+  publishes it at `https://winston.tail5aa588.ts.net:8443`.
+- `30-backups.sh` installs and enables the backup timers. Everything runs
+  overnight, America/New_York time:
+
+  | time        | unit                     | what                                         |
+  | ----------- | ------------------------ | -------------------------------------------- |
+  | 01:00       | `ente-export`            | Ente photos → `~/Ente`                       |
+  | 02:00       | `rclone-backup-seafile`  | `seafile:` → `b2:brattlebowl-winston-seafile` |
+  | 02:00 Sun   | `readeck-export`         | `readeck export` → `~/Drive/Archive/readeck` |
+  | 03:00       | `rclone-backup-drive`    | `~/Drive` → `b2:brattlebowl-winston-drive`   |
+  | 04:00       | `rclone-backup-ente`     | `~/Ente` → `b2:brattlebowl-winston-ente`     |
+
+Readeck is backed up through its own export rather than by copying its
+data directory. The zip is plain JSON, HTML and images, so it can be restored
+into something other than Readeck. Restoring into Readeck is
+`readeck import -u <user> readeck-export.zip`; tested 2026-11-03.
+
+Some of it is set up by hand and isn't tracked here, because it's secrets or
+one-time state:
+
+- `~/.config/rclone/rclone.conf`, which holds the `b2:` and `seafile:` remotes.
+- The ente CLI (`/usr/local/bin/ente`) and its login under `~/.ente`.
+- The B2 buckets' lifecycle rule. `rclone sync` leaves B2 an old version of
+  every file it overwrites or deletes, and without a rule B2 keeps them
+  forever. All three buckets delete those old versions 180 days later, set
+  once per bucket with:
+
+  ```sh
+  rclone backend lifecycle b2:<bucket> -o daysFromHidingToDeleting=180
+  ```
+
+  Running `rclone backend lifecycle b2:<bucket>` with no options shows the
+  current rule. Setting a rule replaces whatever rules the bucket had.
+- The Seafile and arr-stack compose stacks in `/opt`. Their `.env` files
+  hold secrets, so they haven't been ported yet.
+
 ## Secrets
 
 Secrets are *not* rendered by Homie. They flow from 1Password at runtime:

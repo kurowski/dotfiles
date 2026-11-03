@@ -1,0 +1,13 @@
+[Unit]
+Description=rclone backup: ente (/home/brandt/Ente -> b2:brattlebowl-winston-ente)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=brandt
+Environment=HOME=/home/brandt
+ExecStart=/usr/bin/rclone sync /home/brandt/Ente b2:brattlebowl-winston-ente --transfers 8 --stats 1m --stats-log-level NOTICE
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7

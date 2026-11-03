@@ -1,0 +1,35 @@
+name: readeck
+
+# Readeck on winston. Reached only through `tailscale serve`
+# (https://winston.tail5aa588.ts.net:8443). The container port is bound to
+# loopback so it isn't exposed on the LAN.
+#
+# Data (SQLite DB, config.toml with the generated secret key, archived
+# articles) lives in ./data. It is backed up through `readeck export`, not
+# by copying ./data — see readeck-export.service.
+#
+# Installed by scripts.tag-winston/29-readeck.sh; edit the copy in the
+# dotfiles repo, not /opt/readeck.
+
+services:
+  readeck:
+    image: codeberg.org/readeck/readeck:0.23.5   # pinned; bump deliberately
+    container_name: readeck
+    restart: unless-stopped
+    ports:
+      - 127.0.0.1:8000:8000
+    environment:
+      - READECK_LOG_LEVEL=info
+      # Public URL as seen through tailscale serve. Used for links and the
+      # browser extension / app OAuth flow.
+      - READECK_SERVER_BASE_URL=https://winston.tail5aa588.ts.net:8443/
+      - READECK_ALLOWED_HOSTS=winston.tail5aa588.ts.net
+      # TRUSTED_PROXIES default already covers loopback + 172.16/12 (the
+      # docker bridge that docker-proxy forwards from), so not set here.
+    volumes:
+      - ./data:/readeck
+    healthcheck:
+      test: ["CMD", "/bin/readeck", "healthcheck", "-config", "config.toml"]
+      interval: 30s
+      timeout: 2s
+      retries: 3
