@@ -151,6 +151,8 @@ oc() {
 }
 alias ocr='oc --resume'
 
+alias open=xdg-open
+
 [[ -f "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
 
 # opencode
