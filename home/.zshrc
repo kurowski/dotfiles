@@ -15,6 +15,13 @@ export RIPGREP_CONFIG_PATH="$HOME/.config/ripgrep/config"
 
 path=("$HOME/.cargo/bin" "$HOME/.local/bin" "$HOME/.devcontainers/bin" "$GOPATH/bin" $path)
 
+# Installed by scripts.tag-personal.tag-desktop/29-android-sdk.sh. Gradle
+# reads ANDROID_HOME, so Android projects build without a local.properties.
+if [[ -d "$HOME/Android/Sdk" ]]; then
+  export ANDROID_HOME="$HOME/Android/Sdk"
+  path=("$ANDROID_HOME/platform-tools" "$ANDROID_HOME/emulator" "$ANDROID_HOME/cmdline-tools/latest/bin" $path)
+fi
+
 # ── Theme ──────────────────────────────────────────────────────────────────
 # ~/.local/bin/theme-mode resolves light vs. dark — following the desktop's own
 # setting where there is one, pinned per host where there isn't — and leaves the
