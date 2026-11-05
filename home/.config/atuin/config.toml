@@ -1,0 +1,6 @@
+# atuin — only settings that differ from upstream defaults live here.
+# Full reference: https://docs.atuin.sh/configuration/config/
+
+# Record every command, even ones atuin's built-in patterns flag as
+# secrets (AWS keys, GitHub tokens, Stripe keys, …).
+secrets_filter = false

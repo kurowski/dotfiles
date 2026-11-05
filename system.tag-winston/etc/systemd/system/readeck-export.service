@@ -1,0 +1,18 @@
+[Unit]
+Description=Readeck export (/opt/readeck -> /home/brandt/Drive/Archive/readeck)
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+User=brandt
+Environment=HOME=/home/brandt
+# Export inside the container, copy it out under a temp name, then rename so
+# the nightly Drive -> B2 sync never sees a half-written file.
+ExecStart=/usr/bin/docker exec readeck /bin/readeck export -config config.toml /tmp/readeck-export.zip
+ExecStart=/usr/bin/docker cp -q readeck:/tmp/readeck-export.zip /home/brandt/Drive/Archive/readeck/.readeck-export.zip.tmp
+ExecStart=/usr/bin/mv -f /home/brandt/Drive/Archive/readeck/.readeck-export.zip.tmp /home/brandt/Drive/Archive/readeck/readeck-export.zip
+ExecStopPost=-/usr/bin/docker exec readeck rm -f /tmp/readeck-export.zip
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7

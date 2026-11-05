@@ -1,0 +1,14 @@
+[Unit]
+Description=Ente photo export
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=brandt
+Environment=HOME=/home/brandt
+Environment=ENTE_CLI_SECRETS_PATH=/home/brandt/.ente/cli.secret
+ExecStart=/usr/local/bin/ente export
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
