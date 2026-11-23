@@ -39,6 +39,15 @@ command -v op        >/dev/null 2>&1 && gen _op        op completion zsh
 command -v tailscale >/dev/null 2>&1 && gen _tailscale tailscale completion zsh
 command -v starship  >/dev/null 2>&1 && gen _starship  starship completions zsh
 command -v opencode  >/dev/null 2>&1 && gen _opencode  opencode completion zsh
+# coder emits an eval-style snippet (no #compdef header, ends in a `compdef`
+# call), so reshape it into an fpath autoload file: header + the function
+# definition + a call to it, minus the compdef line.
+coder_zsh() {
+  local body
+  body=$(coder completion --shell zsh --print) || return
+  printf '#compdef coder\n%s\n_coder_completions "$@"\n' "$(grep -v '^compdef ' <<<"$body")"
+}
+command -v coder     >/dev/null 2>&1 && gen _coder     coder_zsh
 if command -v rustup >/dev/null 2>&1; then
   gen _rustup rustup completions zsh
   command -v cargo >/dev/null 2>&1 && gen _cargo rustup completions zsh cargo
