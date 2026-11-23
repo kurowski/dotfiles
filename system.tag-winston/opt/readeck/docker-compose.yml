@@ -1,8 +1,8 @@
 name: readeck
 
-# Readeck on winston. Reached only through `tailscale serve`
-# (https://winston.tail5aa588.ts.net:8443). The container port is bound to
-# loopback so it isn't exposed on the LAN.
+# Readeck on winston. Reached only through the svc:readeck Tailscale
+# Service (https://readeck.dinosaur-kingsnake.ts.net). The container port is
+# bound to loopback so it isn't exposed on the LAN.
 #
 # Data (SQLite DB, config.toml with the generated secret key, archived
 # articles) lives in ./data. It is backed up through `readeck export`, not
@@ -20,10 +20,10 @@ services:
       - 127.0.0.1:8000:8000
     environment:
       - READECK_LOG_LEVEL=info
-      # Public URL as seen through tailscale serve. Used for links and the
+      # Public URL as seen through the Tailscale Service. Used for links and the
       # browser extension / app OAuth flow.
-      - READECK_SERVER_BASE_URL=https://winston.tail5aa588.ts.net:8443/
-      - READECK_ALLOWED_HOSTS=winston.tail5aa588.ts.net
+      - READECK_SERVER_BASE_URL=https://readeck.dinosaur-kingsnake.ts.net/
+      - READECK_ALLOWED_HOSTS=readeck.dinosaur-kingsnake.ts.net
       # TRUSTED_PROXIES default already covers loopback + 172.16/12 (the
       # docker bridge that docker-proxy forwards from), so not set here.
     volumes:
