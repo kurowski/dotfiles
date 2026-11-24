@@ -4,3 +4,10 @@
 # Record every command, even ones atuin's built-in patterns flag as
 # secrets (AWS keys, GitHub tokens, Stripe keys, …).
 secrets_filter = false
+
+[threads]
+enabled = true
+
+[daemon]
+enabled = true
+autostart = true
