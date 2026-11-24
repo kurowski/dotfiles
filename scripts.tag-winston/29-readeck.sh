@@ -8,8 +8,9 @@
 # `readeck import` from the weekly export (see 30-backups.sh).
 #
 # Tailnet-only: the container binds 127.0.0.1:8000 and `tailscale serve`
-# publishes it as https://winston.tail5aa588.ts.net:8443. 443 stays free for
-# Seafile.
+# hosts it as the svc:readeck Tailscale Service,
+# https://readeck.dinosaur-kingsnake.ts.net. The service must already exist
+# in the admin console, and winston must carry tag:server to host it.
 set -euo pipefail
 
 src="$(dirname "${BASH_SOURCE[0]}")/../system.tag-winston/opt/readeck/docker-compose.yml"
@@ -31,10 +32,11 @@ if ! cmp -s "$src" "$dir/docker-compose.yml"; then
 fi
 
 # tailscale serve config persists in tailscaled's state; set it only when the
-# 8443 handler is missing. 08-tailscale.sh makes us the operator, so no sudo.
+# service isn't configured yet. 08-tailscale.sh makes us the operator, so no
+# sudo. A first-time host still needs approving in the admin console.
 if command -v tailscale >/dev/null 2>&1; then
-  if ! tailscale serve status --json 2>/dev/null | grep -q '"Proxy": *"http://127.0.0.1:8000"'; then
-    tailscale serve --bg --https=8443 http://127.0.0.1:8000 \
+  if ! tailscale serve status --json 2>/dev/null | grep -q '"svc:readeck"'; then
+    tailscale serve --bg --service=svc:readeck --https=443 http://127.0.0.1:8000 \
       || echo "readeck: could not configure tailscale serve (is tailscale up?)" >&2
   fi
 fi

@@ -205,7 +205,8 @@ in. Edit the repo copy, then re-apply.
 
 - `29-readeck.sh` installs `/opt/readeck/docker-compose.yml`, brings the
   stack up only when the file changed, and makes sure `tailscale serve`
-  publishes it at `https://winston.tail5aa588.ts.net:8443`.
+  hosts it as the `svc:readeck` Tailscale Service,
+  `https://readeck.dinosaur-kingsnake.ts.net`.
 - `30-backups.sh` installs and enables the backup timers. Everything runs
   overnight, America/New_York time:
 
